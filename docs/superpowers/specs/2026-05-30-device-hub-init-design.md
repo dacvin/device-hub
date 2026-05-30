@@ -15,7 +15,7 @@ Initialize `device-hub`, an internal application for the IT department to manage
 | Framework | Next.js (App Router, TypeScript, Turbopack) |
 | Backend | Supabase (Postgres, Auth) — local CLI workspace |
 | Styling | Tailwind CSS |
-| UI primitives | shadcn/ui |
+| UI primitives | shadcn/ui (Nova preset — neutral base, CSS variables, lucide icons) |
 | Data fetching | TanStack Query |
 | Forms | TanStack Form |
 | Validation | Zod |
