@@ -1,0 +1,7 @@
+# OS
+.DS_Store
+
+# npx side effects (real app deps live in client/)
+/node_modules
+/package.json
+/package-lock.json
