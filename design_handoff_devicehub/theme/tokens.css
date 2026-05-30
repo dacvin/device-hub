@@ -1,0 +1,172 @@
+/* =========================================================================
+   DeviceHub — shadcn/ui theme tokens
+   Palette: colorhunt #EEEEEE #6FCF97 #2FA084 #1F6F5F  (drives LIGHT mode)
+   Dark mode is a separately tuned deep-pine palette (see notes below).
+
+   Drop-in for Tailwind v4 + shadcn/ui. Import after Tailwind:
+     @import "tailwindcss";
+     @import "./tokens.css";
+
+   COLOR RULES applied here (so the theme stays consistent):
+   1. ONE brand hue. The three greens are points on a single green ramp
+      (50-950). Everything brand-colored samples that ramp — no ad-hoc greens.
+   2. Neutrals do the heavy lifting. Backgrounds, cards, borders and muted
+      text are a near-neutral gray faintly tinted with the brand hue, so the
+      UI feels calm and the green reads as a deliberate accent.
+   3. Contrast first. #2FA084 on white = 3.24:1 (AA-large only), so the
+      LIGHT primary fill uses green-600 (#2FA084) with white text for the
+      brand identity; if you need strict 4.5:1 body-text-on-fill, swap
+      --primary to green-800 (#1F6F5F, 6.0:1) — it's already in the ramp.
+   4. Dark mode FLIPS the brand: a lightened mint (#6FCF97) fill with dark
+      pine text (9:1), never a dark fill with white text. Surfaces are deep
+      desaturated pine (not pure black); chroma is dialled down to avoid neon.
+   ========================================================================= */
+
+:root {
+  --radius: 0.625rem;
+
+  /* ---- Brand green ramp (light-theme palette lives here) ---- */
+  --green-50:  oklch(0.9792 0.0124 164.81);  /* #F1FBF6 */
+  --green-100: oklch(0.9483 0.0314 163.24);  /* #DCF5E8 */
+  --green-200: oklch(0.8976 0.0641 160.25);  /* #B9EBCF */
+  --green-300: oklch(0.7805 0.1226 156.45);  /* #6FCF97  ← palette */
+  --green-400: oklch(0.7155 0.1295 161.96);  /* #46BC8A */
+  --green-500: oklch(0.6749 0.1199 167.66);  /* #36AE88 */
+  --green-600: oklch(0.6360 0.1084 172.52);  /* #2FA084  ← palette */
+  --green-700: oklch(0.5359 0.0883 173.46);  /* #277E69 */
+  --green-800: oklch(0.4897 0.0800 176.52);  /* #1F6F5F  ← palette */
+  --green-900: oklch(0.4236 0.0676 176.60);  /* #1A5A4D */
+  --green-950: oklch(0.3172 0.0477 180.05);  /* #103A33 */
+
+  /* ---- Semantic tokens (light) ---- */
+  --background: oklch(0.9930 0.0017 145.56);   /* #FCFDFC near-white, whisper of green */
+  --foreground: oklch(0.2327 0.0154 174.56);   /* #16201D deep pine ink */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2327 0.0154 174.56);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2327 0.0154 174.56);
+
+  --primary: oklch(0.6360 0.1084 172.52);              /* #2FA084 */
+  --primary-foreground: oklch(0.9930 0.0017 145.56);
+
+  --secondary: oklch(0.9483 0.0314 163.24);            /* mint surface */
+  --secondary-foreground: oklch(0.4897 0.0800 176.52); /* green-800 */
+
+  --muted: oklch(0.9654 0.0025 165.08);                /* #F2F4F3 (~#EEEEEE) */
+  --muted-foreground: oklch(0.5125 0.0215 170.81);     /* #5B6B65 */
+
+  --accent: oklch(0.9483 0.0314 163.24);
+  --accent-foreground: oklch(0.4897 0.0800 176.52);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.9274 0.0050 165.00);               /* #E4E8E6 */
+  --input: oklch(0.9274 0.0050 165.00);
+  --ring: oklch(0.6360 0.1084 172.52);                 /* brand green focus ring */
+
+  /* ---- Data viz ---- */
+  --chart-1: oklch(0.6360 0.1084 172.52);  /* green-600 */
+  --chart-2: oklch(0.7805 0.1226 156.45);  /* green-300 */
+  --chart-3: oklch(0.4897 0.0800 176.52);  /* green-800 */
+  --chart-4: oklch(0.7000 0.1000 215.00);  /* supporting teal-cyan */
+  --chart-5: oklch(0.7800 0.1300 85.00);   /* supporting warm sand */
+
+  /* ---- Sidebar ---- */
+  --sidebar: oklch(0.9792 0.0124 164.81);              /* green-50 */
+  --sidebar-foreground: oklch(0.2327 0.0154 174.56);
+  --sidebar-primary: oklch(0.6360 0.1084 172.52);
+  --sidebar-primary-foreground: oklch(0.9930 0.0017 145.56);
+  --sidebar-accent: oklch(0.9483 0.0314 163.24);
+  --sidebar-accent-foreground: oklch(0.4897 0.0800 176.52);
+  --sidebar-border: oklch(0.9274 0.0050 165.00);
+  --sidebar-ring: oklch(0.6360 0.1084 172.52);
+}
+
+.dark {
+  /* ---- Semantic tokens (dark) — tuned deep-pine, not derived from light ---- */
+  --background: oklch(0.2090 0.0125 178.04);   /* #121A18 */
+  --foreground: oklch(0.9483 0.0094 171.79);   /* #E8F0ED */
+  --card: oklch(0.2412 0.0153 174.65);         /* #18221F slight elevation */
+  --card-foreground: oklch(0.9483 0.0094 171.79);
+  --popover: oklch(0.2412 0.0153 174.65);
+  --popover-foreground: oklch(0.9483 0.0094 171.79);
+
+  --primary: oklch(0.7805 0.1226 156.45);              /* mint #6FCF97 */
+  --primary-foreground: oklch(0.2090 0.0125 178.04);   /* dark pine text (9:1) */
+
+  --secondary: oklch(0.3094 0.0223 177.61);            /* #243430 */
+  --secondary-foreground: oklch(0.9483 0.0094 171.79);
+
+  --muted: oklch(0.2768 0.0174 177.93);                /* #1F2B28 */
+  --muted-foreground: oklch(0.7390 0.0253 173.55);     /* #9BB0A9 */
+
+  --accent: oklch(0.3416 0.0266 173.15);               /* #2A3D37 */
+  --accent-foreground: oklch(0.9483 0.0094 171.79);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.3345 0.0197 175.72);               /* #2C3A36 */
+  --input: oklch(0.3345 0.0197 175.72);
+  --ring: oklch(0.6749 0.1199 167.66);                 /* green-500 */
+
+  --chart-1: oklch(0.7155 0.1295 161.96);  /* green-400 */
+  --chart-2: oklch(0.7805 0.1226 156.45);  /* green-300 */
+  --chart-3: oklch(0.6749 0.1199 167.66);  /* green-500 */
+  --chart-4: oklch(0.7200 0.1000 215.00);
+  --chart-5: oklch(0.8000 0.1300 85.00);
+
+  --sidebar: oklch(0.2412 0.0153 174.65);
+  --sidebar-foreground: oklch(0.9483 0.0094 171.79);
+  --sidebar-primary: oklch(0.7805 0.1226 156.45);
+  --sidebar-primary-foreground: oklch(0.2090 0.0125 178.04);
+  --sidebar-accent: oklch(0.3416 0.0266 173.15);
+  --sidebar-accent-foreground: oklch(0.9483 0.0094 171.79);
+  --sidebar-border: oklch(0.3345 0.0197 175.72);
+  --sidebar-ring: oklch(0.6749 0.1199 167.66);
+}
+
+/* Tailwind v4 token mapping — exposes the vars as utilities (bg-primary, text-muted-foreground, …) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
