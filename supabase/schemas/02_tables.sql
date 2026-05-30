@@ -56,8 +56,8 @@ create table device (
   warranty_start         date,
   warranty_end           date,
 
+  status                 device_status not null default 'in-storage',  -- lifecycle state (stored)
   cover_photo_id         uuid,
-  is_retired             boolean not null default false,
   deleted_at             timestamptz,
 
   created_at             timestamptz not null default now(),

@@ -1,5 +1,7 @@
 create type "public"."device_source" as enum ('Purchased', 'Leased', 'Donated', 'Transferred');
 
+create type "public"."device_status" as enum ('in-use', 'in-storage', 'in-repair', 'retired');
+
 create type "public"."unit" as enum ('piece', 'set', 'box');
 
 
@@ -37,8 +39,8 @@ alter table "public"."department" enable row level security;
     "inventory_cycle_months" integer not null default 12,
     "warranty_start" date,
     "warranty_end" date,
+    "status" public.device_status not null default 'in-storage'::public.device_status,
     "cover_photo_id" uuid,
-    "is_retired" boolean not null default false,
     "deleted_at" timestamp with time zone,
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now()
@@ -194,7 +196,7 @@ alter table "public"."manufacturer" add constraint "manufacturer_name_key" UNIQU
 
 set check_function_bodies = off;
 
-create or replace view "public"."device_with_status" with (security_invoker = true) as  SELECT id,
+create or replace view "public"."device_with_flags" as  SELECT id,
     code,
     name,
     group_id,
@@ -214,19 +216,13 @@ create or replace view "public"."device_with_status" with (security_invoker = tr
     inventory_cycle_months,
     warranty_start,
     warranty_end,
+    status,
     cover_photo_id,
-    is_retired,
     deleted_at,
     created_at,
     updated_at,
-        CASE
-            WHEN ((deleted_at IS NOT NULL) OR is_retired) THEN 'retired'::text
-            WHEN (condition < 40) THEN 'faulty'::text
-            WHEN ((warranty_end IS NOT NULL) AND (warranty_end <= (CURRENT_DATE + '90 days'::interval)) AND (warranty_end >= CURRENT_DATE)) THEN 'warranty'::text
-            WHEN ((last_check_date IS NOT NULL) AND (last_check_date < (CURRENT_DATE - ((inventory_cycle_months || ' months'::text))::interval))) THEN 'inventory'::text
-            WHEN (location IS NULL) THEN 'storage'::text
-            ELSE 'in-use'::text
-        END AS status
+    ((status <> 'retired'::public.device_status) AND (warranty_end IS NOT NULL) AND (warranty_end >= CURRENT_DATE) AND (warranty_end <= (CURRENT_DATE + '90 days'::interval))) AS flag_warranty_expiring,
+    ((status <> 'retired'::public.device_status) AND (last_check_date IS NOT NULL) AND (last_check_date < (CURRENT_DATE - ((inventory_cycle_months || ' months'::text))::interval))) AS flag_inventory_overdue
    FROM public.device d;
 
 
@@ -758,5 +754,79 @@ CREATE TRIGGER device_photo_set_created_at BEFORE INSERT ON public.device_photo 
 CREATE TRIGGER manufacturer_set_timestamps_insert BEFORE INSERT ON public.manufacturer FOR EACH ROW EXECUTE FUNCTION public.set_created_and_updated_at();
 
 CREATE TRIGGER manufacturer_set_timestamps_update BEFORE UPDATE ON public.manufacturer FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+  create policy "authenticated_delete_device_documents"
+  on "storage"."objects"
+  as permissive
+  for delete
+  to authenticated
+using ((bucket_id = 'device-documents'::text));
+
+
+
+  create policy "authenticated_delete_device_photos"
+  on "storage"."objects"
+  as permissive
+  for delete
+  to authenticated
+using ((bucket_id = 'device-photos'::text));
+
+
+
+  create policy "authenticated_insert_device_documents"
+  on "storage"."objects"
+  as permissive
+  for insert
+  to authenticated
+with check ((bucket_id = 'device-documents'::text));
+
+
+
+  create policy "authenticated_insert_device_photos"
+  on "storage"."objects"
+  as permissive
+  for insert
+  to authenticated
+with check ((bucket_id = 'device-photos'::text));
+
+
+
+  create policy "authenticated_select_device_documents"
+  on "storage"."objects"
+  as permissive
+  for select
+  to authenticated
+using ((bucket_id = 'device-documents'::text));
+
+
+
+  create policy "authenticated_select_device_photos"
+  on "storage"."objects"
+  as permissive
+  for select
+  to authenticated
+using ((bucket_id = 'device-photos'::text));
+
+
+
+  create policy "authenticated_update_device_documents"
+  on "storage"."objects"
+  as permissive
+  for update
+  to authenticated
+using ((bucket_id = 'device-documents'::text))
+with check ((bucket_id = 'device-documents'::text));
+
+
+
+  create policy "authenticated_update_device_photos"
+  on "storage"."objects"
+  as permissive
+  for update
+  to authenticated
+using ((bucket_id = 'device-photos'::text))
+with check ((bucket_id = 'device-photos'::text));
+
 
 

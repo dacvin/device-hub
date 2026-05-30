@@ -76,5 +76,5 @@ create policy "authenticated_update_device_document"
 create policy "authenticated_delete_device_document"
   on device_document for delete to authenticated using (true);
 
--- Note: device_with_status is a view with security_invoker = true,
+-- Note: device_with_flags is a view with security_invoker = true,
 -- so it inherits RLS from device. No separate policies needed.

@@ -1,7 +1,7 @@
 # Handoff: DeviceHub — IT device-management portal
 
 ## Overview
-DeviceHub is an internal IT asset-management web app for Sioux Asia. IT admins register
+DeviceHub is an internal IT asset-management web app. IT admins register
 devices, browse/filter the inventory, inspect a device's full record, and manage the
 lookup catalogs (departments, groups, manufacturers). This package contains hi-fi HTML
 design references plus a **production-ready shadcn/ui theme** derived from the brand palette.
@@ -10,7 +10,7 @@ design references plus a **production-ready shadcn/ui theme** derived from the b
 The HTML files in this bundle are **design references** — prototypes showing the intended
 look and behavior. They are NOT meant to be shipped as-is. The task is to **recreate these
 screens in the target codebase** (React + Tailwind v4 + shadcn/ui is the assumed stack, matching
-the rest of the Sioux portal) using its established components and patterns.
+the rest of the portal) using its established components and patterns.
 
 **One exception — `theme/tokens.css` IS production code.** It's a drop-in shadcn theme
 (see "Design tokens" below). Everything else (`components.css`, `shell.*`, the per-page
@@ -23,7 +23,7 @@ settled. Recreate pixel-faithfully using shadcn/ui primitives. Because the mocks
 shadcn's token names and conventions, most screens map 1:1 onto stock shadcn components.
 
 ## Tech stack assumption
-- **React + Tailwind CSS v4 + shadcn/ui** (the Sioux portal's existing stack).
+- **React + Tailwind CSS v4 + shadcn/ui** (the portal's existing stack).
 - **Geist** + **Geist Mono** fonts.
 - **lucide-react** for icons (the mocks use the lucide CDN; the names are identical).
 - If no codebase exists yet, scaffold Vite + React + Tailwind v4 and run `npx shadcn@latest init`.
@@ -48,7 +48,7 @@ shadcn's token names and conventions, most screens map 1:1 onto stock shadcn com
 - **Components:**
   - **Brand wordmark:** "Device" in foreground + "Hub" in `--primary`; 30px rounded-9px primary glyph with `hard-drive` icon.
   - **Google button:** full-width, 46px tall, `--card` bg, 1px `--border`, official 4-color Google "G" SVG (18px), label "Continue with Google". Hover → `--accent` bg. Focus ring = 3px `--ring` @ 35%.
-  - **Managed-access note:** `--secondary` bg, rounded, `shield-check` icon, text "Access is limited to IT-managed @sioux.asia accounts."
+  - **Managed-access note:** `--secondary` bg, rounded, `shield-check` icon, text "Access is limited to IT-managed accounts."
   - **Legal line:** 12px `--muted-foreground`, link in `--primary`.
   - **Art panel:** eyebrow (uppercase, letter-spacing .14em), 34px/600 headline "Every device, accounted for." ("accounted for." in `#6FCF97`), chips (Laptops/Monitors/Servers/Printers), 3 stats (1,284 · 8 · 98.2%).
 - **shadcn:** `Button` (outline for Google), `Card` optional. Mostly custom layout.
@@ -112,7 +112,7 @@ shadcn's token names and conventions, most screens map 1:1 onto stock shadcn com
 - **View toggle:** segmented control swaps table ↔ cards.
 - **Create form:** sticky section nav scrollspy; condition slider shows live %; required-field validation (port to zod).
 - **Hover states:** table rows → `--muted` bg + reveal row actions; cards → border to `--ring`; count links → `--accent` bg + sliding arrow; buttons → see token notes.
-- **Transitions:** color/border only, ~120–150ms ease. No transforms, no springs (matches the Sioux design language).
+- **Transitions:** color/border only, ~120–150ms ease. No transforms, no springs (matches the design language).
 - **Responsive:** sidebar hides < 980px; details collapses to 1 col < 1080px; create form nav hides < 1000px; login art hides < 880px.
 
 ## Status, condition & flags — three separate concepts (don't conflate)
@@ -186,7 +186,7 @@ strict 4.5:1 for text-on-fill, switch `--primary` to green-800 `#1F6F5F` (6:1); 
 ## Assets
 - **Icons:** lucide (CDN in mocks → `lucide-react` in app). Names used include: `hard-drive, laptop, monitor, printer, network, server, smartphone, webcam, building-2, layers, factory, layout-dashboard, users, settings, search, plus, download, pencil, ellipsis, arrow-left, arrow-right, shield-check, calendar-clock, map-pin, gauge, history, fingerprint, cpu, activity, sticky-note, clipboard-check, check, sliders-horizontal, chevron-left/right, sun, moon`.
 - **Google "G":** inline 4-color SVG in `Login.html` (reuse or swap for your auth lib's button).
-- No raster images required. (The Sioux design system ships a login cover photo if you want one — optional.)
+- No raster images required. (The design system ships a login cover photo if you want one — optional.)
 
 ## Screenshots (`screenshots/`)
 Visual targets — recreate these faithfully. Captured at hi-res; light + dark where relevant.

@@ -73,7 +73,6 @@ export type Database = {
           id: string
           import_date: string | null
           inventory_cycle_months: number
-          is_retired: boolean
           last_check_date: string | null
           location: string | null
           manufacturer_id: string | null
@@ -84,6 +83,7 @@ export type Database = {
           serial_number: string | null
           source: Database["public"]["Enums"]["device_source"] | null
           specifications: string | null
+          status: Database["public"]["Enums"]["device_status"]
           unit: Database["public"]["Enums"]["unit"]
           updated_at: string
           warranty_end: string | null
@@ -100,7 +100,6 @@ export type Database = {
           id?: string
           import_date?: string | null
           inventory_cycle_months?: number
-          is_retired?: boolean
           last_check_date?: string | null
           location?: string | null
           manufacturer_id?: string | null
@@ -111,6 +110,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
+          status?: Database["public"]["Enums"]["device_status"]
           unit?: Database["public"]["Enums"]["unit"]
           updated_at?: string
           warranty_end?: string | null
@@ -127,7 +127,6 @@ export type Database = {
           id?: string
           import_date?: string | null
           inventory_cycle_months?: number
-          is_retired?: boolean
           last_check_date?: string | null
           location?: string | null
           manufacturer_id?: string | null
@@ -138,6 +137,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
+          status?: Database["public"]["Enums"]["device_status"]
           unit?: Database["public"]["Enums"]["unit"]
           updated_at?: string
           warranty_end?: string | null
@@ -214,7 +214,7 @@ export type Database = {
             foreignKeyName: "device_document_device_id_fkey"
             columns: ["device_id"]
             isOneToOne: false
-            referencedRelation: "device_with_status"
+            referencedRelation: "device_with_flags"
             referencedColumns: ["id"]
           },
         ]
@@ -286,7 +286,7 @@ export type Database = {
             foreignKeyName: "device_photo_device_id_fkey"
             columns: ["device_id"]
             isOneToOne: false
-            referencedRelation: "device_with_status"
+            referencedRelation: "device_with_flags"
             referencedColumns: ["id"]
           },
         ]
@@ -317,7 +317,7 @@ export type Database = {
       }
     }
     Views: {
-      device_with_status: {
+      device_with_flags: {
         Row: {
           code: string | null
           condition: number | null
@@ -325,11 +325,12 @@ export type Database = {
           created_at: string | null
           deleted_at: string | null
           department_id: string | null
+          flag_inventory_overdue: boolean | null
+          flag_warranty_expiring: boolean | null
           group_id: string | null
           id: string | null
           import_date: string | null
           inventory_cycle_months: number | null
-          is_retired: boolean | null
           last_check_date: string | null
           location: string | null
           manufacturer_id: string | null
@@ -340,7 +341,7 @@ export type Database = {
           serial_number: string | null
           source: Database["public"]["Enums"]["device_source"] | null
           specifications: string | null
-          status: string | null
+          status: Database["public"]["Enums"]["device_status"] | null
           unit: Database["public"]["Enums"]["unit"] | null
           updated_at: string | null
           warranty_end: string | null
@@ -353,11 +354,12 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           department_id?: string | null
+          flag_inventory_overdue?: never
+          flag_warranty_expiring?: never
           group_id?: string | null
           id?: string | null
           import_date?: string | null
           inventory_cycle_months?: number | null
-          is_retired?: boolean | null
           last_check_date?: string | null
           location?: string | null
           manufacturer_id?: string | null
@@ -368,7 +370,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
-          status?: never
+          status?: Database["public"]["Enums"]["device_status"] | null
           unit?: Database["public"]["Enums"]["unit"] | null
           updated_at?: string | null
           warranty_end?: string | null
@@ -381,11 +383,12 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           department_id?: string | null
+          flag_inventory_overdue?: never
+          flag_warranty_expiring?: never
           group_id?: string | null
           id?: string | null
           import_date?: string | null
           inventory_cycle_months?: number | null
-          is_retired?: boolean | null
           last_check_date?: string | null
           location?: string | null
           manufacturer_id?: string | null
@@ -396,7 +399,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
-          status?: never
+          status?: Database["public"]["Enums"]["device_status"] | null
           unit?: Database["public"]["Enums"]["unit"] | null
           updated_at?: string | null
           warranty_end?: string | null
@@ -439,6 +442,7 @@ export type Database = {
     }
     Enums: {
       device_source: "Purchased" | "Leased" | "Donated" | "Transferred"
+      device_status: "in-use" | "in-storage" | "in-repair" | "retired"
       unit: "piece" | "set" | "box"
     }
     CompositeTypes: {
@@ -571,6 +575,7 @@ export const Constants = {
   public: {
     Enums: {
       device_source: ["Purchased", "Leased", "Donated", "Transferred"],
+      device_status: ["in-use", "in-storage", "in-repair", "retired"],
       unit: ["piece", "set", "box"],
     },
   },
