@@ -31,6 +31,7 @@ device-hub/
 ├── client/                       # Next.js app (created by `pnpm create next-app`)
 │   ├── src/
 │   │   ├── app/                  # Next.js App Router (created by create-next-app)
+│   │   ├── middleware.ts         # Supabase SSR session refresh (Next.js src/ convention)
 │   │   ├── assets/               # Static files (images, fonts) — shared
 │   │   ├── components/           # Shared UI; shadcn primitives land in components/ui/
 │   │   ├── config/               # Global config + exported env vars
@@ -42,7 +43,6 @@ device-hub/
 │   │   ├── types/                # Shared TS types (incl. generated Supabase types)
 │   │   └── utils/                # Shared utility functions
 │   ├── components.json           # shadcn config (created by `shadcn init`)
-│   ├── middleware.ts             # Supabase SSR session refresh (official boilerplate)
 │   ├── next.config.ts            # Created by create-next-app
 │   ├── tailwind.config.ts        # Created by create-next-app
 │   ├── tsconfig.json             # Created by create-next-app
@@ -121,7 +121,7 @@ Files created:
 - `client/src/lib/supabase/client.ts` — browser client (`createBrowserClient`)
 - `client/src/lib/supabase/server.ts` — server client (`createServerClient` + cookies)
 - `client/src/lib/supabase/middleware.ts` — session-refresh helper
-- `client/middleware.ts` — Next.js middleware entry that calls the helper
+- `client/src/middleware.ts` — Next.js middleware entry that calls the helper (src/ convention)
 - `client/.env.local.example` — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ### 6.2 TanStack Query provider
