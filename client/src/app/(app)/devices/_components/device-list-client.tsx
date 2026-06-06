@@ -12,7 +12,6 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 import {
-  ChevronDown,
   MoreHorizontal,
   Pencil,
   Search,
@@ -181,7 +180,7 @@ export function DeviceListClient({
       initialFilters.flag);
 
   return (
-    <div className="space-y-4">
+    <div>
       <Toolbar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -197,7 +196,7 @@ export function DeviceListClient({
         table={table}
       />
 
-      <div className="text-xs text-muted-foreground">
+      <div className="mb-3 text-sm text-muted-foreground">
         {tList("countOfTotal", { shown: devices.length, total: devices.length })}
       </div>
 
@@ -208,7 +207,7 @@ export function DeviceListClient({
       )}
 
       {devices.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
+        <div className="mt-4 rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
           {tList("emptyState")}
         </div>
       )}
@@ -266,75 +265,18 @@ function Toolbar({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2 items-center justify-between">
-        <div className="relative w-full sm:w-[320px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={tList("searchPlaceholder")}
-            className="pl-8 h-9"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <ToggleGroup
-            type="single"
-            value={view}
-            onValueChange={(v) => v && onViewChange(v as "table" | "cards")}
-            variant="outline"
-            size="sm"
-          >
-            <ToggleGroupItem value="table" aria-label={tList("viewComfortable")}>
-              {tList("viewComfortableShort")}
-            </ToggleGroupItem>
-            <ToggleGroupItem value="cards" aria-label={tList("viewCards")}>
-              {tList("viewCardsShort")}
-            </ToggleGroupItem>
-          </ToggleGroup>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <SlidersHorizontal className="size-4" /> {tList("columnsTrigger")}
-                <ChevronDown className="size-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>{tList("toggleColumns")}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {table
-                .getAllLeafColumns()
-                .filter((c) => c.id !== "select")
-                .map((column) => {
-                  const locked = column.id === "name";
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      checked={column.getIsVisible()}
-                      disabled={locked}
-                      onCheckedChange={(value) =>
-                        !locked && column.toggleVisibility(!!value)
-                      }
-                    >
-                      <span className="capitalize">
-                        {COLUMN_LABELS[column.id] ?? column.id}
-                      </span>
-                      {locked && (
-                        <span className="ml-auto text-[10px] text-muted-foreground">
-                          {tList("requiredColumn")}
-                        </span>
-                      )}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+    <div className="mb-4">
+      <div className="mb-3 relative w-full sm:w-[320px]">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={tList("searchPlaceholder")}
+          className="pl-8 h-9"
+        />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2.5">
         <FilterSelect
           value={initialFilters.group ?? ""}
           onChange={(v) => onFilterChange("group", v)}
@@ -375,11 +317,65 @@ function Toolbar({
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-dashed border-border px-3 text-sm text-muted-foreground hover:text-foreground hover:border-muted-foreground"
           >
-            <X className="size-3" /> {tList("clearFilters")}
+            <X className="size-3.5" /> {tList("clearFilters")}
           </button>
         )}
+
+        <div className="flex-1" />
+
+        <ToggleGroup
+          type="single"
+          value={view}
+          onValueChange={(v) => v && onViewChange(v as "table" | "cards")}
+          variant="outline"
+          size="sm"
+        >
+          <ToggleGroupItem value="table" aria-label={tList("viewComfortable")}>
+            {tList("viewComfortableShort")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="cards" aria-label={tList("viewCards")}>
+            {tList("viewCardsShort")}
+          </ToggleGroupItem>
+        </ToggleGroup>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <SlidersHorizontal className="size-4" /> {tList("columnsTrigger")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>{tList("toggleColumns")}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {table
+              .getAllLeafColumns()
+              .filter((c) => c.id !== "select")
+              .map((column) => {
+                const locked = column.id === "name";
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    checked={column.getIsVisible()}
+                    disabled={locked}
+                    onCheckedChange={(value) =>
+                      !locked && column.toggleVisibility(!!value)
+                    }
+                  >
+                    <span className="capitalize">
+                      {COLUMN_LABELS[column.id] ?? column.id}
+                    </span>
+                    {locked && (
+                      <span className="ml-auto text-[10px] text-muted-foreground">
+                        {tList("requiredColumn")}
+                      </span>
+                    )}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
@@ -403,7 +399,7 @@ function FilterSelect({
       value={value || "__all__"}
       onValueChange={(v) => onChange(v === "__all__" ? null : v)}
     >
-      <SelectTrigger size="sm" className="h-9 min-w-[160px] text-xs">
+      <SelectTrigger size="sm" className="h-9 min-w-[140px]">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -447,7 +443,7 @@ function buildColumns(
       id: "type",
       header: "",
       cell: ({ row }) => (
-        <GroupIcon icon={lookups.groups.get(row.original.groupId)?.icon ?? null} size="sm" />
+        <GroupIcon icon={lookups.groups.get(row.original.groupId)?.icon ?? null} size="md" />
       ),
     },
     {
@@ -580,13 +576,16 @@ function buildColumns(
 
 function DeviceTable({ table }: { table: ReturnType<typeof useReactTable<DeviceWithFlags>> }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-[var(--radius-xl)] border border-border bg-card shadow-sm overflow-hidden">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((h) => (
-                <TableHead key={h.id} className="text-xs uppercase tracking-wide text-muted-foreground">
+                <TableHead
+                  key={h.id}
+                  className="h-11 px-4 text-xs font-medium text-muted-foreground"
+                >
                   {h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}
                 </TableHead>
               ))}
@@ -595,9 +594,9 @@ function DeviceTable({ table }: { table: ReturnType<typeof useReactTable<DeviceW
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="group/row h-14 hover:bg-muted/40">
+            <TableRow key={row.id} className="group/row h-14 hover:bg-muted">
               {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id} className="py-2">
+                <TableCell key={cell.id} className="px-4 py-0 align-middle">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}
@@ -627,44 +626,49 @@ function DeviceCards({
             key={d.id}
             href={`/devices/${encodeURIComponent(d.code)}`}
             className={cn(
-              "group rounded-xl border border-border bg-card overflow-hidden",
-              "transition-colors hover:border-ring focus:border-ring focus:outline-none"
+              "group flex flex-col rounded-[var(--radius-xl)] border border-border bg-card shadow-sm overflow-hidden",
+              "transition-[border-color,box-shadow] duration-150",
+              "hover:border-ring hover:shadow-[0_2px_10px_rgba(16,24,40,0.06)]",
+              "focus:border-ring focus:outline-none"
             )}
           >
             <div
-              className="relative h-[120px] bg-gradient-to-br from-secondary via-muted to-background flex items-center justify-center"
+              className={cn(
+                "relative h-[132px] flex items-center justify-center border-b border-border",
+                "bg-[linear-gradient(135deg,color-mix(in_oklch,var(--green-100)_70%,var(--card)),color-mix(in_oklch,var(--green-200)_55%,var(--card)))]",
+                "dark:bg-[linear-gradient(135deg,color-mix(in_oklch,var(--green-800)_30%,var(--card)),color-mix(in_oklch,var(--secondary)_80%,var(--card)))]"
+              )}
             >
-              <GroupIcon icon={g?.icon ?? null} size="md" className="bg-card" />
-              <div className="absolute top-2 right-2">
+              <GroupIcon icon={g?.icon ?? null} size="xl" />
+              <div className="absolute top-3 right-3">
                 <StatusBadge status={d.status} />
               </div>
             </div>
-            <div className="p-4 space-y-3">
+            <div className="flex flex-1 flex-col px-[18px] pt-4 pb-[18px]">
               <div>
-                <div className="font-semibold leading-snug">{d.name}</div>
+                <h3 className="text-[15px] font-semibold leading-snug">{d.name}</h3>
                 <div className="font-mono text-xs text-muted-foreground mt-0.5">{d.code}</div>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+              <div className="mt-3.5 grid grid-cols-2 gap-x-3 gap-y-2.5">
                 <Meta label={tList("metaDepartment")} value={dept?.name ?? "—"} />
                 <Meta label={tList("metaGroup")} value={g?.name ?? "—"} />
                 <Meta label={tList("metaLocation")} value={d.location ?? "—"} span={2} />
               </div>
 
               {d.flags.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="mt-3.5 flex flex-wrap gap-1">
                   {d.flags.map((f) => (
                     <FlagChip key={f} flag={f} />
                   ))}
                 </div>
               )}
 
-              <div className="flex items-end justify-between pt-1">
+              <div className="mt-auto flex items-center justify-between pt-[18px] border-t border-border">
                 <ConditionBar value={d.condition} />
-                <div className="text-right">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{tList("metaQty")}</div>
-                  <div className="font-medium tabular-nums">{d.quantity}</div>
-                </div>
+                <span className="text-xs text-muted-foreground">
+                  {tList("metaQty")} {d.quantity}
+                </span>
               </div>
             </div>
           </Link>
@@ -677,8 +681,8 @@ function DeviceCards({
 function Meta({ label, value, span }: { label: string; value: string; span?: 2 }) {
   return (
     <div className={span === 2 ? "col-span-2" : undefined}>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="text-sm">{value}</div>
+      <div className="text-[11px] uppercase tracking-[0.04em] text-muted-foreground">{label}</div>
+      <div className="mt-px text-[13px] font-medium">{value}</div>
     </div>
   );
 }

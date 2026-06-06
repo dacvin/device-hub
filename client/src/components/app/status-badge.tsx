@@ -6,18 +6,11 @@ import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<"success" | "info" | "warning" | "muted", string> = {
   success:
-    "bg-[oklch(0.94_0.05_160)] text-[oklch(0.42_0.07_175)] dark:bg-[oklch(0.32_0.05_170)] dark:text-[oklch(0.85_0.08_160)]",
-  info: "bg-[oklch(0.94_0.02_240)] text-[oklch(0.42_0.05_240)] dark:bg-[oklch(0.30_0.04_240)] dark:text-[oklch(0.82_0.07_240)]",
+    "bg-[color-mix(in_oklch,var(--green-200)_55%,var(--card))] text-[var(--green-900)] dark:bg-[color-mix(in_oklch,var(--green-800)_40%,var(--card))] dark:text-[var(--green-300)]",
+  info: "bg-[oklch(0.95_0.03_215)] text-[oklch(0.50_0.10_230)] dark:bg-[oklch(0.32_0.06_230)] dark:text-[oklch(0.82_0.09_220)]",
   warning:
-    "bg-[oklch(0.93_0.07_75)] text-[oklch(0.42_0.10_75)] dark:bg-[oklch(0.34_0.07_75)] dark:text-[oklch(0.82_0.10_75)]",
+    "bg-[oklch(0.96_0.05_85)] text-[oklch(0.48_0.10_70)] dark:bg-[oklch(0.34_0.06_75)] dark:text-[oklch(0.84_0.12_85)]",
   muted: "bg-muted text-muted-foreground",
-};
-
-const DOT_CLASSES: Record<"success" | "info" | "warning" | "muted", string> = {
-  success: "bg-[oklch(0.67_0.12_167)]",
-  info: "bg-[oklch(0.55_0.10_240)]",
-  warning: "bg-[oklch(0.78_0.13_75)]",
-  muted: "bg-muted-foreground/60",
 };
 
 export function StatusBadge({ status, className }: { status: DeviceStatus; className?: string }) {
@@ -26,12 +19,12 @@ export function StatusBadge({ status, className }: { status: DeviceStatus; class
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
+        "inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 text-xs font-medium leading-none whitespace-nowrap",
         TONE_CLASSES[tone],
         className
       )}
     >
-      <span className={cn("size-1.5 rounded-full", DOT_CLASSES[tone])} aria-hidden />
+      <span className="size-1.5 rounded-full bg-current" aria-hidden />
       {t(status)}
     </span>
   );

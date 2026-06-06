@@ -17,8 +17,8 @@ export function FlagChip({ flag, className }: { flag: DeviceFlag; className?: st
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
-        "bg-[oklch(0.95_0.05_75)] text-[oklch(0.45_0.10_75)] dark:bg-[oklch(0.32_0.07_75)] dark:text-[oklch(0.82_0.10_75)]",
+        "inline-flex h-[22px] items-center gap-1.5 rounded-full px-2.5 text-xs font-medium leading-none whitespace-nowrap",
+        "bg-[oklch(0.96_0.05_85)] text-[oklch(0.48_0.10_70)] dark:bg-[oklch(0.34_0.06_75)] dark:text-[oklch(0.84_0.12_85)]",
         className
       )}
     >
