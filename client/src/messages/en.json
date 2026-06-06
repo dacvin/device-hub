@@ -1,8 +1,4 @@
 {
-  "brand": {
-    "device": "Device",
-    "hub": "Hub"
-  },
   "sidebar": {
     "groupMain": "Main",
     "groupCatalog": "Catalog",
