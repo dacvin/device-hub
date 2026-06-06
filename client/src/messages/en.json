@@ -1,1 +1,20 @@
-{}
+{
+  "brand": {
+    "device": "Device",
+    "hub": "Hub"
+  },
+  "sidebar": {
+    "groupMain": "Main",
+    "groupCatalog": "Catalog",
+    "groupSystem": "System"
+  },
+  "nav": {
+    "overview": "Overview",
+    "devices": "Devices",
+    "departments": "Departments",
+    "groups": "Groups",
+    "manufacturers": "Manufacturers",
+    "members": "Members",
+    "settings": "Settings"
+  }
+}

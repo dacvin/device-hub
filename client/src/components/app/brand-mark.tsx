@@ -1,4 +1,7 @@
+"use client";
+
 import { HardDrive } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface BrandMarkProps {
@@ -7,6 +10,7 @@ interface BrandMarkProps {
 }
 
 export function BrandMark({ className, size = "md" }: BrandMarkProps) {
+  const t = useTranslations("brand");
   const glyph =
     size === "sm" ? "size-6 rounded-[7px]" : "size-[30px] rounded-[9px]";
   const icon = size === "sm" ? "size-3.5" : "size-4";
@@ -22,8 +26,8 @@ export function BrandMark({ className, size = "md" }: BrandMarkProps) {
         <HardDrive className={icon} aria-hidden />
       </span>
       <span className="tracking-tight">
-        <span>Device</span>
-        <span className="text-primary">Hub</span>
+        <span>{t("device")}</span>
+        <span className="text-primary">{t("hub")}</span>
       </span>
     </div>
   );

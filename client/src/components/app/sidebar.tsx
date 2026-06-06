@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { BrandMark } from "@/components/app/brand-mark";
 import { NAV_GROUPS } from "@/components/app/nav-items";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,8 @@ export interface SidebarUser {
 
 export function Sidebar({ user }: { user: SidebarUser }) {
   const pathname = usePathname();
+  const tSidebar = useTranslations("sidebar");
+  const tNav = useTranslations("nav");
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -28,9 +31,9 @@ export function Sidebar({ user }: { user: SidebarUser }) {
 
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-5">
         {NAV_GROUPS.map((group) => (
-          <div key={group.label}>
+          <div key={group.labelKey}>
             <div className="px-2 mb-1 text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-              {group.label}
+              {tSidebar(group.labelKey)}
             </div>
             <ul className="space-y-0.5">
               {group.items.map((item) => {
@@ -48,7 +51,7 @@ export function Sidebar({ user }: { user: SidebarUser }) {
                       )}
                     >
                       <Icon className="size-4" aria-hidden />
-                      <span>{item.label}</span>
+                      <span>{tNav(item.labelKey)}</span>
                     </Link>
                   </li>
                 );

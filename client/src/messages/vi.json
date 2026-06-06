@@ -1,1 +1,20 @@
-{}
+{
+  "brand": {
+    "device": "Thiết",
+    "hub": "Bị"
+  },
+  "sidebar": {
+    "groupMain": "Chính",
+    "groupCatalog": "Danh mục",
+    "groupSystem": "Hệ thống"
+  },
+  "nav": {
+    "overview": "Tổng quan",
+    "devices": "Thiết bị",
+    "departments": "Phòng ban",
+    "groups": "Nhóm",
+    "manufacturers": "Nhà sản xuất",
+    "members": "Thành viên",
+    "settings": "Cài đặt"
+  }
+}

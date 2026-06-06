@@ -10,37 +10,39 @@ import {
 } from "lucide-react";
 
 export interface NavItem {
-  label: string;
+  // i18n key under "nav" namespace
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 }
 
 export interface NavGroup {
-  label: string;
+  // i18n key under "sidebar" namespace
+  labelKey: string;
   items: NavItem[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    label: "Main",
+    labelKey: "groupMain",
     items: [
-      { label: "Overview", href: "/overview", icon: LayoutDashboard },
-      { label: "Devices", href: "/devices", icon: HardDrive },
+      { labelKey: "overview", href: "/overview", icon: LayoutDashboard },
+      { labelKey: "devices", href: "/devices", icon: HardDrive },
     ],
   },
   {
-    label: "Catalog",
+    labelKey: "groupCatalog",
     items: [
-      { label: "Departments", href: "/departments", icon: Building2 },
-      { label: "Groups", href: "/groups", icon: Layers },
-      { label: "Manufacturers", href: "/manufacturers", icon: Factory },
+      { labelKey: "departments", href: "/departments", icon: Building2 },
+      { labelKey: "groups", href: "/groups", icon: Layers },
+      { labelKey: "manufacturers", href: "/manufacturers", icon: Factory },
     ],
   },
   {
-    label: "System",
+    labelKey: "groupSystem",
     items: [
-      { label: "Members", href: "/members", icon: Users },
-      { label: "Settings", href: "/settings", icon: Settings },
+      { labelKey: "members", href: "/members", icon: Users },
+      { labelKey: "settings", href: "/settings", icon: Settings },
     ],
   },
 ];
