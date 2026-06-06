@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import {
   getDeviceWithFlagsByCode,
   listDeviceDocuments,
@@ -25,12 +26,13 @@ export default async function EditDevicePage({ params }: PageProps) {
   const device = await getDeviceWithFlagsByCode(decodedCode);
   if (!device) notFound();
 
-  const [groups, departments, manufacturers, photoRows, docRows] = await Promise.all([
+  const [groups, departments, manufacturers, photoRows, docRows, tForm] = await Promise.all([
     listGroups(),
     listDepartments(),
     listManufacturers(),
     listDevicePhotos(device.id),
     listDeviceDocuments(device.id),
+    getTranslations("devices.form"),
   ]);
 
   const photoUrlMap = await signedPhotoUrls(photoRows.map((p) => p.url));
@@ -90,7 +92,7 @@ export default async function EditDevicePage({ params }: PageProps) {
       groups={groups}
       departments={departments}
       manufacturers={manufacturers}
-      pageTitle={`Edit ${device.name}`}
+      pageTitle={tForm("editPageTitle", { name: device.name })}
       pageSubtitle={device.code}
       headerGroupIcon={headerGroupIcon}
     />

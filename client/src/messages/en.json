@@ -76,6 +76,7 @@
     "tableName": "Name",
     "tableCycle": "Default inventory cycle",
     "tableDevices": "Devices",
+    "cycleMonthsValue": "{count, plural, one {# month} other {# months}}",
     "reassignFirst": "Reassign devices first",
     "dialogAdd": "Add group",
     "dialogEdit": "Edit group",
@@ -220,6 +221,7 @@
       "recentActivityCardTitle": "Recent activity"
     },
     "form": {
+      "editPageTitle": "Edit {name}",
       "sectionGeneralLabel": "General",
       "sectionGeneralDescription": "Identity and ownership of the device.",
       "sectionClassificationLabel": "Classification",

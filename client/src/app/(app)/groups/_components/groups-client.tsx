@@ -81,38 +81,38 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
         search={search}
         onSearchChange={setSearch}
       >
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableName")}</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableCycle")}</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableDevices")}</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableName")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableCycle")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground w-[200px]">{t("tableDevices")}</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((r) => (
-                <TableRow key={r.id} className="group/row h-14 hover:bg-muted/40">
-                  <TableCell>
+                <TableRow key={r.id} className="group/row h-14 hover:bg-muted">
+                  <TableCell className="px-4">
                     <div className="flex items-center gap-3">
                       <GroupIcon icon={r.icon} size="md" />
                       <span className="font-medium">{r.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{r.defaultInventoryCycleMonths} months</TableCell>
-                  <TableCell>
+                  <TableCell className="px-4">{t("cycleMonthsValue", { count: r.defaultInventoryCycleMonths })}</TableCell>
+                  <TableCell className="px-4">
                     <CountLink count={r.deviceCount} max={max} href={`/devices?group=${r.id}`} />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="px-4 text-right">
                     <div className="opacity-0 group-hover/row:opacity-100 transition-opacity flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="size-7" onClick={() => setOpenId(r.id)}>
+                      <Button variant="ghost" size="icon" className="size-[30px] border-0" onClick={() => setOpenId(r.id)}>
                         <Pencil className="size-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7 text-destructive hover:text-destructive disabled:opacity-30"
+                        className="size-[30px] border-0 text-destructive hover:text-destructive disabled:opacity-30"
                         disabled={r.deviceCount > 0}
                         title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {

@@ -76,6 +76,7 @@
     "tableName": "Tên",
     "tableCycle": "Chu kỳ kiểm kê mặc định",
     "tableDevices": "Thiết bị",
+    "cycleMonthsValue": "{count} tháng",
     "reassignFirst": "Vui lòng điều chuyển thiết bị trước",
     "dialogAdd": "Thêm nhóm",
     "dialogEdit": "Sửa nhóm",
@@ -220,6 +221,7 @@
       "recentActivityCardTitle": "Hoạt động gần đây"
     },
     "form": {
+      "editPageTitle": "Sửa {name}",
       "sectionGeneralLabel": "Chung",
       "sectionGeneralDescription": "Định danh và phân quyền của thiết bị.",
       "sectionClassificationLabel": "Phân loại",
