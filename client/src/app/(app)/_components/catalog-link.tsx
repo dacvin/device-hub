@@ -40,12 +40,3 @@ export function CountLink({
     </Link>
   );
 }
-
-export function MiniBar({ value, max }: { value: number; max: number }) {
-  const pct = max === 0 ? 0 : Math.min(100, (value / max) * 100);
-  return (
-    <span className="ml-2 inline-block h-1.5 w-[120px] overflow-hidden rounded-full bg-muted align-middle">
-      <span className="block h-full bg-primary" style={{ width: `${pct}%` }} />
-    </span>
-  );
-}
