@@ -237,7 +237,7 @@ export function DeviceForm(props: DeviceFormProps) {
         href="/devices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
       >
-        <ArrowLeft className="size-4" /> Back to devices
+        <ArrowLeft className="size-4" /> {tForm("backToDevices")}
       </Link>
 
       <form
@@ -281,7 +281,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   children={(field) => (
                     <FieldWrap field={field}>
                       <FieldLabel htmlFor={field.name}>
-                        Device name <Required />
+                        {tForm("deviceName")} <Required />
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -289,7 +289,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="e.g. Dell XPS 15 9530"
+                        placeholder={tForm("deviceNamePlaceholder")}
                         aria-invalid={isInvalid(field)}
                       />
                       <FieldError errors={errs(field)} />
@@ -301,7 +301,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   children={(field) => (
                     <FieldWrap field={field}>
                       <FieldLabel htmlFor={field.name}>
-                        Device code <Required />
+                        {tForm("deviceCode")} <Required />
                       </FieldLabel>
                       <Input
                         id={field.name}
@@ -309,7 +309,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
                         onBlur={field.handleBlur}
-                        placeholder="DEV-0000-XXX"
+                        placeholder={tForm("deviceCodePlaceholder")}
                         className="font-mono"
                         aria-invalid={isInvalid(field)}
                       />
@@ -323,7 +323,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   children={(field) => (
                     <FieldWrap field={field}>
                       <FieldLabel htmlFor={field.name}>
-                        Group <Required />
+                        {tForm("group")} <Required />
                       </FieldLabel>
                       <Select
                         value={field.state.value || undefined}
@@ -352,7 +352,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   children={(field) => (
                     <FieldWrap field={field}>
                       <FieldLabel htmlFor={field.name}>
-                        Department <Required />
+                        {tForm("department")} <Required />
                       </FieldLabel>
                       <Select
                         value={field.state.value || undefined}
@@ -553,7 +553,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         id={field.name}
                         value={field.state.value ?? ""}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g. HCMC · Floor 4 · Desk E-12"
+                        placeholder={tForm("locationPlaceholder")}
                       />
                     </FieldWrap>
                   )}
@@ -590,7 +590,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="inventoryCycleMonths"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Inventory cycle (months)</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("inventoryCycleField")}</FieldLabel>
                       <Input
                         id={field.name}
                         type="number"
@@ -622,7 +622,7 @@ export function DeviceForm(props: DeviceFormProps) {
                       onValueChange={(v) => field.handleChange(v[0])}
                     />
                     <FieldDescription>
-                      0% = unusable · 100% = brand new.
+                      {tForm("conditionDescription")}
                     </FieldDescription>
                   </FieldWrap>
                 )}
@@ -710,7 +710,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   rows={4}
                   value={field.state.value ?? ""}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Anything else worth remembering…"
+                  placeholder={tForm("notesPlaceholder")}
                 />
               )}
             />
@@ -725,14 +725,14 @@ export function DeviceForm(props: DeviceFormProps) {
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive" size="sm" type="button">
-                      <Trash2 className="size-4" /> Delete device
+                      <Trash2 className="size-4" /> {tForm("deleteDevice")}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>{tForm("deleteConfirmTitle")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        The device will be soft-deleted and removed from lists. Catalog records remain.
+                        {tForm("deleteConfirmDescription")}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

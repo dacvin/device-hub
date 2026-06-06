@@ -72,7 +72,7 @@ export function DocumentList({ items, onChange, onRemovePersisted }: DocumentLis
         </div>
         <div className="text-sm font-medium">{t("uploadDocuments")}</div>
         <div className="text-xs text-muted-foreground">
-          Invoices, warranty cards, manuals · PDF, DOCX, XLSX, images
+          {t("documentsHint")}
         </div>
         <input
           type="file"

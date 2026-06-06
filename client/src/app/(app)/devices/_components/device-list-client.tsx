@@ -198,7 +198,7 @@ export function DeviceListClient({
       />
 
       <div className="text-xs text-muted-foreground">
-        {devices.length} of {devices.length} devices
+        {tList("countOfTotal", { shown: devices.length, total: devices.length })}
       </div>
 
       {view === "table" ? (
@@ -209,7 +209,7 @@ export function DeviceListClient({
 
       {devices.length === 0 && (
         <div className="rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
-          No devices match these filters.
+          {tList("emptyState")}
         </div>
       )}
     </div>
@@ -256,7 +256,7 @@ function Toolbar({
     name: tCols("name"),
     group: tCols("group"),
     department: tCols("department"),
-    manufacturer: "Manufacturer / Model",
+    manufacturer: tList("columnManufacturer"),
     condition: tCols("condition"),
     location: tCols("location"),
     status: tCols("status"),
@@ -273,7 +273,7 @@ function Toolbar({
           <Input
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search code, name, serial…"
+            placeholder={tList("searchPlaceholder")}
             className="pl-8 h-9"
           />
         </div>
@@ -287,17 +287,17 @@ function Toolbar({
             size="sm"
           >
             <ToggleGroupItem value="table" aria-label={tList("viewComfortable")}>
-              Comfortable
+              {tList("viewComfortableShort")}
             </ToggleGroupItem>
             <ToggleGroupItem value="cards" aria-label={tList("viewCards")}>
-              Cards
+              {tList("viewCardsShort")}
             </ToggleGroupItem>
           </ToggleGroup>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <SlidersHorizontal className="size-4" /> Columns
+                <SlidersHorizontal className="size-4" /> {tList("columnsTrigger")}
                 <ChevronDown className="size-3" />
               </Button>
             </DropdownMenuTrigger>
@@ -323,7 +323,7 @@ function Toolbar({
                       </span>
                       {locked && (
                         <span className="ml-auto text-[10px] text-muted-foreground">
-                          Required
+                          {tList("requiredColumn")}
                         </span>
                       )}
                     </DropdownMenuCheckboxItem>
@@ -377,7 +377,7 @@ function Toolbar({
             onClick={onClear}
             className="inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
-            <X className="size-3" /> Clear
+            <X className="size-3" /> {tList("clearFilters")}
           </button>
         )}
       </div>
@@ -486,7 +486,7 @@ function buildColumns(
     },
     {
       id: "manufacturer",
-      header: "Manufacturer / Model", // not in devices.columns — left as-is
+      header: tList("columnManufacturer"),
       cell: ({ row }) => {
         const m = row.original.manufacturerId
           ? lookups.manufacturers.get(row.original.manufacturerId)
@@ -616,6 +616,7 @@ function DeviceCards({
   devices: DeviceWithFlags[];
   lookups: Lookups;
 }) {
+  const tList = useTranslations("devices.list");
   return (
     <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]">
       {devices.map((d) => {
@@ -645,9 +646,9 @@ function DeviceCards({
               </div>
 
               <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-                <Meta label="Department" value={dept?.name ?? "—"} />
-                <Meta label="Group" value={g?.name ?? "—"} />
-                <Meta label="Location" value={d.location ?? "—"} span={2} />
+                <Meta label={tList("metaDepartment")} value={dept?.name ?? "—"} />
+                <Meta label={tList("metaGroup")} value={g?.name ?? "—"} />
+                <Meta label={tList("metaLocation")} value={d.location ?? "—"} span={2} />
               </div>
 
               {d.flags.length > 0 && (
@@ -661,7 +662,7 @@ function DeviceCards({
               <div className="flex items-end justify-between pt-1">
                 <ConditionBar value={d.condition} />
                 <div className="text-right">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Qty</div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{tList("metaQty")}</div>
                   <div className="font-medium tabular-nums">{d.quantity}</div>
                 </div>
               </div>

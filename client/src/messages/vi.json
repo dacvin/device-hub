@@ -138,7 +138,20 @@
       "selectRow": "Chọn dòng",
       "viewDetails": "Xem chi tiết",
       "edit": "Sửa",
-      "more": "Khác"
+      "more": "Khác",
+      "searchPlaceholder": "Tìm theo mã, tên, serial…",
+      "viewComfortableShort": "Thoáng",
+      "viewCardsShort": "Thẻ",
+      "columnsTrigger": "Cột",
+      "requiredColumn": "Bắt buộc",
+      "clearFilters": "Xoá lọc",
+      "emptyState": "Không có thiết bị nào khớp với bộ lọc.",
+      "countOfTotal": "{shown} / {total} thiết bị",
+      "columnManufacturer": "Nhà sản xuất / Dòng",
+      "metaDepartment": "Phòng ban",
+      "metaGroup": "Nhóm",
+      "metaLocation": "Địa điểm",
+      "metaQty": "SL"
     },
     "columns": {
       "typeIcon": "Biểu tượng",
@@ -191,7 +204,17 @@
       "lastInventoryCheckTitle": "Kiểm kê gần nhất",
       "createdTitle": "Đã tạo",
       "noSpecifications": "Chưa có thông số.",
-      "noNotes": "Chưa có ghi chú."
+      "noNotes": "Chưa có ghi chú.",
+      "backToDevices": "Quay lại danh sách",
+      "printLabel": "In nhãn",
+      "editDevice": "Sửa thiết bị",
+      "photosWithCount": "Ảnh ({count})",
+      "documentsWithCount": "Tài liệu ({count})",
+      "photoCover": "Bìa",
+      "openDocument": "Mở",
+      "conditionCardTitle": "Tình trạng",
+      "snapshotCardTitle": "Tổng quan",
+      "recentActivityCardTitle": "Hoạt động gần đây"
     },
     "form": {
       "sectionGeneralLabel": "Chung",
@@ -233,7 +256,23 @@
       "couldNotSave": "Không thể lưu thiết bị",
       "createdToast": "Đã tạo thiết bị",
       "updatedToast": "Đã cập nhật thiết bị",
-      "deleteConfirmTitle": "Xoá thiết bị này?"
+      "deleteConfirmTitle": "Xoá thiết bị này?",
+      "backToDevices": "Quay lại danh sách",
+      "deviceName": "Tên thiết bị",
+      "deviceNamePlaceholder": "VD: Dell XPS 15 9530",
+      "deviceCode": "Mã thiết bị",
+      "deviceCodePlaceholder": "DEV-0000-XXX",
+      "group": "Nhóm",
+      "department": "Phòng ban",
+      "locationPlaceholder": "VD: HCMC · Tầng 4 · Bàn E-12",
+      "inventoryCycleField": "Chu kỳ kiểm kê (tháng)",
+      "conditionDescription": "0% = không dùng được · 100% = mới hoàn toàn.",
+      "deleteDevice": "Xoá thiết bị",
+      "deleteConfirmDescription": "Thiết bị sẽ được đánh dấu xoá và biến mất khỏi danh sách. Các bản ghi danh mục vẫn được giữ lại.",
+      "notesPlaceholder": "Ghi chú thêm…",
+      "photoCover": "Bìa",
+      "photosHint": "Ảnh đầu tiên là ảnh bìa · kéo thả hoặc nhấp · PNG, JPG hoặc WEBP, tối đa 5 MB mỗi ảnh.",
+      "documentsHint": "Hoá đơn, phiếu bảo hành, tài liệu · PDF, DOCX, XLSX, ảnh"
     }
   }
 }

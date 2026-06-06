@@ -86,7 +86,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
         href="/devices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
       >
-        <ArrowLeft className="size-4" /> Back to devices
+        <ArrowLeft className="size-4" /> {t("backToDevices")}
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -112,14 +112,14 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="outline" size="sm">
-            <Printer className="size-4" /> Print label
+            <Printer className="size-4" /> {t("printLabel")}
           </Button>
           <Button variant="outline" size="icon">
             <MoreHorizontal className="size-4" />
           </Button>
           <Button size="sm" asChild>
             <Link href={`/devices/${encodeURIComponent(device.code)}/edit`}>
-              <Pencil className="size-4" /> Edit device
+              <Pencil className="size-4" /> {t("editDevice")}
             </Link>
           </Button>
         </div>
@@ -197,7 +197,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
           {photos.length > 0 && (
             <SectionCard
               icon={<Cpu className="size-4 text-primary" />}
-              title={`Photos (${photos.length})`}
+              title={t("photosWithCount", { count: photos.length })}
             >
               <div className="grid grid-cols-4 gap-2">
                 {photos.map((p) => {
@@ -213,7 +213,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
                       )}
                       {p.sortOrder === 0 && (
                         <span className="absolute top-1 left-1 text-[10px] font-medium bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
-                          Cover
+                          {t("photoCover")}
                         </span>
                       )}
                     </div>
@@ -226,7 +226,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
           {documents.length > 0 && (
             <SectionCard
               icon={<ClipboardCheck className="size-4 text-primary" />}
-              title={`Documents (${documents.length})`}
+              title={t("documentsWithCount", { count: documents.length })}
             >
               <ul className="divide-y divide-border">
                 {documents.map((d) => {
@@ -249,7 +249,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
                           rel="noreferrer"
                           className="text-xs text-primary hover:underline"
                         >
-                          Open
+                          {t("openDocument")}
                         </a>
                       )}
                     </li>
@@ -263,7 +263,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
         <aside className="space-y-4">
           <Card className="p-5">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-3">
-              Condition
+              {t("conditionCardTitle")}
             </div>
             <div className="flex items-center justify-center">
               <ConditionRing value={device.condition} />
@@ -272,7 +272,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
           <Card className="p-5">
             <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-3">
-              Snapshot
+              {t("snapshotCardTitle")}
             </div>
             <DefList
               compact
@@ -299,7 +299,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             <div className="flex items-center gap-2 mb-3">
               <History className="size-4 text-primary" />
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Recent activity
+                {t("recentActivityCardTitle")}
               </div>
             </div>
             <ul className="relative space-y-3 pl-5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-border">

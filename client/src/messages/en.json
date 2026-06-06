@@ -138,7 +138,20 @@
       "selectRow": "Select row",
       "viewDetails": "View details",
       "edit": "Edit",
-      "more": "More"
+      "more": "More",
+      "searchPlaceholder": "Search code, name, serial…",
+      "viewComfortableShort": "Comfortable",
+      "viewCardsShort": "Cards",
+      "columnsTrigger": "Columns",
+      "requiredColumn": "Required",
+      "clearFilters": "Clear",
+      "emptyState": "No devices match these filters.",
+      "countOfTotal": "{shown} of {total} devices",
+      "columnManufacturer": "Manufacturer / Model",
+      "metaDepartment": "Department",
+      "metaGroup": "Group",
+      "metaLocation": "Location",
+      "metaQty": "Qty"
     },
     "columns": {
       "typeIcon": "Type icon",
@@ -191,7 +204,17 @@
       "lastInventoryCheckTitle": "Last inventory check",
       "createdTitle": "Created",
       "noSpecifications": "No specifications recorded.",
-      "noNotes": "No notes."
+      "noNotes": "No notes.",
+      "backToDevices": "Back to devices",
+      "printLabel": "Print label",
+      "editDevice": "Edit device",
+      "photosWithCount": "Photos ({count})",
+      "documentsWithCount": "Documents ({count})",
+      "photoCover": "Cover",
+      "openDocument": "Open",
+      "conditionCardTitle": "Condition",
+      "snapshotCardTitle": "Snapshot",
+      "recentActivityCardTitle": "Recent activity"
     },
     "form": {
       "sectionGeneralLabel": "General",
@@ -233,7 +256,23 @@
       "couldNotSave": "Could not save device",
       "createdToast": "Device created",
       "updatedToast": "Device updated",
-      "deleteConfirmTitle": "Delete this device?"
+      "deleteConfirmTitle": "Delete this device?",
+      "backToDevices": "Back to devices",
+      "deviceName": "Device name",
+      "deviceNamePlaceholder": "e.g. Dell XPS 15 9530",
+      "deviceCode": "Device code",
+      "deviceCodePlaceholder": "DEV-0000-XXX",
+      "group": "Group",
+      "department": "Department",
+      "locationPlaceholder": "e.g. HCMC · Floor 4 · Desk E-12",
+      "inventoryCycleField": "Inventory cycle (months)",
+      "conditionDescription": "0% = unusable · 100% = brand new.",
+      "deleteDevice": "Delete device",
+      "deleteConfirmDescription": "The device will be soft-deleted and removed from lists. Catalog records remain.",
+      "notesPlaceholder": "Anything else worth remembering…",
+      "photoCover": "Cover",
+      "photosHint": "First photo is the cover · drag & drop or click · PNG, JPG, or WEBP, up to 5 MB each.",
+      "documentsHint": "Invoices, warranty cards, manuals · PDF, DOCX, XLSX, images"
     }
   }
 }

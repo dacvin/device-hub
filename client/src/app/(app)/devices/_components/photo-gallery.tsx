@@ -100,7 +100,7 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
             <img src={item.previewUrl} alt={item.fileName ?? ""} className="size-full object-cover" />
             {idx === 0 && (
               <span className="absolute top-1 left-1 text-[10px] font-medium bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
-                Cover
+                {t("photoCover")}
               </span>
             )}
             <button
@@ -137,7 +137,7 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
         </label>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        First photo is the cover · drag &amp; drop or click · PNG, JPG, or WEBP, up to 5 MB each.
+        {t("photosHint")}
       </p>
     </div>
   );
