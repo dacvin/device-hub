@@ -70,7 +70,8 @@ For each page in the sequence:
 2. **Read the built page.** Open the route + its `_components/*`. Locate each region; record current value + file:line.
 3. **Resolve gaps in Tailwind.** Prefer named tokens (`px-4`, `gap-2`, `rounded-xl`, `bg-card`) when they match exactly; fall back to arbitrary values (`h-[56px]`, `w-[248px]`) only when no token matches. Never inline literal hex colors — use the semantic token from `globals.css`.
 4. **Run the dev server and look.** `pnpm dev`, open the page in a browser, compare side-by-side with the mock HTML (also opened in a browser). Spot-check the fixed values.
-5. **Commit.** One commit per page. Message format: `fix(ui): match <page> to mock`.
+5. **Subagent verification.** Dispatch an `Explore`-style subagent with the mock file paths, the built component paths, and the gap-report table. The subagent's job is to independently re-read both sides and confirm every row's Built value now matches the Mock value (light + dark, plus the page's responsive breakpoints). If it flags discrepancies, fix them in the same page before committing. Self-reported "done" is not sufficient.
+6. **Commit.** One commit per page. Message format: `fix(ui): match <page> to mock`.
 
 ## Verification
 
