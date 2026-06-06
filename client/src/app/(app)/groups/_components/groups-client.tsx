@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
-import { CountLink, MiniBar } from "@/app/(app)/_components/catalog-link";
+import { CountLink } from "@/app/(app)/_components/catalog-link";
 import { GroupIcon } from "@/components/app/group-icon";
 import { groupFormSchema, type GroupFormValues } from "@/lib/domain/devices";
 import { deleteGroupAction, saveGroupAction } from "@/app/(app)/groups/_actions";
@@ -102,8 +102,7 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
                   </TableCell>
                   <TableCell>{r.defaultInventoryCycleMonths} months</TableCell>
                   <TableCell>
-                    <CountLink count={r.deviceCount} href={`/devices?group=${r.id}`} />
-                    <MiniBar value={r.deviceCount} max={max} />
+                    <CountLink count={r.deviceCount} max={max} href={`/devices?group=${r.id}`} />
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="opacity-0 group-hover/row:opacity-100 transition-opacity flex justify-end gap-1">
@@ -192,7 +191,9 @@ function GroupForm({
           name="name"
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
-              <FieldLabel htmlFor={f.name}>{t("fieldName")} *</FieldLabel>
+              <FieldLabel htmlFor={f.name}>
+                {t("fieldName")} <span className="text-destructive">*</span>
+              </FieldLabel>
               <Input
                 id={f.name}
                 value={f.state.value}
@@ -223,7 +224,7 @@ function GroupForm({
                     )}
                     aria-label={name}
                   >
-                    <GroupIcon icon={name} size="sm" className="border-0 bg-transparent" />
+                    <GroupIcon icon={name} size="sm" />
                   </button>
                 ))}
               </div>
