@@ -48,7 +48,8 @@
     "delete": "Xoá",
     "saveFailed": "Lưu thất bại",
     "deleteFailed": "Xoá thất bại",
-    "loading": "Đang tải…"
+    "loading": "Đang tải…",
+    "toggleTheme": "Đổi giao diện"
   },
   "departments": {
     "title": "Phòng ban",

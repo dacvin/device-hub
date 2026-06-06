@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +12,7 @@ function subscribe() {
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  const t = useTranslations("common");
   const mounted = useSyncExternalStore(
     subscribe,
     () => true,
@@ -24,7 +26,7 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      aria-label="Toggle theme"
+      aria-label={t("toggleTheme")}
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className="size-8"
     >

@@ -48,7 +48,8 @@
     "delete": "Delete",
     "saveFailed": "Save failed",
     "deleteFailed": "Delete failed",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "toggleTheme": "Toggle theme"
   },
   "departments": {
     "title": "Departments",
