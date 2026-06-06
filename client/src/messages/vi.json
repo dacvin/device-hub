@@ -39,5 +39,28 @@
       "departmentsLabel": "Phòng ban",
       "inventoryAccuracyLabel": "Độ chính xác kiểm kê"
     }
+  },
+  "devices": {
+    "status": {
+      "in-use": "Đang sử dụng",
+      "in-storage": "Trong kho",
+      "in-repair": "Đang sửa",
+      "retired": "Đã thanh lý"
+    },
+    "flag": {
+      "warranty-expiring": "Sắp hết bảo hành",
+      "inventory-overdue": "Quá hạn kiểm kê"
+    },
+    "source": {
+      "Purchased": "Mua mới",
+      "Leased": "Thuê",
+      "Donated": "Tặng",
+      "Transferred": "Điều chuyển"
+    },
+    "unit": {
+      "piece": "cái",
+      "set": "bộ",
+      "box": "thùng"
+    }
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarClock, ShieldAlert, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { FLAG_META, type DeviceFlag } from "@/lib/domain/devices";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ const ICONS: Record<string, LucideIcon> = {
 export function FlagChip({ flag, className }: { flag: DeviceFlag; className?: string }) {
   const meta = FLAG_META[flag];
   const Icon = ICONS[meta.icon] ?? ShieldAlert;
+  const t = useTranslations("devices.flag");
   return (
     <span
       className={cn(
@@ -21,7 +23,7 @@ export function FlagChip({ flag, className }: { flag: DeviceFlag; className?: st
       )}
     >
       <Icon className="size-3" aria-hidden />
-      {meta.label}
+      {t(flag)}
     </span>
   );
 }

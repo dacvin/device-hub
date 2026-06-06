@@ -188,16 +188,9 @@ export const STATUS_TONE: Record<DeviceStatus, "success" | "info" | "warning" | 
   retired: "muted",
 };
 
-export const STATUS_LABEL: Record<DeviceStatus, string> = {
-  "in-use": "In use",
-  "in-storage": "In storage",
-  "in-repair": "In repair",
-  retired: "Retired",
-};
-
-export const FLAG_META: Record<DeviceFlag, { label: string; icon: string }> = {
-  "warranty-expiring": { label: "Warranty expiring", icon: "shield-alert" },
-  "inventory-overdue": { label: "Inventory overdue", icon: "calendar-clock" },
+export const FLAG_META: Record<DeviceFlag, { icon: string }> = {
+  "warranty-expiring": { icon: "shield-alert" },
+  "inventory-overdue": { icon: "calendar-clock" },
 };
 
 /* ---------- Row -> domain mappers ---------- */

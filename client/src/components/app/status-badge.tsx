@@ -1,4 +1,7 @@
-import { STATUS_LABEL, STATUS_TONE, type DeviceStatus } from "@/lib/domain/devices";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { STATUS_TONE, type DeviceStatus } from "@/lib/domain/devices";
 import { cn } from "@/lib/utils";
 
 const TONE_CLASSES: Record<"success" | "info" | "warning" | "muted", string> = {
@@ -19,6 +22,7 @@ const DOT_CLASSES: Record<"success" | "info" | "warning" | "muted", string> = {
 
 export function StatusBadge({ status, className }: { status: DeviceStatus; className?: string }) {
   const tone = STATUS_TONE[status];
+  const t = useTranslations("devices.status");
   return (
     <span
       className={cn(
@@ -28,7 +32,7 @@ export function StatusBadge({ status, className }: { status: DeviceStatus; class
       )}
     >
       <span className={cn("size-1.5 rounded-full", DOT_CLASSES[tone])} aria-hidden />
-      {STATUS_LABEL[status]}
+      {t(status)}
     </span>
   );
 }

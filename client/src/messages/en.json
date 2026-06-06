@@ -39,5 +39,28 @@
       "departmentsLabel": "Departments",
       "inventoryAccuracyLabel": "Inventory accuracy"
     }
+  },
+  "devices": {
+    "status": {
+      "in-use": "In use",
+      "in-storage": "In storage",
+      "in-repair": "In repair",
+      "retired": "Retired"
+    },
+    "flag": {
+      "warranty-expiring": "Warranty expiring",
+      "inventory-overdue": "Inventory overdue"
+    },
+    "source": {
+      "Purchased": "Purchased",
+      "Leased": "Leased",
+      "Donated": "Donated",
+      "Transferred": "Transferred"
+    },
+    "unit": {
+      "piece": "piece",
+      "set": "set",
+      "box": "box"
+    }
   }
 }

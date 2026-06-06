@@ -49,7 +49,6 @@ import { cn } from "@/lib/utils";
 import {
   DEVICE_STATUSES,
   SOURCES,
-  STATUS_LABEL,
   UNITS,
   deviceFormSchema,
   type Department,
@@ -507,7 +506,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         <SelectContent>
                           {DEVICE_STATUSES.map((s) => (
                             <SelectItem key={s} value={s}>
-                              {STATUS_LABEL[s]}
+                              {s}
                             </SelectItem>
                           ))}
                         </SelectContent>

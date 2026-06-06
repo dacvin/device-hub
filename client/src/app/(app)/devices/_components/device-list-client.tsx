@@ -54,7 +54,6 @@ import { FlagChip } from "@/components/app/flag-chip";
 import { ConditionBar } from "@/components/app/condition-bar";
 import {
   DEVICE_STATUSES,
-  STATUS_LABEL,
   type Department,
   type DeviceGroup,
   type DeviceWithFlags,
@@ -330,7 +329,7 @@ function Toolbar({
           onChange={(v) => onFilterChange("status", v)}
           placeholder="Any status"
           allLabel="Any status"
-          options={DEVICE_STATUSES.map((s) => ({ value: s, label: STATUS_LABEL[s] }))}
+          options={DEVICE_STATUSES.map((s) => ({ value: s, label: s }))}
         />
         <FilterSelect
           value={initialFilters.flag ?? ""}
