@@ -16,5 +16,28 @@
     "manufacturers": "Nhà sản xuất",
     "members": "Thành viên",
     "settings": "Cài đặt"
+  },
+  "login": {
+    "signInTitle": "Đăng nhập DeviceHub",
+    "subtitle": "Tiếp tục với tài khoản Google của bạn.",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "redirecting": "Đang chuyển hướng…",
+    "oauthError": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "termsPrefix": "Bằng việc đăng nhập, bạn đồng ý với",
+    "termsLink": "chính sách sử dụng",
+    "termsSuffix": ".",
+    "taglineRich": "Mọi thiết bị, <accent>đều được quản lý.</accent>",
+    "description": "Theo dõi laptop, màn hình, máy chủ và thiết bị ngoại vi từ lúc mua đến khi thanh lý — kèm cảnh báo bảo hành và chu kỳ kiểm kê tích hợp.",
+    "chips": {
+      "laptops": "Laptop",
+      "monitors": "Màn hình",
+      "servers": "Máy chủ",
+      "printers": "Máy in"
+    },
+    "stats": {
+      "devicesTrackedLabel": "Thiết bị đang quản lý",
+      "departmentsLabel": "Phòng ban",
+      "inventoryAccuracyLabel": "Độ chính xác kiểm kê"
+    }
   }
 }

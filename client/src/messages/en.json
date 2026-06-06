@@ -16,5 +16,28 @@
     "manufacturers": "Manufacturers",
     "members": "Members",
     "settings": "Settings"
+  },
+  "login": {
+    "signInTitle": "Sign in to DeviceHub",
+    "subtitle": "Continue with your Google account.",
+    "continueWithGoogle": "Continue with Google",
+    "redirecting": "Redirecting…",
+    "oauthError": "Sign-in failed. Try again.",
+    "termsPrefix": "By signing in you agree to the",
+    "termsLink": "acceptable-use policy",
+    "termsSuffix": ".",
+    "taglineRich": "Every device, <accent>accounted for.</accent>",
+    "description": "Track laptops, monitors, servers and peripherals from purchase to retirement — with warranty alerts and inventory cycles built in.",
+    "chips": {
+      "laptops": "Laptops",
+      "monitors": "Monitors",
+      "servers": "Servers",
+      "printers": "Printers"
+    },
+    "stats": {
+      "devicesTrackedLabel": "Devices tracked",
+      "departmentsLabel": "Departments",
+      "inventoryAccuracyLabel": "Inventory accuracy"
+    }
   }
 }
