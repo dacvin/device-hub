@@ -69,7 +69,7 @@ export default function LoginPage() {
 
         <div className="relative flex-1 flex flex-col justify-center max-w-md">
           <p className="text-xs uppercase tracking-[0.14em] opacity-80 mb-3">
-            Sioux Asia IT
+            DeviceHub
           </p>
           <h2 className="text-[34px] font-semibold leading-tight">
             Every device,{" "}
