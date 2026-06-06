@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
-import { CountLink, MiniBar } from "@/app/(app)/_components/catalog-link";
+import { CountLink } from "@/app/(app)/_components/catalog-link";
 import { departmentFormSchema, type DepartmentFormValues } from "@/lib/domain/devices";
 import {
   deleteDepartmentAction,
@@ -71,36 +71,35 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
         search={search}
         onSearchChange={setSearch}
       >
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableName")}</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableManager")}</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableLocation")}</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableDevices")}</TableHead>
-                <TableHead className="w-20" />
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableName")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableManager")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableLocation")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground w-[200px]">{t("tableDevices")}</TableHead>
+                <TableHead className="h-11 w-20" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((r) => (
-                <TableRow key={r.id} className="group/row h-14 hover:bg-muted/40">
-                  <TableCell className="font-medium">{r.name}</TableCell>
-                  <TableCell>{r.manager ?? <Muted>—</Muted>}</TableCell>
-                  <TableCell>{r.primaryLocation ?? <Muted>—</Muted>}</TableCell>
-                  <TableCell>
-                    <CountLink count={r.deviceCount} href={`/devices?dept=${r.id}`} />
-                    <MiniBar value={r.deviceCount} max={max} />
+                <TableRow key={r.id} className="group/row h-14 hover:bg-muted">
+                  <TableCell className="px-4 font-medium">{r.name}</TableCell>
+                  <TableCell className="px-4">{r.manager ?? <Muted>—</Muted>}</TableCell>
+                  <TableCell className="px-4">{r.primaryLocation ?? <Muted>—</Muted>}</TableCell>
+                  <TableCell className="px-4">
+                    <CountLink count={r.deviceCount} max={max} href={`/devices?dept=${r.id}`} />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="px-4 text-right">
                     <div className="opacity-0 group-hover/row:opacity-100 transition-opacity flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="size-7" onClick={() => setOpenId(r.id)}>
+                      <Button variant="ghost" size="icon" className="size-[30px] border-0" onClick={() => setOpenId(r.id)}>
                         <Pencil className="size-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7 text-destructive hover:text-destructive disabled:opacity-30"
+                        className="size-[30px] border-0 text-destructive hover:text-destructive disabled:opacity-30"
                         disabled={r.deviceCount > 0}
                         title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
@@ -183,7 +182,9 @@ function DepartmentForm({
           name="name"
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
-              <FieldLabel htmlFor={f.name}>{t("fieldName")} *</FieldLabel>
+              <FieldLabel htmlFor={f.name}>
+                {t("fieldName")} <span className="text-destructive">*</span>
+              </FieldLabel>
               <Input
                 id={f.name}
                 value={f.state.value}
