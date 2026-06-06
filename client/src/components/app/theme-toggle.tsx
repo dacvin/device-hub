@@ -24,16 +24,16 @@ export function ThemeToggle() {
   return (
     <Button
       type="button"
-      variant="ghost"
-      size="icon"
+      variant="outline"
+      size="icon-lg"
       aria-label={t("toggleTheme")}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="size-8"
+      className="rounded-md bg-card hover:bg-accent dark:bg-card dark:hover:bg-accent"
     >
       {mounted ? (
-        isDark ? <Sun className="size-4" /> : <Moon className="size-4" />
+        isDark ? <Sun className="size-[17px]" /> : <Moon className="size-[17px]" />
       ) : (
-        <Sun className="size-4 opacity-0" />
+        <Sun className="size-[17px] opacity-0" />
       )}
     </Button>
   );
