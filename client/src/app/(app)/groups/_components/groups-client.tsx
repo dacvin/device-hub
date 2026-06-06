@@ -30,6 +30,7 @@ import {
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
 import { CountLink } from "@/app/(app)/_components/catalog-link";
 import { GroupIcon } from "@/components/app/group-icon";
+import { Required } from "@/components/app/required";
 import { groupFormSchema, type GroupFormValues } from "@/lib/domain/devices";
 import { deleteGroupAction, saveGroupAction } from "@/app/(app)/groups/_actions";
 import type { GroupWithCount } from "@/lib/data/groups";
@@ -192,7 +193,7 @@ function GroupForm({
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
               <FieldLabel htmlFor={f.name}>
-                {t("fieldName")} <span className="text-destructive">*</span>
+                {t("fieldName")} <Required />
               </FieldLabel>
               <Input
                 id={f.name}

@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PageHeader } from "@/components/app/page-header";
 import { GroupIcon } from "@/components/app/group-icon";
+import { Required } from "@/components/app/required";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -820,10 +821,6 @@ function SectionHeader({
       </div>
     </div>
   );
-}
-
-function Required() {
-  return <span className="text-destructive">*</span>;
 }
 
 function isInvalid(field: AnyFieldApi): boolean {

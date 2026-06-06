@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/table";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
 import { CountLink } from "@/app/(app)/_components/catalog-link";
+import { Required } from "@/components/app/required";
 import {
   manufacturerFormSchema,
   type ManufacturerFormValues,
@@ -184,7 +185,7 @@ function ManufacturerForm({
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
               <FieldLabel htmlFor={f.name}>
-                {t("fieldName")} <span className="text-destructive">*</span>
+                {t("fieldName")} <Required />
               </FieldLabel>
               <Input
                 id={f.name}
