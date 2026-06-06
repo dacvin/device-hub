@@ -136,6 +136,8 @@
       "viewDetails": "View details",
       "edit": "Edit",
       "more": "More",
+      "addDevice": "Add device",
+      "export": "Export",
       "searchPlaceholder": "Search code, name, serial…",
       "viewComfortableShort": "Comfortable",
       "viewCardsShort": "Cards",

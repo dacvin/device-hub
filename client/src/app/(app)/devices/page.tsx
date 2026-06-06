@@ -51,11 +51,11 @@ export default async function DevicesPage({ searchParams }: PageProps) {
         actions={
           <>
             <Button variant="outline" size="sm">
-              <Download className="size-4" /> Export
+              <Download className="size-4" /> {t("export")}
             </Button>
             <Button size="sm" asChild>
               <Link href="/devices/new">
-                <Plus className="size-4" /> Add device
+                <Plus className="size-4" /> {t("addDevice")}
               </Link>
             </Button>
           </>
