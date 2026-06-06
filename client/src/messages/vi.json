@@ -23,7 +23,9 @@
     "termsLink": "chính sách sử dụng",
     "termsSuffix": ".",
     "taglineRich": "Mọi thiết bị, <accent>đều được quản lý.</accent>",
-    "description": "Theo dõi laptop, màn hình, máy chủ và thiết bị ngoại vi từ lúc mua đến khi thanh lý — kèm cảnh báo bảo hành và chu kỳ kiểm kê tích hợp.",
+    "managedNote": "Chỉ tài khoản IT được phép truy cập. Không cần mật khẩu.",
+    "eyebrow": "Boeing · Phòng IT",
+    "footer": "© 2026 Boeing · DeviceHub · Phòng IT",
     "chips": {
       "laptops": "Laptop",
       "monitors": "Màn hình",

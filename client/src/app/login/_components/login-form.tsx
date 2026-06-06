@@ -32,7 +32,7 @@ export function LoginForm() {
         variant="outline"
         onClick={onGoogle}
         disabled={loading}
-        className="w-full h-[46px] gap-3 text-sm font-medium"
+        className="w-full h-[46px] gap-3 bg-card text-[15px] font-medium hover:bg-accent dark:hover:bg-accent"
       >
         <GoogleG className="size-[18px]" />
         {loading ? t("redirecting") : t("continueWithGoogle")}

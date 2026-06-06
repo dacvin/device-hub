@@ -23,7 +23,9 @@
     "termsLink": "acceptable-use policy",
     "termsSuffix": ".",
     "taglineRich": "Every device, <accent>accounted for.</accent>",
-    "description": "Track laptops, monitors, servers and peripherals from purchase to retirement — with warranty alerts and inventory cycles built in.",
+    "managedNote": "Access is limited to IT-managed accounts. There's no password to set.",
+    "eyebrow": "Boeing · IT Operations",
+    "footer": "© 2026 Boeing · DeviceHub · IT Operations",
     "chips": {
       "laptops": "Laptops",
       "monitors": "Monitors",
