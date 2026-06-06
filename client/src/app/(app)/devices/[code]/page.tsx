@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -58,6 +59,10 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
   const photoUrlMap = await signedPhotoUrls(photos.map((p) => p.url));
   const docUrlMap = await signedDocumentUrls(documents.map((d) => d.url));
 
+  const t = await getTranslations("devices.details");
+  const tSource = await getTranslations("devices.source");
+  const tUnit = await getTranslations("devices.unit");
+
   const now = new Date();
   const warrantyDaysLeft = device.warrantyEnd
     ? Math.ceil(
@@ -75,7 +80,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
   return (
     <>
-      <PageHeader title="Device details" />
+      <PageHeader title={t("pageTitle")} />
 
       <Link
         href="/devices"
@@ -122,70 +127,70 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         <div className="space-y-4 min-w-0">
-          <SectionCard icon={<Fingerprint className="size-4 text-primary" />} title="Identification">
+          <SectionCard icon={<Fingerprint className="size-4 text-primary" />} title={t("sectionIdentification")}>
             <DefList
               items={[
-                ["Code", <span key="code" className="font-mono">{device.code}</span>],
-                ["Serial number", <span key="serial" className="font-mono">{device.serialNumber ?? "—"}</span>],
-                ["Name", device.name],
-                ["Manufacturer", mfr?.name ?? "—"],
-                ["Model", device.model ?? "—"],
-                ["Group", group?.name ?? "—"],
+                [t("fieldCode"), <span key="code" className="font-mono">{device.code}</span>],
+                [t("fieldSerial"), <span key="serial" className="font-mono">{device.serialNumber ?? "—"}</span>],
+                [t("fieldName"), device.name],
+                [t("fieldManufacturer"), mfr?.name ?? "—"],
+                [t("fieldModel"), device.model ?? "—"],
+                [t("fieldGroup"), group?.name ?? "—"],
               ]}
             />
           </SectionCard>
 
-          <SectionCard icon={<Cpu className="size-4 text-primary" />} title="Specifications">
+          <SectionCard icon={<Cpu className="size-4 text-primary" />} title={t("sectionSpecifications")}>
             <div className="text-sm whitespace-pre-wrap leading-relaxed">
               {device.specifications || (
-                <span className="text-muted-foreground">No specifications recorded.</span>
+                <span className="text-muted-foreground">{t("noSpecifications")}</span>
               )}
             </div>
           </SectionCard>
 
-          <SectionCard icon={<ClipboardCheck className="size-4 text-primary" />} title="Allocation">
+          <SectionCard icon={<ClipboardCheck className="size-4 text-primary" />} title={t("sectionAllocation")}>
             <DefList
               items={[
-                ["Department", dept?.name ?? "—"],
-                ["Location", device.location ?? "—"],
-                ["Quantity", `${device.quantity} ${device.unit}`],
-                ["Source", device.source ?? "—"],
+                [t("fieldDepartment"), dept?.name ?? "—"],
+                [t("fieldLocation"), device.location ?? "—"],
+                [t("fieldQuantity"), `${device.quantity} ${tUnit(device.unit)}`],
+                [t("fieldSource"), device.source ? tSource(device.source) : "—"],
               ]}
             />
           </SectionCard>
 
-          <SectionCard icon={<Gauge className="size-4 text-primary" />} title="Lifecycle">
+          <SectionCard icon={<Gauge className="size-4 text-primary" />} title={t("sectionLifecycle")}>
             <DefList
               items={[
-                ["Status", <StatusBadge key="status" status={device.status} />],
-                ["Condition", `${device.condition}%`],
-                ["Import date", formatDate(device.importDate)],
-                ["Last check", formatDate(device.lastCheckDate)],
-                ["Inventory cycle", `${device.inventoryCycleMonths} months`],
+                [t("fieldStatus"), <StatusBadge key="status" status={device.status} />],
+                [t("fieldCondition"), `${device.condition}%`],
+                [t("fieldImportDate"), formatDate(device.importDate)],
+                [t("fieldLastCheck"), formatDate(device.lastCheckDate)],
+                [t("fieldInventoryCycle"), `${device.inventoryCycleMonths} ${t("fieldInventoryCycleSuffix")}`],
               ]}
             />
           </SectionCard>
 
-          <SectionCard icon={<ShieldCheck className="size-4 text-primary" />} title="Warranty">
+          <SectionCard icon={<ShieldCheck className="size-4 text-primary" />} title={t("sectionWarranty")}>
             <DefList
               items={[
-                ["Warranty start", formatDate(device.warrantyStart)],
-                ["Warranty end", formatDate(device.warrantyEnd)],
+                [t("fieldWarrantyStart"), formatDate(device.warrantyStart)],
+                [t("fieldWarrantyEnd"), formatDate(device.warrantyEnd)],
                 [
-                  "Days left",
+                  t("fieldDaysLeft"),
                   warrantyDaysLeft === null
                     ? "—"
                     : warrantyDaysLeft < 0
-                      ? "Expired"
+                      ? t("warrantyExpired")
                       : `${warrantyDaysLeft} days`,
                 ],
               ]}
             />
           </SectionCard>
 
-          <SectionCard icon={<StickyNote className="size-4 text-primary" />} title="Notes">
+          <SectionCard icon={<StickyNote className="size-4 text-primary" />} title={t("sectionNotes")}>
             <div className="text-sm whitespace-pre-wrap leading-relaxed">
-              {device.notes || <span className="text-muted-foreground">No notes.</span>}
+              {device.notes || <span className="text-muted-foreground">{t("noNotes")}</span>}
             </div>
           </SectionCard>
 
@@ -273,19 +278,19 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
               compact
               items={[
                 [
-                  "Warranty",
+                  t("warrantyTitle"),
                   warrantyDaysLeft === null
                     ? "—"
                     : warrantyDaysLeft < 0
-                      ? "Expired"
+                      ? t("warrantyExpired")
                       : `${warrantyDaysLeft} days left`,
                 ],
                 [
-                  "Next inventory",
+                  t("nextInventoryTitle"),
                   nextInventoryDue ? formatDate(nextInventoryDue.toISOString()) : "—",
                 ],
-                ["Location", device.location ?? "—"],
-                ["Department", dept?.name ?? "—"],
+                [t("fieldLocation"), device.location ?? "—"],
+                [t("fieldDepartment"), dept?.name ?? "—"],
               ]}
             />
           </Card>
@@ -300,17 +305,17 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             <ul className="relative space-y-3 pl-5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-border">
               <TimelineItem
                 icon={<CalendarClock className="size-3" />}
-                title="Last update"
+                title={t("lastUpdateTitle")}
                 time={formatDate(device.updatedAt)}
               />
               <TimelineItem
                 icon={<MapPin className="size-3" />}
-                title="Last inventory check"
+                title={t("lastInventoryCheckTitle")}
                 time={formatDate(device.lastCheckDate)}
               />
               <TimelineItem
                 icon={<ShieldCheck className="size-3" />}
-                title="Created"
+                title={t("createdTitle")}
                 time={formatDate(device.createdAt)}
               />
             </ul>
