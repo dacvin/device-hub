@@ -122,6 +122,36 @@
       "piece": "cái",
       "set": "bộ",
       "box": "thùng"
+    },
+    "list": {
+      "title": "Thiết bị",
+      "subtitle": "Kiểm kê tài sản trên toàn bộ phòng ban",
+      "viewComfortable": "Hiển thị thoáng",
+      "viewCards": "Hiển thị thẻ",
+      "toggleColumns": "Bật/tắt cột",
+      "filterAllGroups": "Tất cả nhóm",
+      "filterAllDepartments": "Tất cả phòng ban",
+      "filterAnyStatus": "Mọi trạng thái",
+      "filterAnyFlag": "Mọi cảnh báo",
+      "filterAllManufacturers": "Tất cả nhà sản xuất",
+      "selectAll": "Chọn tất cả",
+      "selectRow": "Chọn dòng",
+      "viewDetails": "Xem chi tiết",
+      "edit": "Sửa",
+      "more": "Khác"
+    },
+    "columns": {
+      "typeIcon": "Biểu tượng",
+      "code": "Mã",
+      "name": "Tên",
+      "group": "Nhóm",
+      "department": "Phòng ban",
+      "condition": "Tình trạng",
+      "location": "Địa điểm",
+      "status": "Trạng thái",
+      "flags": "Cảnh báo",
+      "quantity": "Số lượng",
+      "actions": "Thao tác"
     }
   }
 }

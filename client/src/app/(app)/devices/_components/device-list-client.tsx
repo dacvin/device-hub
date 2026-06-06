@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   flexRender,
   getCoreRowModel,
@@ -53,6 +54,7 @@ import { StatusBadge } from "@/components/app/status-badge";
 import { FlagChip } from "@/components/app/flag-chip";
 import { ConditionBar } from "@/components/app/condition-bar";
 import {
+  DEVICE_FLAGS,
   DEVICE_STATUSES,
   type Department,
   type DeviceGroup,
@@ -87,6 +89,8 @@ export function DeviceListClient({
   initialFilters,
   initialView,
 }: Props) {
+  const tList = useTranslations("devices.list");
+  const tCols = useTranslations("devices.columns");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -155,7 +159,8 @@ export function DeviceListClient({
   }, [columnVisibility]);
 
   const columns = useMemo<ColumnDef<DeviceWithFlags>[]>(
-    () => buildColumns(lookups),
+    () => buildColumns(lookups, tList, tCols),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lookups]
   );
 
@@ -240,6 +245,26 @@ function Toolbar({
   onViewChange,
   table,
 }: ToolbarProps) {
+  const tList = useTranslations("devices.list");
+  const tCols = useTranslations("devices.columns");
+  const tStatus = useTranslations("devices.status");
+  const tFlag = useTranslations("devices.flag");
+
+  const COLUMN_LABELS: Record<string, string> = {
+    type: tCols("typeIcon"),
+    code: tCols("code"),
+    name: tCols("name"),
+    group: tCols("group"),
+    department: tCols("department"),
+    manufacturer: "Manufacturer / Model",
+    condition: tCols("condition"),
+    location: tCols("location"),
+    status: tCols("status"),
+    flags: tCols("flags"),
+    quantity: tCols("quantity"),
+    actions: tCols("actions"),
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2 items-center justify-between">
@@ -261,10 +286,10 @@ function Toolbar({
             variant="outline"
             size="sm"
           >
-            <ToggleGroupItem value="table" aria-label="Comfortable view">
+            <ToggleGroupItem value="table" aria-label={tList("viewComfortable")}>
               Comfortable
             </ToggleGroupItem>
-            <ToggleGroupItem value="cards" aria-label="Cards view">
+            <ToggleGroupItem value="cards" aria-label={tList("viewCards")}>
               Cards
             </ToggleGroupItem>
           </ToggleGroup>
@@ -277,7 +302,7 @@ function Toolbar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+              <DropdownMenuLabel>{tList("toggleColumns")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {table
                 .getAllLeafColumns()
@@ -313,39 +338,36 @@ function Toolbar({
         <FilterSelect
           value={initialFilters.group ?? ""}
           onChange={(v) => onFilterChange("group", v)}
-          placeholder="All groups"
-          allLabel="All groups"
+          placeholder={tList("filterAllGroups")}
+          allLabel={tList("filterAllGroups")}
           options={groups.map((g) => ({ value: g.id, label: g.name }))}
         />
         <FilterSelect
           value={initialFilters.dept ?? ""}
           onChange={(v) => onFilterChange("dept", v)}
-          placeholder="All departments"
-          allLabel="All departments"
+          placeholder={tList("filterAllDepartments")}
+          allLabel={tList("filterAllDepartments")}
           options={departments.map((d) => ({ value: d.id, label: d.name }))}
         />
         <FilterSelect
           value={initialFilters.status ?? ""}
           onChange={(v) => onFilterChange("status", v)}
-          placeholder="Any status"
-          allLabel="Any status"
-          options={DEVICE_STATUSES.map((s) => ({ value: s, label: s }))}
+          placeholder={tList("filterAnyStatus")}
+          allLabel={tList("filterAnyStatus")}
+          options={DEVICE_STATUSES.map((s) => ({ value: s, label: tStatus(s) }))}
         />
         <FilterSelect
           value={initialFilters.flag ?? ""}
           onChange={(v) => onFilterChange("flag", v)}
-          placeholder="Any flag"
-          allLabel="Any flag"
-          options={[
-            { value: "warranty-expiring", label: "Warranty expiring" },
-            { value: "inventory-overdue", label: "Inventory overdue" },
-          ]}
+          placeholder={tList("filterAnyFlag")}
+          allLabel={tList("filterAnyFlag")}
+          options={DEVICE_FLAGS.map((f) => ({ value: f, label: tFlag(f) }))}
         />
         <FilterSelect
           value={initialFilters.mfr ?? ""}
           onChange={(v) => onFilterChange("mfr", v)}
-          placeholder="All manufacturers"
-          allLabel="All manufacturers"
+          placeholder={tList("filterAllManufacturers")}
+          allLabel={tList("filterAllManufacturers")}
           options={manufacturers.map((m) => ({ value: m.id, label: m.name }))}
         />
 
@@ -396,22 +418,11 @@ function FilterSelect({
   );
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  type: "Type icon",
-  code: "Code",
-  name: "Name",
-  group: "Group",
-  department: "Department",
-  manufacturer: "Manufacturer / Model",
-  condition: "Condition",
-  location: "Location",
-  status: "Status",
-  flags: "Flags",
-  quantity: "Quantity",
-  actions: "Actions",
-};
-
-function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
+function buildColumns(
+  lookups: Lookups,
+  tList: ReturnType<typeof useTranslations>,
+  tCols: ReturnType<typeof useTranslations>
+): ColumnDef<DeviceWithFlags>[] {
   return [
     {
       id: "select",
@@ -419,14 +430,14 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
         <Checkbox
           checked={table.getIsAllRowsSelected()}
           onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label={tList("selectAll")}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label={tList("selectRow")}
         />
       ),
       enableHiding: false,
@@ -442,7 +453,7 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     {
       id: "code",
       accessorKey: "code",
-      header: "Code",
+      header: tCols("code"),
       cell: ({ row }) => (
         <span className="font-mono text-xs text-muted-foreground">{row.original.code}</span>
       ),
@@ -450,7 +461,7 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     {
       id: "name",
       accessorKey: "name",
-      header: "Name",
+      header: tCols("name"),
       cell: ({ row }) => (
         <Link
           href={`/devices/${encodeURIComponent(row.original.code)}`}
@@ -462,7 +473,7 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     },
     {
       id: "group",
-      header: "Group",
+      header: tCols("group"),
       cell: ({ row }) => {
         const g = lookups.groups.get(row.original.groupId);
         return g ? <Badge variant="secondary">{g.name}</Badge> : null;
@@ -470,12 +481,12 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     },
     {
       id: "department",
-      header: "Department",
+      header: tCols("department"),
       cell: ({ row }) => lookups.departments.get(row.original.departmentId)?.name ?? "—",
     },
     {
       id: "manufacturer",
-      header: "Manufacturer / Model",
+      header: "Manufacturer / Model", // not in devices.columns — left as-is
       cell: ({ row }) => {
         const m = row.original.manufacturerId
           ? lookups.manufacturers.get(row.original.manufacturerId)
@@ -493,13 +504,13 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     {
       id: "condition",
       accessorKey: "condition",
-      header: "Condition",
+      header: tCols("condition"),
       cell: ({ row }) => <ConditionBar value={row.original.condition} />,
     },
     {
       id: "location",
       accessorKey: "location",
-      header: "Location",
+      header: tCols("location"),
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">{row.original.location ?? "—"}</span>
       ),
@@ -507,12 +518,12 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     {
       id: "status",
       accessorKey: "status",
-      header: "Status",
+      header: tCols("status"),
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
     {
       id: "flags",
-      header: "Flags",
+      header: tCols("flags"),
       cell: ({ row }) => {
         if (row.original.flags.length === 0)
           return <span className="text-xs text-muted-foreground">—</span>;
@@ -528,7 +539,7 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
     {
       id: "quantity",
       accessorKey: "quantity",
-      header: "Qty",
+      header: tCols("quantity"),
       cell: ({ row }) => (
         <span className="tabular-nums text-sm">{row.original.quantity}</span>
       ),
@@ -542,22 +553,22 @@ function buildColumns(lookups: Lookups): ColumnDef<DeviceWithFlags>[] {
           <Button variant="ghost" size="icon" className="size-7" asChild>
             <Link href={`/devices/${encodeURIComponent(row.original.code)}/edit`}>
               <Pencil className="size-3.5" />
-              <span className="sr-only">Edit</span>
+              <span className="sr-only">{tList("edit")}</span>
             </Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="size-7">
                 <MoreHorizontal className="size-3.5" />
-                <span className="sr-only">More</span>
+                <span className="sr-only">{tList("more")}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/devices/${encodeURIComponent(row.original.code)}`}>View details</Link>
+                <Link href={`/devices/${encodeURIComponent(row.original.code)}`}>{tList("viewDetails")}</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/devices/${encodeURIComponent(row.original.code)}/edit`}>Edit</Link>
+                <Link href={`/devices/${encodeURIComponent(row.original.code)}/edit`}>{tList("edit")}</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

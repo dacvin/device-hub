@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Download, Plus } from "lucide-react";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { DeviceListClient } from "./_components/device-list-client";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ interface PageProps {
 }
 
 export default async function DevicesPage({ searchParams }: PageProps) {
+  const t = await getTranslations("devices.list");
   const params = await searchParams;
   const filters: DeviceListFilters = {
     q: params.q,
@@ -44,8 +46,8 @@ export default async function DevicesPage({ searchParams }: PageProps) {
   return (
     <>
       <PageHeader
-        title="Devices"
-        subtitle="Asset inventory across all departments"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <>
             <Button variant="outline" size="sm">

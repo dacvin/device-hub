@@ -122,6 +122,36 @@
       "piece": "piece",
       "set": "set",
       "box": "box"
+    },
+    "list": {
+      "title": "Devices",
+      "subtitle": "Asset inventory across all departments",
+      "viewComfortable": "Comfortable view",
+      "viewCards": "Cards view",
+      "toggleColumns": "Toggle columns",
+      "filterAllGroups": "All groups",
+      "filterAllDepartments": "All departments",
+      "filterAnyStatus": "Any status",
+      "filterAnyFlag": "Any flag",
+      "filterAllManufacturers": "All manufacturers",
+      "selectAll": "Select all",
+      "selectRow": "Select row",
+      "viewDetails": "View details",
+      "edit": "Edit",
+      "more": "More"
+    },
+    "columns": {
+      "typeIcon": "Type icon",
+      "code": "Code",
+      "name": "Name",
+      "group": "Group",
+      "department": "Department",
+      "condition": "Condition",
+      "location": "Location",
+      "status": "Status",
+      "flags": "Flags",
+      "quantity": "Quantity",
+      "actions": "Actions"
     }
   }
 }
