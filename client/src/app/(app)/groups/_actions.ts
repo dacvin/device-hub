@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { groupFormSchema } from "@/lib/domain/devices";
 import { createGroup, deleteGroup, updateGroup } from "@/lib/data/groups";
 
@@ -33,7 +34,8 @@ export async function saveGroupAction(
     revalidatePath("/groups");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Save failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("saveFailed") };
   }
 }
 
@@ -43,6 +45,7 @@ export async function deleteGroupAction(id: string): Promise<ActionResult> {
     revalidatePath("/groups");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Delete failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("deleteFailed") };
   }
 }

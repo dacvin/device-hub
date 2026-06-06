@@ -3,6 +3,7 @@
 /* eslint-disable react/no-children-prop */
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, type AnyFieldApi } from "@tanstack/react-form";
@@ -53,6 +54,8 @@ const empty: GroupFormValues = {
 };
 
 export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
+  const t = useTranslations("groups");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
   const [, startTransition] = useTransition();
@@ -70,10 +73,10 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
   return (
     <>
       <CatalogPageShell
-        title="Groups"
-        subtitle="Categories of devices"
+        title={t("title")}
+        subtitle={t("subtitle")}
         metaLine={`${rows.length} groups · ${totalDevices} devices catalogued`}
-        addLabel="Add group"
+        addLabel={t("addAction")}
         onAdd={() => setOpenId("new")}
         search={search}
         onSearchChange={setSearch}
@@ -82,9 +85,9 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Name</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Default inventory cycle</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Devices</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableName")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableCycle")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableDevices")}</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
@@ -112,11 +115,11 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive disabled:opacity-30"
                         disabled={r.deviceCount > 0}
-                        title={r.deviceCount > 0 ? "Reassign devices first" : "Delete"}
+                        title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
                           startTransition(async () => {
                             const res = await deleteGroupAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? "Delete failed");
+                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
                           });
                         }}
                       >
@@ -134,8 +137,8 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
       <Dialog open={openId !== null} onOpenChange={(open) => !open && setOpenId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit group" : "Add group"}</DialogTitle>
-            <DialogDescription>Categories control the device icon and default inventory cycle.</DialogDescription>
+            <DialogTitle>{editing ? t("dialogEdit") : t("dialogAdd")}</DialogTitle>
+            <DialogDescription>{t("dialogDescription")}</DialogDescription>
           </DialogHeader>
           <GroupForm
             initial={editing ? {
@@ -147,9 +150,9 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
               const res = await saveGroupAction(editing?.id ?? null, values);
               if (res.ok) {
                 setOpenId(null);
-                toast.success(editing ? "Group updated" : "Group added");
+                toast.success(editing ? t("updated") : t("added"));
               } else {
-                toast.error(res.error ?? "Save failed");
+                toast.error(res.error ?? tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
@@ -169,6 +172,8 @@ function GroupForm({
   onSubmit: (v: GroupFormValues) => Promise<void>;
   onCancel: () => void;
 }) {
+  const t = useTranslations("groups");
+  const tCommon = useTranslations("common");
   const form = useForm({
     defaultValues: initial,
     validators: { onSubmit: groupFormSchema },
@@ -187,7 +192,7 @@ function GroupForm({
           name="name"
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
-              <FieldLabel htmlFor={f.name}>Name *</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldName")} *</FieldLabel>
               <Input
                 id={f.name}
                 value={f.state.value}
@@ -203,7 +208,7 @@ function GroupForm({
           name="icon"
           children={(f) => (
             <Field>
-              <FieldLabel>Icon</FieldLabel>
+              <FieldLabel>{t("fieldIcon")}</FieldLabel>
               <div className="grid grid-cols-9 gap-1.5">
                 {ICON_OPTIONS.map((name) => (
                   <button
@@ -243,8 +248,8 @@ function GroupForm({
         />
       </FieldGroup>
       <DialogFooter className="mt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">{initial.name ? "Save" : "Create"}</Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>{tCommon("cancel")}</Button>
+        <Button type="submit">{initial.name ? tCommon("save") : tCommon("create")}</Button>
       </DialogFooter>
     </form>
   );
