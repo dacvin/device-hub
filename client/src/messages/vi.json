@@ -40,6 +40,65 @@
       "inventoryAccuracyLabel": "Độ chính xác kiểm kê"
     }
   },
+  "common": {
+    "save": "Lưu",
+    "create": "Tạo",
+    "cancel": "Huỷ",
+    "edit": "Sửa",
+    "delete": "Xoá",
+    "saveFailed": "Lưu thất bại",
+    "deleteFailed": "Xoá thất bại",
+    "loading": "Đang tải…"
+  },
+  "departments": {
+    "title": "Phòng ban",
+    "subtitle": "Nơi thiết bị được phân bổ",
+    "addAction": "Thêm phòng ban",
+    "tableName": "Tên",
+    "tableManager": "Quản lý",
+    "tableLocation": "Địa điểm chính",
+    "tableDevices": "Thiết bị",
+    "reassignFirst": "Vui lòng điều chuyển thiết bị trước",
+    "dialogAdd": "Thêm phòng ban",
+    "dialogEdit": "Sửa phòng ban",
+    "updated": "Đã cập nhật phòng ban",
+    "added": "Đã thêm phòng ban",
+    "fieldName": "Tên",
+    "fieldManager": "Quản lý",
+    "fieldLocation": "Địa điểm chính"
+  },
+  "groups": {
+    "title": "Nhóm",
+    "subtitle": "Phân loại thiết bị",
+    "addAction": "Thêm nhóm",
+    "tableName": "Tên",
+    "tableCycle": "Chu kỳ kiểm kê mặc định",
+    "tableDevices": "Thiết bị",
+    "reassignFirst": "Vui lòng điều chuyển thiết bị trước",
+    "dialogAdd": "Thêm nhóm",
+    "dialogEdit": "Sửa nhóm",
+    "dialogDescription": "Phân loại điều khiển biểu tượng thiết bị và chu kỳ kiểm kê mặc định.",
+    "updated": "Đã cập nhật nhóm",
+    "added": "Đã thêm nhóm",
+    "fieldName": "Tên",
+    "fieldIcon": "Biểu tượng"
+  },
+  "manufacturers": {
+    "title": "Nhà sản xuất",
+    "subtitle": "Nhà cung cấp các thiết bị đã đăng ký",
+    "addAction": "Thêm nhà sản xuất",
+    "tableName": "Tên",
+    "tableSupport": "Liên hệ hỗ trợ",
+    "tableDevices": "Thiết bị",
+    "reassignFirst": "Vui lòng điều chuyển thiết bị trước",
+    "dialogAdd": "Thêm nhà sản xuất",
+    "dialogEdit": "Sửa nhà sản xuất",
+    "dialogDescription": "Nhà cung cấp các thiết bị đã đăng ký.",
+    "updated": "Đã cập nhật nhà sản xuất",
+    "added": "Đã thêm nhà sản xuất",
+    "fieldName": "Tên",
+    "fieldSupport": "Liên hệ hỗ trợ"
+  },
   "devices": {
     "status": {
       "in-use": "Đang sử dụng",

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { departmentFormSchema } from "@/lib/domain/devices";
 import {
   createDepartment,
@@ -37,7 +38,8 @@ export async function saveDepartmentAction(
     revalidatePath("/departments");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Save failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("saveFailed") };
   }
 }
 
@@ -47,6 +49,7 @@ export async function deleteDepartmentAction(id: string): Promise<ActionResult> 
     revalidatePath("/departments");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Delete failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("deleteFailed") };
   }
 }

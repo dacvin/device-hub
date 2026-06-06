@@ -40,6 +40,65 @@
       "inventoryAccuracyLabel": "Inventory accuracy"
     }
   },
+  "common": {
+    "save": "Save",
+    "create": "Create",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed",
+    "loading": "Loading…"
+  },
+  "departments": {
+    "title": "Departments",
+    "subtitle": "Where devices are allocated",
+    "addAction": "Add department",
+    "tableName": "Name",
+    "tableManager": "Manager",
+    "tableLocation": "Primary location",
+    "tableDevices": "Devices",
+    "reassignFirst": "Reassign devices first",
+    "dialogAdd": "Add department",
+    "dialogEdit": "Edit department",
+    "updated": "Department updated",
+    "added": "Department added",
+    "fieldName": "Name",
+    "fieldManager": "Manager",
+    "fieldLocation": "Primary location"
+  },
+  "groups": {
+    "title": "Groups",
+    "subtitle": "Categories of devices",
+    "addAction": "Add group",
+    "tableName": "Name",
+    "tableCycle": "Default inventory cycle",
+    "tableDevices": "Devices",
+    "reassignFirst": "Reassign devices first",
+    "dialogAdd": "Add group",
+    "dialogEdit": "Edit group",
+    "dialogDescription": "Categories control the device icon and default inventory cycle.",
+    "updated": "Group updated",
+    "added": "Group added",
+    "fieldName": "Name",
+    "fieldIcon": "Icon"
+  },
+  "manufacturers": {
+    "title": "Manufacturers",
+    "subtitle": "Vendors of catalogued devices",
+    "addAction": "Add manufacturer",
+    "tableName": "Name",
+    "tableSupport": "Support contact",
+    "tableDevices": "Devices",
+    "reassignFirst": "Reassign devices first",
+    "dialogAdd": "Add manufacturer",
+    "dialogEdit": "Edit manufacturer",
+    "dialogDescription": "Vendors of catalogued devices.",
+    "updated": "Manufacturer updated",
+    "added": "Manufacturer added",
+    "fieldName": "Name",
+    "fieldSupport": "Support contact"
+  },
   "devices": {
     "status": {
       "in-use": "In use",

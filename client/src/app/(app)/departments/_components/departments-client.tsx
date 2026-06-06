@@ -3,6 +3,7 @@
 /* eslint-disable react/no-children-prop */
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, type AnyFieldApi } from "@tanstack/react-form";
@@ -38,6 +39,8 @@ import type { DepartmentWithCount } from "@/lib/data/departments";
 const empty: DepartmentFormValues = { name: "", manager: "", primaryLocation: "" };
 
 export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
+  const t = useTranslations("departments");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
   const [, startTransition] = useTransition();
@@ -60,10 +63,10 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
   return (
     <>
       <CatalogPageShell
-        title="Departments"
-        subtitle="Where devices are allocated"
+        title={t("title")}
+        subtitle={t("subtitle")}
         metaLine={`${rows.length} departments · ${totalDevices} devices catalogued`}
-        addLabel="Add department"
+        addLabel={t("addAction")}
         onAdd={() => setOpenId("new")}
         search={search}
         onSearchChange={setSearch}
@@ -72,10 +75,10 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Name</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Manager</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Primary location</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Devices</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableName")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableManager")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableLocation")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableDevices")}</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
@@ -99,11 +102,11 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive disabled:opacity-30"
                         disabled={r.deviceCount > 0}
-                        title={r.deviceCount > 0 ? "Reassign devices first" : "Delete"}
+                        title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
                           startTransition(async () => {
                             const res = await deleteDepartmentAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? "Delete failed");
+                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
                           });
                         }}
                       >
@@ -121,7 +124,7 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
       <Dialog open={openId !== null} onOpenChange={(open) => !open && setOpenId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit department" : "Add department"}</DialogTitle>
+            <DialogTitle>{editing ? t("dialogEdit") : t("dialogAdd")}</DialogTitle>
             <DialogDescription>
               Departments are where devices are physically allocated.
             </DialogDescription>
@@ -136,9 +139,9 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
               const res = await saveDepartmentAction(editing?.id ?? null, values);
               if (res.ok) {
                 setOpenId(null);
-                toast.success(editing ? "Department updated" : "Department added");
+                toast.success(editing ? t("updated") : t("added"));
               } else {
-                toast.error(res.error ?? "Save failed");
+                toast.error(res.error ?? tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
@@ -162,6 +165,8 @@ function DepartmentForm({
   onSubmit: (v: DepartmentFormValues) => Promise<void>;
   onCancel: () => void;
 }) {
+  const t = useTranslations("departments");
+  const tCommon = useTranslations("common");
   const form = useForm({
     defaultValues: initial,
     validators: { onSubmit: departmentFormSchema },
@@ -180,7 +185,7 @@ function DepartmentForm({
           name="name"
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
-              <FieldLabel htmlFor={f.name}>Name *</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldName")} *</FieldLabel>
               <Input
                 id={f.name}
                 value={f.state.value}
@@ -196,7 +201,7 @@ function DepartmentForm({
           name="manager"
           children={(f) => (
             <Field>
-              <FieldLabel htmlFor={f.name}>Manager</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldManager")}</FieldLabel>
               <Input id={f.name} value={f.state.value ?? ""} onChange={(e) => f.handleChange(e.target.value)} />
             </Field>
           )}
@@ -205,15 +210,15 @@ function DepartmentForm({
           name="primaryLocation"
           children={(f) => (
             <Field>
-              <FieldLabel htmlFor={f.name}>Primary location</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldLocation")}</FieldLabel>
               <Input id={f.name} value={f.state.value ?? ""} onChange={(e) => f.handleChange(e.target.value)} />
             </Field>
           )}
         />
       </FieldGroup>
       <DialogFooter className="mt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">{initial.name ? "Save" : "Create"}</Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>{tCommon("cancel")}</Button>
+        <Button type="submit">{initial.name ? tCommon("save") : tCommon("create")}</Button>
       </DialogFooter>
     </form>
   );
