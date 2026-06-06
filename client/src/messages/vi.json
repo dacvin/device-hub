@@ -65,7 +65,8 @@
     "added": "Đã thêm phòng ban",
     "fieldName": "Tên",
     "fieldManager": "Quản lý",
-    "fieldLocation": "Địa điểm chính"
+    "fieldLocation": "Địa điểm chính",
+    "dialogDescription": "Phòng ban là nơi thiết bị được phân bổ thực tế."
   },
   "groups": {
     "title": "Nhóm",
@@ -81,7 +82,8 @@
     "updated": "Đã cập nhật nhóm",
     "added": "Đã thêm nhóm",
     "fieldName": "Tên",
-    "fieldIcon": "Biểu tượng"
+    "fieldIcon": "Biểu tượng",
+    "fieldCycle": "Chu kỳ kiểm kê mặc định (tháng)"
   },
   "manufacturers": {
     "title": "Nhà sản xuất",

@@ -65,7 +65,8 @@
     "added": "Department added",
     "fieldName": "Name",
     "fieldManager": "Manager",
-    "fieldLocation": "Primary location"
+    "fieldLocation": "Primary location",
+    "dialogDescription": "Departments are where devices are physically allocated."
   },
   "groups": {
     "title": "Groups",
@@ -81,7 +82,8 @@
     "updated": "Group updated",
     "added": "Group added",
     "fieldName": "Name",
-    "fieldIcon": "Icon"
+    "fieldIcon": "Icon",
+    "fieldCycle": "Default inventory cycle (months)"
   },
   "manufacturers": {
     "title": "Manufacturers",

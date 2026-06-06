@@ -234,7 +234,7 @@ function GroupForm({
           name="defaultInventoryCycleMonths"
           children={(f) => (
             <Field>
-              <FieldLabel htmlFor={f.name}>Default inventory cycle (months)</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldCycle")}</FieldLabel>
               <Input
                 id={f.name}
                 type="number"

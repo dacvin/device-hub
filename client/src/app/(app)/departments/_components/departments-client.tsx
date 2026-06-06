@@ -125,9 +125,7 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? t("dialogEdit") : t("dialogAdd")}</DialogTitle>
-            <DialogDescription>
-              Departments are where devices are physically allocated.
-            </DialogDescription>
+            <DialogDescription>{t("dialogDescription")}</DialogDescription>
           </DialogHeader>
           <DepartmentForm
             initial={editing ? {
