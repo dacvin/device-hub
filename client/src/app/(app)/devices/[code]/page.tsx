@@ -84,40 +84,44 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
       <Link
         href="/devices"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+        className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground mb-4"
       >
-        <ArrowLeft className="size-4" /> {t("backToDevices")}
+        <ArrowLeft className="size-[15px]" /> {t("backToDevices")}
       </Link>
 
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-        <div className="flex items-start gap-4 min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-[18px] mb-[22px]">
+        <div className="flex items-start gap-[18px] min-w-0">
           <GroupIcon icon={group?.icon ?? null} size="lg" />
           <div className="min-w-0">
             <h2 className="text-2xl font-semibold tracking-tight leading-tight">{device.name}</h2>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="font-mono text-xs text-muted-foreground">{device.code}</span>
-              <span className="text-muted-foreground">·</span>
+            <div className="flex flex-wrap items-center gap-2.5 mt-1.5">
+              <span className="font-mono text-[13px] text-muted-foreground">{device.code}</span>
+              <span className="inline-block h-[14px] w-px bg-border" aria-hidden />
               {group && <Badge variant="secondary">{group.name}</Badge>}
               <StatusBadge status={device.status} />
+              {device.flags.map((f) => (
+                <FlagChip key={f} flag={f} />
+              ))}
             </div>
-            {device.flags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {device.flags.map((f) => (
-                  <FlagChip key={f} flag={f} />
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="lg"
+            className="hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent"
+          >
             <Printer className="size-4" /> {t("printLabel")}
           </Button>
-          <Button variant="outline" size="icon">
+          <Button
+            variant="outline"
+            size="icon-lg"
+            className="hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent"
+          >
             <MoreHorizontal className="size-4" />
           </Button>
-          <Button size="sm" asChild>
+          <Button size="lg" asChild>
             <Link href={`/devices/${encodeURIComponent(device.code)}/edit`}>
               <Pencil className="size-4" /> {t("editDevice")}
             </Link>
@@ -125,13 +129,13 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
-        <div className="space-y-4 min-w-0">
-          <SectionCard icon={<Fingerprint className="size-4 text-primary" />} title={t("sectionIdentification")}>
+      <div className="grid grid-cols-1 [@media(min-width:1080px)]:grid-cols-[1fr_320px] gap-5 items-start">
+        <div className="space-y-5 min-w-0">
+          <SectionCard icon={<Fingerprint className="size-[15px] text-primary" />} title={t("sectionIdentification")}>
             <DefList
               items={[
-                [t("fieldCode"), <span key="code" className="font-mono">{device.code}</span>],
-                [t("fieldSerial"), <span key="serial" className="font-mono">{device.serialNumber ?? "—"}</span>],
+                [t("fieldCode"), <span key="code" className="font-mono font-normal">{device.code}</span>],
+                [t("fieldSerial"), <span key="serial" className="font-mono font-normal">{device.serialNumber ?? "—"}</span>],
                 [t("fieldName"), device.name],
                 [t("fieldManufacturer"), mfr?.name ?? "—"],
                 [t("fieldModel"), device.model ?? "—"],
@@ -140,15 +144,15 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             />
           </SectionCard>
 
-          <SectionCard icon={<Cpu className="size-4 text-primary" />} title={t("sectionSpecifications")}>
-            <div className="text-sm whitespace-pre-wrap leading-relaxed">
+          <SectionCard icon={<Cpu className="size-[15px] text-primary" />} title={t("sectionSpecifications")}>
+            <div className="mt-[18px] text-sm whitespace-pre-wrap leading-relaxed">
               {device.specifications || (
                 <span className="text-muted-foreground">{t("noSpecifications")}</span>
               )}
             </div>
           </SectionCard>
 
-          <SectionCard icon={<ClipboardCheck className="size-4 text-primary" />} title={t("sectionAllocation")}>
+          <SectionCard icon={<ClipboardCheck className="size-[15px] text-primary" />} title={t("sectionAllocation")}>
             <DefList
               items={[
                 [t("fieldDepartment"), dept?.name ?? "—"],
@@ -159,7 +163,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             />
           </SectionCard>
 
-          <SectionCard icon={<Gauge className="size-4 text-primary" />} title={t("sectionLifecycle")}>
+          <SectionCard icon={<Gauge className="size-[15px] text-primary" />} title={t("sectionLifecycle")}>
             <DefList
               items={[
                 [t("fieldStatus"), <StatusBadge key="status" status={device.status} />],
@@ -171,7 +175,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             />
           </SectionCard>
 
-          <SectionCard icon={<ShieldCheck className="size-4 text-primary" />} title={t("sectionWarranty")}>
+          <SectionCard icon={<ShieldCheck className="size-[15px] text-primary" />} title={t("sectionWarranty")}>
             <DefList
               items={[
                 [t("fieldWarrantyStart"), formatDate(device.warrantyStart)],
@@ -188,15 +192,15 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
             />
           </SectionCard>
 
-          <SectionCard icon={<StickyNote className="size-4 text-primary" />} title={t("sectionNotes")}>
-            <div className="text-sm whitespace-pre-wrap leading-relaxed">
-              {device.notes || <span className="text-muted-foreground">{t("noNotes")}</span>}
+          <SectionCard icon={<StickyNote className="size-[15px] text-primary" />} title={t("sectionNotes")}>
+            <div className="mt-[18px] text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">
+              {device.notes || <span>{t("noNotes")}</span>}
             </div>
           </SectionCard>
 
           {photos.length > 0 && (
             <SectionCard
-              icon={<Cpu className="size-4 text-primary" />}
+              icon={<Cpu className="size-[15px] text-primary" />}
               title={t("photosWithCount", { count: photos.length })}
             >
               <div className="grid grid-cols-4 gap-2">
@@ -225,7 +229,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
           {documents.length > 0 && (
             <SectionCard
-              icon={<ClipboardCheck className="size-4 text-primary" />}
+              icon={<ClipboardCheck className="size-[15px] text-primary" />}
               title={t("documentsWithCount", { count: documents.length })}
             >
               <ul className="divide-y divide-border">
@@ -260,69 +264,76 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
           )}
         </div>
 
-        <aside className="space-y-4">
-          <Card className="p-5">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-3">
-              {t("conditionCardTitle")}
-            </div>
-            <div className="flex items-center justify-center">
+        <aside className="space-y-5">
+          <Card className="p-[22px]">
+            <SectionTitle icon={<Gauge className="size-[15px] text-primary" />} title={t("conditionCardTitle")} />
+            <div className="mt-4 flex items-center gap-4">
               <ConditionRing value={device.condition} />
             </div>
           </Card>
 
-          <Card className="p-5">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground mb-3">
-              {t("snapshotCardTitle")}
-            </div>
-            <DefList
-              compact
-              items={[
-                [
-                  t("warrantyTitle"),
-                  warrantyDaysLeft === null
-                    ? "—"
-                    : warrantyDaysLeft < 0
-                      ? t("warrantyExpired")
-                      : `${warrantyDaysLeft} days left`,
-                ],
-                [
-                  t("nextInventoryTitle"),
-                  nextInventoryDue ? formatDate(nextInventoryDue.toISOString()) : "—",
-                ],
-                [t("fieldLocation"), device.location ?? "—"],
-                [t("fieldDepartment"), dept?.name ?? "—"],
-              ]}
+          <Card className="px-[22px] py-2">
+            <RailStat
+              icon={<ShieldCheck className="size-[17px]" />}
+              label={t("warrantyTitle")}
+              value={
+                warrantyDaysLeft === null
+                  ? "—"
+                  : warrantyDaysLeft < 0
+                    ? t("warrantyExpired")
+                    : `${warrantyDaysLeft} days left`
+              }
+            />
+            <RailStat
+              icon={<CalendarClock className="size-[17px]" />}
+              label={t("nextInventoryTitle")}
+              value={nextInventoryDue ? formatDate(nextInventoryDue.toISOString()) : "—"}
+            />
+            <RailStat
+              icon={<MapPin className="size-[17px]" />}
+              label={t("fieldLocation")}
+              value={device.location ?? "—"}
+            />
+            <RailStat
+              icon={<MapPin className="size-[17px]" />}
+              label={t("fieldDepartment")}
+              value={dept?.name ?? "—"}
             />
           </Card>
 
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <History className="size-4 text-primary" />
-              <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                {t("recentActivityCardTitle")}
-              </div>
-            </div>
-            <ul className="relative space-y-3 pl-5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-border">
+          <Card className="p-[22px]">
+            <SectionTitle icon={<History className="size-[15px] text-primary" />} title={t("recentActivityCardTitle")} />
+            <ul className="relative mt-[18px] flex flex-col">
               <TimelineItem
-                icon={<CalendarClock className="size-3" />}
+                icon={<Pencil className="size-[13px]" />}
                 title={t("lastUpdateTitle")}
                 time={formatDate(device.updatedAt)}
               />
               <TimelineItem
-                icon={<MapPin className="size-3" />}
+                icon={<MapPin className="size-[13px]" />}
                 title={t("lastInventoryCheckTitle")}
                 time={formatDate(device.lastCheckDate)}
               />
               <TimelineItem
-                icon={<ShieldCheck className="size-3" />}
+                icon={<ShieldCheck className="size-[13px]" />}
                 title={t("createdTitle")}
                 time={formatDate(device.createdAt)}
+                last
               />
             </ul>
           </Card>
         </aside>
       </div>
     </>
+  );
+}
+
+function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.04em] text-muted-foreground">
+      {icon}
+      {title}
+    </div>
   );
 }
 
@@ -336,13 +347,8 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="p-5">
-      <div className="flex items-center gap-2 mb-4">
-        {icon}
-        <div className="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">
-          {title}
-        </div>
-      </div>
+    <Card className="p-[22px]">
+      <SectionTitle icon={icon} title={title} />
       {children}
     </Card>
   );
@@ -350,26 +356,40 @@ function SectionCard({
 
 function DefList({
   items,
-  compact = false,
 }: {
   items: [string, React.ReactNode][];
-  compact?: boolean;
 }) {
   return (
-    <dl
-      className={
-        compact
-          ? "grid grid-cols-2 gap-x-3 gap-y-3 text-xs"
-          : "grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm"
-      }
-    >
+    <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-7 gap-y-[18px] mt-[18px]">
       {items.map(([k, v], i) => (
         <div key={i}>
           <dt className="text-xs text-muted-foreground">{k}</dt>
-          <dd className="font-medium mt-0.5">{v}</dd>
+          <dd className="text-sm font-medium mt-[3px]">{v}</dd>
         </div>
       ))}
     </dl>
+  );
+}
+
+function RailStat({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-[14px] border-b border-border last:border-b-0">
+      <span className="inline-flex size-[34px] shrink-0 items-center justify-center rounded-[9px] bg-muted text-muted-foreground">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-sm font-medium mt-px">{value}</div>
+      </div>
+    </div>
   );
 }
 
@@ -377,18 +397,28 @@ function TimelineItem({
   icon,
   title,
   time,
+  last = false,
 }: {
   icon: React.ReactNode;
   title: string;
   time: string;
+  last?: boolean;
 }) {
   return (
-    <li className="relative">
-      <span className="absolute -left-5 top-0.5 size-4 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center">
+    <li className={`relative flex gap-3 ${last ? "" : "pb-[18px]"}`}>
+      {!last && (
+        <span
+          className="absolute left-[11px] top-6 bottom-0 w-0.5 bg-border"
+          aria-hidden
+        />
+      )}
+      <span className="relative z-10 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
         {icon}
       </span>
-      <div className="text-sm font-medium">{title}</div>
-      <div className="text-xs text-muted-foreground">{time}</div>
+      <div className="min-w-0">
+        <div className="text-sm font-medium">{title}</div>
+        <div className="text-xs text-muted-foreground mt-px">{time}</div>
+      </div>
     </li>
   );
 }
