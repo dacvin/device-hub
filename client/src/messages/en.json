@@ -45,7 +45,9 @@
     "saveFailed": "Save failed",
     "deleteFailed": "Delete failed",
     "loading": "Loading…",
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "export": "Export",
+    "search": "Search…"
   },
   "departments": {
     "title": "Departments",
@@ -123,7 +125,7 @@
     "list": {
       "title": "Devices",
       "subtitle": "Asset inventory across all departments",
-      "viewComfortable": "Comfortable view",
+      "viewComfortable": "Table view",
       "viewCards": "Cards view",
       "toggleColumns": "Toggle columns",
       "filterAllGroups": "All groups",
@@ -139,7 +141,7 @@
       "addDevice": "Add device",
       "export": "Export",
       "searchPlaceholder": "Search code, name, serial…",
-      "viewComfortableShort": "Comfortable",
+      "viewComfortableShort": "Table",
       "viewCardsShort": "Cards",
       "columnsTrigger": "Columns",
       "requiredColumn": "Required",

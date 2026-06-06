@@ -45,7 +45,9 @@
     "saveFailed": "Lưu thất bại",
     "deleteFailed": "Xoá thất bại",
     "loading": "Đang tải…",
-    "toggleTheme": "Đổi giao diện"
+    "toggleTheme": "Đổi giao diện",
+    "export": "Xuất",
+    "search": "Tìm kiếm…"
   },
   "departments": {
     "title": "Phòng ban",
@@ -123,7 +125,7 @@
     "list": {
       "title": "Thiết bị",
       "subtitle": "Kiểm kê tài sản trên toàn bộ phòng ban",
-      "viewComfortable": "Hiển thị thoáng",
+      "viewComfortable": "Hiển thị bảng",
       "viewCards": "Hiển thị thẻ",
       "toggleColumns": "Bật/tắt cột",
       "filterAllGroups": "Tất cả nhóm",
@@ -139,7 +141,7 @@
       "addDevice": "Thêm thiết bị",
       "export": "Xuất",
       "searchPlaceholder": "Tìm theo mã, tên, serial…",
-      "viewComfortableShort": "Thoáng",
+      "viewComfortableShort": "Bảng",
       "viewCardsShort": "Thẻ",
       "columnsTrigger": "Cột",
       "requiredColumn": "Bắt buộc",

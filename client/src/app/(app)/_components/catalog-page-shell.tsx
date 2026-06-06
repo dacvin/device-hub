@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ export function CatalogPageShell({
   onSearchChange,
   children,
 }: Props) {
+  const tCommon = useTranslations("common");
   return (
     <>
       <PageHeader
@@ -37,11 +39,11 @@ export function CatalogPageShell({
             <Input
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search…"
+              placeholder={tCommon("search")}
               className="h-9 w-[220px]"
             />
             <Button variant="outline" size="sm">
-              <Download className="size-4" /> Export
+              <Download className="size-4" /> {tCommon("export")}
             </Button>
             <Button size="sm" onClick={onAdd}>
               <Plus className="size-4" /> {addLabel}
