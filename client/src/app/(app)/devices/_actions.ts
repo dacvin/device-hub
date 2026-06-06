@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { deviceFormSchema, type DeviceFormValues } from "@/lib/domain/devices";
 import {
   createDevice,
@@ -42,7 +43,7 @@ export async function createDeviceAction(values: unknown): Promise<ActionResult>
     revalidatePath("/devices");
     return { ok: true, deviceId: device.id, code: device.code };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: await errorMessage(e) };
   }
 }
 
@@ -55,7 +56,7 @@ export async function updateDeviceAction(id: string, values: unknown): Promise<A
     revalidatePath(`/devices/${device.code}`);
     return { ok: true, deviceId: device.id, code: device.code };
   } catch (e) {
-    return { ok: false, error: errorMessage(e) };
+    return { ok: false, error: await errorMessage(e) };
   }
 }
 
@@ -98,7 +99,8 @@ export async function removeDocumentAction(docId: string, storagePath: string) {
   await deleteDocumentRow(docId);
 }
 
-function errorMessage(e: unknown): string {
+async function errorMessage(e: unknown): Promise<string> {
   if (e instanceof Error) return e.message;
-  return "Something went wrong";
+  const tCommon = await getTranslations("common");
+  return tCommon("saveFailed");
 }

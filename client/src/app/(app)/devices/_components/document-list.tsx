@@ -2,6 +2,7 @@
 
 import { File, FileImage, FileSpreadsheet, FileText, Upload, X, type LucideIcon } from "lucide-react";
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { fileTypeIcon, formatBytes } from "@/lib/domain/devices";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ interface DocumentListProps {
 }
 
 export function DocumentList({ items, onChange, onRemovePersisted }: DocumentListProps) {
+  const t = useTranslations("devices.form");
   const addFiles = useCallback(
     (files: FileList | File[]) => {
       const additions: DocumentItem[] = [];
@@ -68,7 +70,7 @@ export function DocumentList({ items, onChange, onRemovePersisted }: DocumentLis
         <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
           <Upload className="size-4" />
         </div>
-        <div className="text-sm font-medium">Upload documents</div>
+        <div className="text-sm font-medium">{t("uploadDocuments")}</div>
         <div className="text-xs text-muted-foreground">
           Invoices, warranty cards, manuals · PDF, DOCX, XLSX, images
         </div>
@@ -103,7 +105,7 @@ export function DocumentList({ items, onChange, onRemovePersisted }: DocumentLis
                   type="button"
                   onClick={() => remove(idx)}
                   className="size-6 rounded-md text-muted-foreground hover:bg-accent flex items-center justify-center"
-                  aria-label="Remove document"
+                  aria-label={t("removeDocument")}
                 >
                   <X className="size-3.5" />
                 </button>

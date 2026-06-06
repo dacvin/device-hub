@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useForm, type AnyFieldApi } from "@tanstack/react-form";
 import { ArrowLeft, Cpu, Fingerprint, Gauge, Paperclip, ShieldCheck, StickyNote, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -79,12 +80,12 @@ const PHOTO_BUCKET = "device-photos";
 const DOC_BUCKET = "device-documents";
 
 const SECTIONS = [
-  { id: "general", number: "01", label: "General", icon: Fingerprint },
-  { id: "classification", number: "02", label: "Classification", icon: Cpu },
-  { id: "lifecycle", number: "03", label: "Lifecycle", icon: Gauge },
-  { id: "warranty", number: "04", label: "Warranty", icon: ShieldCheck },
-  { id: "uploads", number: "05", label: "Photos & documents", icon: Paperclip },
-  { id: "notes", number: "06", label: "Notes", icon: StickyNote },
+  { id: "general",        labelKey: "sectionGeneralLabel",        descKey: "sectionGeneralDescription",        number: "01", icon: Fingerprint },
+  { id: "classification", labelKey: "sectionClassificationLabel", descKey: "sectionClassificationDescription", number: "02", icon: Cpu },
+  { id: "lifecycle",      labelKey: "sectionLifecycleLabel",      descKey: "sectionLifecycleDescription",      number: "03", icon: Gauge },
+  { id: "warranty",       labelKey: "sectionWarrantyLabel",       descKey: "sectionWarrantyDescription",       number: "04", icon: ShieldCheck },
+  { id: "uploads",        labelKey: "sectionUploadsLabel",        descKey: "sectionUploadsDescription",        number: "05", icon: Paperclip },
+  { id: "notes",          labelKey: "sectionNotesLabel",          descKey: "sectionNotesDescription",          number: "06", icon: StickyNote },
 ] as const;
 
 interface DeviceFormProps {
@@ -104,6 +105,12 @@ export function DeviceForm(props: DeviceFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [activeSection, setActiveSection] = useState<string>("general");
+
+  const tForm = useTranslations("devices.form");
+  const tCommon = useTranslations("common");
+  const tStatus = useTranslations("devices.status");
+  const tUnit = useTranslations("devices.unit");
+  const tSource = useTranslations("devices.source");
 
   const [photos, setPhotos] = useState<PhotoItem[]>(props.initialPhotos);
   const [documents, setDocuments] = useState<DocumentItem[]>(props.initialDocuments);
@@ -125,17 +132,17 @@ export function DeviceForm(props: DeviceFormProps) {
               ? await createDeviceAction(value)
               : await updateDeviceAction(props.deviceId!, value);
           if (!action.ok) {
-            toast.error(action.error ?? "Could not save device");
+            toast.error(action.error ?? tForm("couldNotSave"));
             return;
           }
           const deviceId = action.deviceId!;
           const code = action.code!;
           await persistUploads(deviceId);
-          toast.success(props.mode === "create" ? "Device created" : "Device updated");
+          toast.success(props.mode === "create" ? tForm("createdToast") : tForm("updatedToast"));
           router.push(`/devices/${encodeURIComponent(code)}`);
           router.refresh();
         } catch (e) {
-          toast.error(e instanceof Error ? e.message : "Save failed");
+          toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
         }
       });
     },
@@ -256,7 +263,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   )}
                 >
                   <span className="text-[10px] font-mono">{s.number}</span>
-                  <span>{s.label}</span>
+                  <span>{tForm(s.labelKey)}</span>
                 </a>
               );
             })}
@@ -266,7 +273,7 @@ export function DeviceForm(props: DeviceFormProps) {
         <div className="space-y-4 min-w-0">
           {/* General */}
           <Card id="general" className="p-6 scroll-mt-20">
-            <SectionHeader number="01" label="General" description="Identity and ownership of the device." icon={Fingerprint} />
+            <SectionHeader number="01" label={tForm("sectionGeneralLabel")} description={tForm("sectionGeneralDescription")} icon={Fingerprint} />
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <form.Field
@@ -306,7 +313,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         className="font-mono"
                         aria-invalid={isInvalid(field)}
                       />
-                      <FieldDescription>Unique. Auto-suggested from group.</FieldDescription>
+                      <FieldDescription>{tForm("codeDescription")}</FieldDescription>
                       <FieldError errors={errs(field)} />
                     </FieldWrap>
                   )}
@@ -372,14 +379,14 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Classification */}
           <Card id="classification" className="p-6 scroll-mt-20">
-            <SectionHeader number="02" label="Classification" description="Make, model and technical detail." icon={Cpu} />
+            <SectionHeader number="02" label={tForm("sectionClassificationLabel")} description={tForm("sectionClassificationDescription")} icon={Cpu} />
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <form.Field
                   name="manufacturerId"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Manufacturer</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("manufacturer")}</FieldLabel>
                       <Select
                         value={field.state.value || undefined}
                         onValueChange={(v) => field.handleChange(v)}
@@ -403,7 +410,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="model"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Model</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("model")}</FieldLabel>
                       <Input
                         id={field.name}
                         value={field.state.value ?? ""}
@@ -416,7 +423,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="serialNumber"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Serial number</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("serialNumber")}</FieldLabel>
                       <Input
                         id={field.name}
                         className="font-mono"
@@ -431,7 +438,7 @@ export function DeviceForm(props: DeviceFormProps) {
                     name="quantity"
                     children={(field) => (
                       <FieldWrap field={field}>
-                        <FieldLabel htmlFor={field.name}>Quantity</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>{tForm("quantity")}</FieldLabel>
                         <Input
                           id={field.name}
                           type="number"
@@ -448,7 +455,7 @@ export function DeviceForm(props: DeviceFormProps) {
                     name="unit"
                     children={(field) => (
                       <FieldWrap field={field}>
-                        <FieldLabel>Unit</FieldLabel>
+                        <FieldLabel>{tForm("unit")}</FieldLabel>
                         <ToggleGroup
                           type="single"
                           variant="outline"
@@ -459,7 +466,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         >
                           {UNITS.map((u) => (
                             <ToggleGroupItem key={u} value={u} className="capitalize text-xs">
-                              {u}
+                              {tUnit(u)}
                             </ToggleGroupItem>
                           ))}
                         </ToggleGroup>
@@ -472,7 +479,7 @@ export function DeviceForm(props: DeviceFormProps) {
                 name="specifications"
                 children={(field) => (
                   <FieldWrap field={field}>
-                    <FieldLabel htmlFor={field.name}>Specifications</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{tForm("specifications")}</FieldLabel>
                     <Textarea
                       id={field.name}
                       rows={4}
@@ -488,14 +495,14 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Lifecycle */}
           <Card id="lifecycle" className="p-6 scroll-mt-20">
-            <SectionHeader number="03" label="Lifecycle" description="Status, condition and inventory cadence." icon={Gauge} />
+            <SectionHeader number="03" label={tForm("sectionLifecycleLabel")} description={tForm("sectionLifecycleDescription")} icon={Gauge} />
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <form.Field
                   name="status"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("status")}</FieldLabel>
                       <Select
                         value={field.state.value}
                         onValueChange={(v) => field.handleChange(v as DeviceFormValues["status"])}
@@ -506,7 +513,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         <SelectContent>
                           {DEVICE_STATUSES.map((s) => (
                             <SelectItem key={s} value={s}>
-                              {s}
+                              {tStatus(s)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -518,7 +525,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="source"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Source</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("source")}</FieldLabel>
                       <Select
                         value={field.state.value ?? undefined}
                         onValueChange={(v) => field.handleChange(v as DeviceFormValues["source"])}
@@ -529,7 +536,7 @@ export function DeviceForm(props: DeviceFormProps) {
                         <SelectContent>
                           {SOURCES.map((s) => (
                             <SelectItem key={s} value={s}>
-                              {s}
+                              {tSource(s)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -541,7 +548,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="location"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Storage location</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("storageLocation")}</FieldLabel>
                       <Input
                         id={field.name}
                         value={field.state.value ?? ""}
@@ -555,7 +562,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="importDate"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Import date</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("importDate")}</FieldLabel>
                       <Input
                         id={field.name}
                         type="date"
@@ -569,7 +576,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="lastCheckDate"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Last inventory check</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("lastInventoryCheck")}</FieldLabel>
                       <Input
                         id={field.name}
                         type="date"
@@ -601,7 +608,7 @@ export function DeviceForm(props: DeviceFormProps) {
                 children={(field) => (
                   <FieldWrap field={field}>
                     <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor={field.name}>Condition</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("condition")}</FieldLabel>
                       <span className="text-sm font-medium tabular-nums">
                         {field.state.value}%
                       </span>
@@ -625,14 +632,14 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Warranty */}
           <Card id="warranty" className="p-6 scroll-mt-20">
-            <SectionHeader number="04" label="Warranty" description="Coverage window." icon={ShieldCheck} />
+            <SectionHeader number="04" label={tForm("sectionWarrantyLabel")} description={tForm("sectionWarrantyDescription")} icon={ShieldCheck} />
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <form.Field
                   name="warrantyStart"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Warranty start</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("warrantyStart")}</FieldLabel>
                       <Input
                         id={field.name}
                         type="date"
@@ -646,7 +653,7 @@ export function DeviceForm(props: DeviceFormProps) {
                   name="warrantyEnd"
                   children={(field) => (
                     <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>Warranty end</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>{tForm("warrantyEnd")}</FieldLabel>
                       <Input
                         id={field.name}
                         type="date"
@@ -664,10 +671,10 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Uploads */}
           <Card id="uploads" className="p-6 scroll-mt-20">
-            <SectionHeader number="05" label="Photos & documents" description="A device photo and any supporting files." icon={Paperclip} />
+            <SectionHeader number="05" label={tForm("sectionUploadsLabel")} description={tForm("sectionUploadsDescription")} icon={Paperclip} />
             <FieldGroup>
               <FieldSet>
-                <FieldLegend>Device photos</FieldLegend>
+                <FieldLegend>{tForm("devicePhotos")}</FieldLegend>
                 <PhotoGallery
                   items={photos}
                   onChange={setPhotos}
@@ -679,7 +686,7 @@ export function DeviceForm(props: DeviceFormProps) {
                 />
               </FieldSet>
               <FieldSet>
-                <FieldLegend>Documents</FieldLegend>
+                <FieldLegend>{tForm("documents")}</FieldLegend>
                 <DocumentList
                   items={documents}
                   onChange={setDocuments}
@@ -695,7 +702,7 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Notes */}
           <Card id="notes" className="p-6 scroll-mt-20">
-            <SectionHeader number="06" label="Notes" description="Free-form context." icon={StickyNote} />
+            <SectionHeader number="06" label={tForm("sectionNotesLabel")} description={tForm("sectionNotesDescription")} icon={StickyNote} />
             <form.Field
               name="notes"
               children={(field) => (
@@ -723,13 +730,13 @@ export function DeviceForm(props: DeviceFormProps) {
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete this device?</AlertDialogTitle>
+                      <AlertDialogTitle>{tForm("deleteConfirmTitle")}</AlertDialogTitle>
                       <AlertDialogDescription>
                         The device will be soft-deleted and removed from lists. Catalog records remain.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => {
                           startTransition(async () => {
@@ -737,7 +744,7 @@ export function DeviceForm(props: DeviceFormProps) {
                           });
                         }}
                       >
-                        Delete
+                        {tCommon("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -746,10 +753,10 @@ export function DeviceForm(props: DeviceFormProps) {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/devices">Cancel</Link>
+                <Link href="/devices">{tCommon("cancel")}</Link>
               </Button>
               <Button type="submit" size="sm" disabled={pending}>
-                {pending ? "Saving…" : props.mode === "create" ? "Create device" : "Save changes"}
+                {pending ? tForm("saving") : props.mode === "create" ? tForm("createDevice") : tForm("saveChanges")}
               </Button>
             </div>
           </div>

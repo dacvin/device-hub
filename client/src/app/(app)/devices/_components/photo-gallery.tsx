@@ -2,6 +2,7 @@
 
 import { ImagePlus, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export interface PhotoItem {
@@ -29,6 +30,7 @@ const MAX_SIZE = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
 export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGalleryProps) {
+  const t = useTranslations("devices.form");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const addFiles = useCallback(
@@ -105,7 +107,7 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
               type="button"
               onClick={() => remove(idx)}
               className="absolute top-1 right-1 size-5 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 flex items-center justify-center"
-              aria-label="Remove photo"
+              aria-label={t("removePhoto")}
             >
               <X className="size-3" />
             </button>
@@ -121,7 +123,7 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
           onDragOver={(e) => e.preventDefault()}
         >
           <ImagePlus className="size-5" />
-          <span className="text-[11px] mt-1">Add photo</span>
+          <span className="text-[11px] mt-1">{t("addPhoto")}</span>
           <input
             type="file"
             accept={ALLOWED.join(",")}

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { listDepartments } from "@/lib/data/departments";
 import { listGroups } from "@/lib/data/groups";
 import { listManufacturers } from "@/lib/data/manufacturers";
@@ -30,10 +31,11 @@ const defaults: DeviceFormValues = {
 };
 
 export default async function NewDevicePage() {
-  const [groups, departments, manufacturers] = await Promise.all([
+  const [groups, departments, manufacturers, t] = await Promise.all([
     listGroups(),
     listDepartments(),
     listManufacturers(),
+    getTranslations("devices.new"),
   ]);
 
   return (
@@ -45,8 +47,8 @@ export default async function NewDevicePage() {
       groups={groups}
       departments={departments}
       manufacturers={manufacturers}
-      pageTitle="Add device"
-      pageSubtitle="Register a new asset in the inventory"
+      pageTitle={t("pageTitle")}
+      pageSubtitle={t("pageSubtitle")}
     />
   );
 }
