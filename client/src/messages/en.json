@@ -256,6 +256,8 @@
       "saving": "Saving…",
       "createDevice": "Create device",
       "saveChanges": "Save changes",
+      "saveAsDraft": "Save as draft",
+      "requiredFields": "* Required fields",
       "couldNotSave": "Could not save device",
       "createdToast": "Device created",
       "updatedToast": "Device updated",

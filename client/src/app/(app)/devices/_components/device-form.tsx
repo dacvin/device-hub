@@ -80,12 +80,12 @@ const PHOTO_BUCKET = "device-photos";
 const DOC_BUCKET = "device-documents";
 
 const SECTIONS = [
-  { id: "general",        labelKey: "sectionGeneralLabel",        descKey: "sectionGeneralDescription",        number: "01", icon: Fingerprint },
-  { id: "classification", labelKey: "sectionClassificationLabel", descKey: "sectionClassificationDescription", number: "02", icon: Cpu },
-  { id: "lifecycle",      labelKey: "sectionLifecycleLabel",      descKey: "sectionLifecycleDescription",      number: "03", icon: Gauge },
-  { id: "warranty",       labelKey: "sectionWarrantyLabel",       descKey: "sectionWarrantyDescription",       number: "04", icon: ShieldCheck },
-  { id: "uploads",        labelKey: "sectionUploadsLabel",        descKey: "sectionUploadsDescription",        number: "05", icon: Paperclip },
-  { id: "notes",          labelKey: "sectionNotesLabel",          descKey: "sectionNotesDescription",          number: "06", icon: StickyNote },
+  { id: "general",        labelKey: "sectionGeneralLabel",        descKey: "sectionGeneralDescription",        icon: Fingerprint },
+  { id: "classification", labelKey: "sectionClassificationLabel", descKey: "sectionClassificationDescription", icon: Cpu },
+  { id: "lifecycle",      labelKey: "sectionLifecycleLabel",      descKey: "sectionLifecycleDescription",      icon: Gauge },
+  { id: "warranty",       labelKey: "sectionWarrantyLabel",       descKey: "sectionWarrantyDescription",       icon: ShieldCheck },
+  { id: "uploads",        labelKey: "sectionUploadsLabel",        descKey: "sectionUploadsDescription",        icon: Paperclip },
+  { id: "notes",          labelKey: "sectionNotesLabel",          descKey: "sectionNotesDescription",          icon: StickyNote },
 ] as const;
 
 interface DeviceFormProps {
@@ -245,24 +245,33 @@ export function DeviceForm(props: DeviceFormProps) {
           e.preventDefault();
           form.handleSubmit();
         }}
-        className="grid grid-cols-1 xl:grid-cols-[220px_1fr] gap-6 pb-24"
+        className="grid grid-cols-1 gap-8 [@media(min-width:1000px)]:grid-cols-[220px_1fr]"
       >
-        <aside className="hidden xl:block">
-          <div className="sticky top-20 space-y-1">
-            {SECTIONS.map((s) => {
+        <aside className="hidden [@media(min-width:1000px)]:block">
+          <div className="sticky top-[90px] flex flex-col gap-0.5">
+            {SECTIONS.map((s, i) => {
               const active = activeSection === s.id;
               return (
                 <a
                   key={s.id}
                   href={`#${s.id}`}
                   className={cn(
-                    "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+                    "flex items-center gap-2.5 rounded-md px-3 py-[9px] text-sm transition-colors",
                     active
-                      ? "bg-accent text-accent-foreground font-medium"
-                      : "text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                      ? "bg-secondary text-secondary-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <span className="text-[10px] font-mono">{s.number}</span>
+                  <span
+                    className={cn(
+                      "grid size-[22px] shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                      active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border"
+                    )}
+                  >
+                    {i + 1}
+                  </span>
                   <span>{tForm(s.labelKey)}</span>
                 </a>
               );
@@ -270,12 +279,12 @@ export function DeviceForm(props: DeviceFormProps) {
           </div>
         </aside>
 
-        <div className="space-y-4 min-w-0">
+        <div className="space-y-5 min-w-0">
           {/* General */}
           <Card id="general" className="p-6 scroll-mt-20">
-            <SectionHeader number="01" label={tForm("sectionGeneralLabel")} description={tForm("sectionGeneralDescription")} icon={Fingerprint} />
+            <SectionHeader label={tForm("sectionGeneralLabel")} description={tForm("sectionGeneralDescription")} icon={Fingerprint} />
             <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
                 <form.Field
                   name="name"
                   children={(field) => (
@@ -379,9 +388,9 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Classification */}
           <Card id="classification" className="p-6 scroll-mt-20">
-            <SectionHeader number="02" label={tForm("sectionClassificationLabel")} description={tForm("sectionClassificationDescription")} icon={Cpu} />
+            <SectionHeader label={tForm("sectionClassificationLabel")} description={tForm("sectionClassificationDescription")} icon={Cpu} />
             <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
                 <form.Field
                   name="manufacturerId"
                   children={(field) => (
@@ -495,9 +504,9 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Lifecycle */}
           <Card id="lifecycle" className="p-6 scroll-mt-20">
-            <SectionHeader number="03" label={tForm("sectionLifecycleLabel")} description={tForm("sectionLifecycleDescription")} icon={Gauge} />
+            <SectionHeader label={tForm("sectionLifecycleLabel")} description={tForm("sectionLifecycleDescription")} icon={Gauge} />
             <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
                 <form.Field
                   name="status"
                   children={(field) => (
@@ -632,9 +641,9 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Warranty */}
           <Card id="warranty" className="p-6 scroll-mt-20">
-            <SectionHeader number="04" label={tForm("sectionWarrantyLabel")} description={tForm("sectionWarrantyDescription")} icon={ShieldCheck} />
+            <SectionHeader label={tForm("sectionWarrantyLabel")} description={tForm("sectionWarrantyDescription")} icon={ShieldCheck} />
             <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
                 <form.Field
                   name="warrantyStart"
                   children={(field) => (
@@ -671,7 +680,7 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Uploads */}
           <Card id="uploads" className="p-6 scroll-mt-20">
-            <SectionHeader number="05" label={tForm("sectionUploadsLabel")} description={tForm("sectionUploadsDescription")} icon={Paperclip} />
+            <SectionHeader label={tForm("sectionUploadsLabel")} description={tForm("sectionUploadsDescription")} icon={Paperclip} />
             <FieldGroup>
               <FieldSet>
                 <FieldLegend>{tForm("devicePhotos")}</FieldLegend>
@@ -702,7 +711,7 @@ export function DeviceForm(props: DeviceFormProps) {
 
           {/* Notes */}
           <Card id="notes" className="p-6 scroll-mt-20">
-            <SectionHeader number="06" label={tForm("sectionNotesLabel")} description={tForm("sectionNotesDescription")} icon={StickyNote} />
+            <SectionHeader label={tForm("sectionNotesLabel")} description={tForm("sectionNotesDescription")} icon={StickyNote} />
             <form.Field
               name="notes"
               children={(field) => (
@@ -715,47 +724,50 @@ export function DeviceForm(props: DeviceFormProps) {
               )}
             />
           </Card>
-        </div>
 
-        {/* Action bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur">
-          <div className="max-w-[1320px] mx-auto px-7 py-3 flex items-center justify-between gap-3 lg:pl-[280px]">
-            <div>
-              {props.mode === "edit" && props.deviceId && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" type="button">
-                      <Trash2 className="size-4" /> {tForm("deleteDevice")}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{tForm("deleteConfirmTitle")}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {tForm("deleteConfirmDescription")}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          startTransition(async () => {
-                            await deleteDeviceAction(props.deviceId!);
-                          });
-                        }}
-                      >
-                        {tCommon("delete")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
+          {/* Action bar */}
+          <div className="mt-6 pt-5 border-t border-border flex items-center gap-2.5">
+            {props.mode === "edit" && props.deviceId && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" type="button">
+                    <Trash2 className="size-4" /> {tForm("deleteDevice")}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{tForm("deleteConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {tForm("deleteConfirmDescription")}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        startTransition(async () => {
+                          await deleteDeviceAction(props.deviceId!);
+                        });
+                      }}
+                    >
+                      {tCommon("delete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+            <span className="text-[13px] text-muted-foreground">
+              {tForm("requiredFields")}
+            </span>
+            <div className="ml-auto flex items-center gap-2.5">
+              <Button variant="ghost" asChild>
                 <Link href="/devices">{tCommon("cancel")}</Link>
               </Button>
-              <Button type="submit" size="sm" disabled={pending}>
+              {/* TODO: wire draft persistence */}
+              <Button variant="outline" type="button">
+                {tForm("saveAsDraft")}
+              </Button>
+              <Button type="submit" disabled={pending}>
                 {pending ? tForm("saving") : props.mode === "create" ? tForm("createDevice") : tForm("saveChanges")}
               </Button>
             </div>
@@ -767,27 +779,22 @@ export function DeviceForm(props: DeviceFormProps) {
 }
 
 function SectionHeader({
-  number,
   label,
   description,
   icon: Icon,
 }: {
-  number: string;
   label: string;
   description: string;
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div className="flex items-start gap-3 mb-5">
-      <div className="size-9 rounded-md bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
-        <Icon className="size-4" />
+    <div className="flex items-center gap-2.5 mb-5">
+      <div className="size-[34px] rounded-[9px] bg-secondary text-secondary-foreground grid place-items-center shrink-0">
+        <Icon className="size-[17px]" />
       </div>
       <div>
-        <h3 className="text-base font-semibold tracking-tight">
-          <span className="text-[10px] font-mono text-muted-foreground mr-2 align-middle">{number}</span>
-          {label}
-        </h3>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <h3 className="text-base font-semibold tracking-tight">{label}</h3>
+        <p className="text-xs text-muted-foreground mt-px">{description}</p>
       </div>
     </div>
   );

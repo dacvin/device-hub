@@ -256,6 +256,8 @@
       "saving": "Đang lưu…",
       "createDevice": "Tạo thiết bị",
       "saveChanges": "Lưu thay đổi",
+      "saveAsDraft": "Lưu bản nháp",
+      "requiredFields": "* Trường bắt buộc",
       "couldNotSave": "Không thể lưu thiết bị",
       "createdToast": "Đã tạo thiết bị",
       "updatedToast": "Đã cập nhật thiết bị",

@@ -79,7 +79,7 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-3">
         {items.map((item, idx) => (
           <div
             key={item.key}
@@ -92,21 +92,21 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
             }}
             onDragEnd={() => setDragIndex(null)}
             className={cn(
-              "group relative size-24 rounded-lg overflow-hidden border border-border bg-muted",
-              dragIndex === idx && "opacity-50"
+              "group relative size-24 cursor-grab overflow-hidden rounded-md border border-border bg-secondary active:cursor-grabbing",
+              dragIndex === idx && "opacity-40"
             )}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.previewUrl} alt={item.fileName ?? ""} className="size-full object-cover" />
+            <img src={item.previewUrl} alt={item.fileName ?? ""} draggable={false} className="size-full object-cover" />
             {idx === 0 && (
-              <span className="absolute top-1 left-1 text-[10px] font-medium bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+              <span className="absolute inset-x-0 bottom-0 bg-primary text-primary-foreground text-center text-[10px] font-semibold py-0.5 tracking-wider">
                 {t("photoCover")}
               </span>
             )}
             <button
               type="button"
               onClick={() => remove(idx)}
-              className="absolute top-1 right-1 size-5 rounded-full bg-background/80 text-foreground opacity-0 group-hover:opacity-100 flex items-center justify-center"
+              className="absolute top-1 right-1 grid size-[22px] place-items-center rounded-full border-0 bg-foreground/55 text-background opacity-0 transition-opacity group-hover:opacity-100"
               aria-label={t("removePhoto")}
             >
               <X className="size-3" />
@@ -115,15 +115,15 @@ export function PhotoGallery({ items, onChange, onRemovePersisted }: PhotoGaller
         ))}
 
         <label
-          className="size-24 rounded-lg border-2 border-dashed border-border bg-muted/40 flex flex-col items-center justify-center cursor-pointer hover:bg-accent transition-colors text-muted-foreground"
+          className="flex size-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-md border-[1.5px] border-dashed border-border bg-muted text-[11px] font-medium text-muted-foreground transition-colors hover:border-ring hover:text-foreground"
           onDrop={(e) => {
             e.preventDefault();
             addFiles(e.dataTransfer.files);
           }}
           onDragOver={(e) => e.preventDefault()}
         >
-          <ImagePlus className="size-5" />
-          <span className="text-[11px] mt-1">{t("addPhoto")}</span>
+          <ImagePlus className="size-5 text-primary" />
+          <span>{t("addPhoto")}</span>
           <input
             type="file"
             accept={ALLOWED.join(",")}
