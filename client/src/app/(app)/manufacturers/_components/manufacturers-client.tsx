@@ -3,6 +3,7 @@
 /* eslint-disable react/no-children-prop */
 
 import { useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm, type AnyFieldApi } from "@tanstack/react-form";
@@ -41,6 +42,8 @@ import type { ManufacturerWithCount } from "@/lib/data/manufacturers";
 const empty: ManufacturerFormValues = { name: "", supportContact: "" };
 
 export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] }) {
+  const t = useTranslations("manufacturers");
+  const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
   const [, startTransition] = useTransition();
@@ -62,10 +65,10 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
   return (
     <>
       <CatalogPageShell
-        title="Manufacturers"
-        subtitle="Vendors of catalogued devices"
+        title={t("title")}
+        subtitle={t("subtitle")}
         metaLine={`${rows.length} manufacturers · ${totalDevices} devices catalogued`}
-        addLabel="Add manufacturer"
+        addLabel={t("addAction")}
         onAdd={() => setOpenId("new")}
         search={search}
         onSearchChange={setSearch}
@@ -74,9 +77,9 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Name</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Support contact</TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">Devices</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableName")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableSupport")}</TableHead>
+                <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">{t("tableDevices")}</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
             </TableHeader>
@@ -105,11 +108,11 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
                         size="icon"
                         className="size-7 text-destructive hover:text-destructive disabled:opacity-30"
                         disabled={r.deviceCount > 0}
-                        title={r.deviceCount > 0 ? "Reassign devices first" : "Delete"}
+                        title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
                           startTransition(async () => {
                             const res = await deleteManufacturerAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? "Delete failed");
+                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
                           });
                         }}
                       >
@@ -127,8 +130,8 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
       <Dialog open={openId !== null} onOpenChange={(open) => !open && setOpenId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit manufacturer" : "Add manufacturer"}</DialogTitle>
-            <DialogDescription>Vendors of catalogued devices.</DialogDescription>
+            <DialogTitle>{editing ? t("dialogEdit") : t("dialogAdd")}</DialogTitle>
+            <DialogDescription>{t("dialogDescription")}</DialogDescription>
           </DialogHeader>
           <ManufacturerForm
             initial={editing ? {
@@ -139,9 +142,9 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
               const res = await saveManufacturerAction(editing?.id ?? null, values);
               if (res.ok) {
                 setOpenId(null);
-                toast.success(editing ? "Manufacturer updated" : "Manufacturer added");
+                toast.success(editing ? t("updated") : t("added"));
               } else {
-                toast.error(res.error ?? "Save failed");
+                toast.error(res.error ?? tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
@@ -161,6 +164,8 @@ function ManufacturerForm({
   onSubmit: (v: ManufacturerFormValues) => Promise<void>;
   onCancel: () => void;
 }) {
+  const t = useTranslations("manufacturers");
+  const tCommon = useTranslations("common");
   const form = useForm({
     defaultValues: initial,
     validators: { onSubmit: manufacturerFormSchema },
@@ -179,7 +184,7 @@ function ManufacturerForm({
           name="name"
           children={(f) => (
             <Field data-invalid={isInvalid(f)}>
-              <FieldLabel htmlFor={f.name}>Name *</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldName")} *</FieldLabel>
               <Input
                 id={f.name}
                 value={f.state.value}
@@ -195,7 +200,7 @@ function ManufacturerForm({
           name="supportContact"
           children={(f) => (
             <Field>
-              <FieldLabel htmlFor={f.name}>Support contact</FieldLabel>
+              <FieldLabel htmlFor={f.name}>{t("fieldSupport")}</FieldLabel>
               <Input
                 id={f.name}
                 className="font-mono"
@@ -207,8 +212,8 @@ function ManufacturerForm({
         />
       </FieldGroup>
       <DialogFooter className="mt-4">
-        <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button type="submit">{initial.name ? "Save" : "Create"}</Button>
+        <Button type="button" variant="ghost" onClick={onCancel}>{tCommon("cancel")}</Button>
+        <Button type="submit">{initial.name ? tCommon("save") : tCommon("create")}</Button>
       </DialogFooter>
     </form>
   );

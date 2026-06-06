@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { manufacturerFormSchema } from "@/lib/domain/devices";
 import {
   createManufacturer,
@@ -37,7 +38,8 @@ export async function saveManufacturerAction(
     revalidatePath("/manufacturers");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Save failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("saveFailed") };
   }
 }
 
@@ -47,6 +49,7 @@ export async function deleteManufacturerAction(id: string): Promise<ActionResult
     revalidatePath("/manufacturers");
     return { ok: true };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Delete failed" };
+    const tCommon = await getTranslations("common");
+    return { ok: false, error: e instanceof Error ? e.message : tCommon("deleteFailed") };
   }
 }
