@@ -78,6 +78,8 @@ export default async function EditDevicePage({ params }: PageProps) {
     warrantyEnd: device.warrantyEnd,
   };
 
+  const headerGroupIcon = groups.find((g) => g.id === device.groupId)?.icon ?? null;
+
   return (
     <DeviceForm
       mode="edit"
@@ -90,6 +92,7 @@ export default async function EditDevicePage({ params }: PageProps) {
       manufacturers={manufacturers}
       pageTitle={`Edit ${device.name}`}
       pageSubtitle={device.code}
+      headerGroupIcon={headerGroupIcon}
     />
   );
 }

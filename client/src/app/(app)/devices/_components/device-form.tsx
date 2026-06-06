@@ -99,6 +99,8 @@ interface DeviceFormProps {
   manufacturers: Manufacturer[];
   pageTitle: string;
   pageSubtitle?: string;
+  /** Icon key for the group tile rendered in the edit-mode header. */
+  headerGroupIcon?: string | null;
 }
 
 export function DeviceForm(props: DeviceFormProps) {
@@ -231,7 +233,23 @@ export function DeviceForm(props: DeviceFormProps) {
 
   return (
     <>
-      <PageHeader title={props.pageTitle} subtitle={props.pageSubtitle} />
+      {props.mode === "edit" ? (
+        <div className="flex items-center gap-3.5 mb-[22px]">
+          <GroupIcon icon={props.headerGroupIcon ?? null} size="lg" />
+          <div className="min-w-0">
+            <h1 className="text-[22px] font-semibold tracking-[-0.02em] leading-7">
+              {props.pageTitle}
+            </h1>
+            {props.pageSubtitle && (
+              <p className="font-mono text-[12.5px] text-muted-foreground mt-0.5">
+                {props.pageSubtitle}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <PageHeader title={props.pageTitle} subtitle={props.pageSubtitle} />
+      )}
 
       <Link
         href="/devices"
@@ -756,17 +774,21 @@ export function DeviceForm(props: DeviceFormProps) {
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <span className="text-[13px] text-muted-foreground">
-              {tForm("requiredFields")}
-            </span>
+            {props.mode === "create" && (
+              <span className="text-[13px] text-muted-foreground">
+                {tForm("requiredFields")}
+              </span>
+            )}
             <div className="ml-auto flex items-center gap-2.5">
               <Button variant="ghost" asChild>
                 <Link href="/devices">{tCommon("cancel")}</Link>
               </Button>
-              {/* TODO: wire draft persistence */}
-              <Button variant="outline" type="button">
-                {tForm("saveAsDraft")}
-              </Button>
+              {props.mode === "create" && (
+                /* TODO: wire draft persistence */
+                <Button variant="outline" type="button">
+                  {tForm("saveAsDraft")}
+                </Button>
+              )}
               <Button type="submit" disabled={pending}>
                 {pending ? tForm("saving") : props.mode === "create" ? tForm("createDevice") : tForm("saveChanges")}
               </Button>
