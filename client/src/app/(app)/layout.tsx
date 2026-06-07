@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar, type SidebarUser } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
 import { Toaster } from "@/components/ui/sonner";
+import { ConfirmProvider } from "@/hooks/use-confirm";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -27,9 +28,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar user={sidebarUser} />
       <div className="flex-1 min-w-0 flex flex-col">
         <Topbar />
-        <main className="flex-1 px-7 py-7">
-          <div className="max-w-[1320px] mx-auto">{children}</div>
-        </main>
+        <ConfirmProvider>
+          <main className="flex-1 px-7 py-7">
+            <div className="max-w-[1320px] mx-auto">{children}</div>
+          </main>
+        </ConfirmProvider>
       </div>
       <Toaster richColors position="bottom-right" />
     </div>
