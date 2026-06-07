@@ -43,7 +43,31 @@ create table user_preference (
 
 create function devices_with_flags(p_warranty_days int default 90)
 returns table (
-  like device,
+  id                     uuid,
+  code                   text,
+  name                   text,
+  group_id               uuid,
+  department_id          uuid,
+  manufacturer_id        uuid,
+  model                  text,
+  serial_number          text,
+  specifications         text,
+  notes                  text,
+  condition              int,
+  location               text,
+  quantity               int,
+  unit                   unit,
+  source                 device_source,
+  import_date            date,
+  last_check_date        date,
+  inventory_cycle_months int,
+  warranty_start         date,
+  warranty_end           date,
+  status                 device_status,
+  cover_photo_id         uuid,
+  deleted_at             timestamptz,
+  created_at             timestamptz,
+  updated_at             timestamptz,
   flag_warranty_expiring boolean,
   flag_inventory_overdue boolean
 )
