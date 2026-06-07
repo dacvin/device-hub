@@ -433,6 +433,18 @@
       "documentsHint": "Invoices, warranty cards, manuals · PDF, DOCX, XLSX, images"
     }
   },
+  "notFound": {
+    "title": "We couldn't find that page",
+    "description": "The page you're looking for may have been moved, retired, or never existed. Check the address or head back to your overview.",
+    "viewDevices": "View devices",
+    "back": "Back to overview"
+  },
+  "serverError": {
+    "title": "Something went wrong on our end",
+    "description": "An unexpected error occurred while loading DeviceHub. Our team has been notified. Try again in a moment.",
+    "reload": "Try again",
+    "back": "Back to overview"
+  },
   "settings": {
     "title": "Settings",
     "permissionDeniedTitle": "Settings are admin-only",

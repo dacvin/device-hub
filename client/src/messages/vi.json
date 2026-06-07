@@ -433,6 +433,18 @@
       "documentsHint": "Hoá đơn, phiếu bảo hành, tài liệu · PDF, DOCX, XLSX, ảnh"
     }
   },
+  "notFound": {
+    "title": "[vi] We couldn't find that page",
+    "description": "[vi] The page you're looking for may have been moved, retired, or never existed. Check the address or head back to your overview.",
+    "viewDevices": "[vi] View devices",
+    "back": "[vi] Back to overview"
+  },
+  "serverError": {
+    "title": "[vi] Something went wrong on our end",
+    "description": "[vi] An unexpected error occurred while loading DeviceHub. Our team has been notified. Try again in a moment.",
+    "reload": "[vi] Try again",
+    "back": "[vi] Back to overview"
+  },
   "settings": {
     "title": "[vi] Settings",
     "permissionDeniedTitle": "[vi] Settings are admin-only",
