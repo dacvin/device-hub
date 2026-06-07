@@ -6,8 +6,11 @@ import { departmentFormSchema } from "@/lib/domain/devices";
 import {
   createDepartment,
   deleteDepartment,
+  getDepartmentById,
   updateDepartment,
 } from "@/lib/data/departments";
+import { getCurrentMember } from "@/lib/data/auth";
+import { logActivity } from "@/lib/data/activity";
 
 interface ActionResult {
   ok: boolean;
@@ -30,10 +33,25 @@ export async function saveDepartmentAction(
   const parsed = parse(values);
   if (!parsed.ok) return { ok: false, fieldErrors: parsed.fieldErrors };
   try {
+    const me = await getCurrentMember();
     if (id) {
-      await updateDepartment(id, parsed.values);
+      const row = await updateDepartment(id, parsed.values);
+      await logActivity({
+        actorId: me?.id ?? null,
+        action: "catalog.updated",
+        entityType: "department",
+        entityId: row.id,
+        entityLabel: row.name,
+      });
     } else {
-      await createDepartment(parsed.values);
+      const row = await createDepartment(parsed.values);
+      await logActivity({
+        actorId: me?.id ?? null,
+        action: "catalog.created",
+        entityType: "department",
+        entityId: row.id,
+        entityLabel: row.name,
+      });
     }
     revalidatePath("/departments");
     return { ok: true };
@@ -45,7 +63,15 @@ export async function saveDepartmentAction(
 
 export async function deleteDepartmentAction(id: string): Promise<ActionResult> {
   try {
+    const [row, me] = await Promise.all([getDepartmentById(id), getCurrentMember()]);
     await deleteDepartment(id);
+    await logActivity({
+      actorId: me?.id ?? null,
+      action: "catalog.deleted",
+      entityType: "department",
+      entityId: id,
+      entityLabel: row?.name ?? null,
+    });
     revalidatePath("/departments");
     return { ok: true };
   } catch (e) {

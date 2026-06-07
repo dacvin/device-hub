@@ -6,8 +6,11 @@ import { manufacturerFormSchema } from "@/lib/domain/devices";
 import {
   createManufacturer,
   deleteManufacturer,
+  getManufacturerById,
   updateManufacturer,
 } from "@/lib/data/manufacturers";
+import { getCurrentMember } from "@/lib/data/auth";
+import { logActivity } from "@/lib/data/activity";
 
 interface ActionResult {
   ok: boolean;
@@ -30,10 +33,25 @@ export async function saveManufacturerAction(
   const parsed = parse(values);
   if (!parsed.ok) return { ok: false, fieldErrors: parsed.fieldErrors };
   try {
+    const me = await getCurrentMember();
     if (id) {
-      await updateManufacturer(id, parsed.values);
+      const row = await updateManufacturer(id, parsed.values);
+      await logActivity({
+        actorId: me?.id ?? null,
+        action: "catalog.updated",
+        entityType: "manufacturer",
+        entityId: row.id,
+        entityLabel: row.name,
+      });
     } else {
-      await createManufacturer(parsed.values);
+      const row = await createManufacturer(parsed.values);
+      await logActivity({
+        actorId: me?.id ?? null,
+        action: "catalog.created",
+        entityType: "manufacturer",
+        entityId: row.id,
+        entityLabel: row.name,
+      });
     }
     revalidatePath("/manufacturers");
     return { ok: true };
@@ -45,7 +63,15 @@ export async function saveManufacturerAction(
 
 export async function deleteManufacturerAction(id: string): Promise<ActionResult> {
   try {
+    const [row, me] = await Promise.all([getManufacturerById(id), getCurrentMember()]);
     await deleteManufacturer(id);
+    await logActivity({
+      actorId: me?.id ?? null,
+      action: "catalog.deleted",
+      entityType: "manufacturer",
+      entityId: id,
+      entityLabel: row?.name ?? null,
+    });
     revalidatePath("/manufacturers");
     return { ok: true };
   } catch (e) {
