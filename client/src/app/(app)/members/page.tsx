@@ -1,0 +1,138 @@
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { getCurrentMember } from "@/lib/data/auth";
+import { listMembers } from "@/lib/data/members";
+import { listDepartments } from "@/lib/data/departments";
+import { can } from "@/lib/domain/members";
+import { PageHeader } from "@/components/app/page-header";
+import { RoleSummaryRow } from "./_components/role-summary-row";
+import { RoleFilter } from "./_components/role-filter";
+import { MembersPageClient } from "./_components/members-page-client";
+
+interface MembersPageProps {
+  searchParams: Promise<{ q?: string; role?: string }>;
+}
+
+export default async function MembersPage({ searchParams }: MembersPageProps) {
+  const member = await getCurrentMember();
+  if (!member) redirect("/login");
+
+  const { q, role } = await searchParams;
+  const t = await getTranslations("members");
+
+  const roleFilter = role === "it_admin" || role === "manager" || role === "viewer" ? role : undefined;
+
+  const [members, departments] = await Promise.all([
+    listMembers({ q, role: roleFilter ?? "all" }),
+    listDepartments(),
+  ]);
+
+  // For role-summary cards, always show full totals
+  const allMembersForSummary = (roleFilter || q)
+    ? await listMembers({})
+    : members;
+  const totalAdmins = allMembersForSummary.filter((m) => m.role === "it_admin").length;
+  const totalManagers = allMembersForSummary.filter((m) => m.role === "manager").length;
+  const totalViewers = allMembersForSummary.filter((m) => m.role === "viewer").length;
+
+  const canManage = can(member.role, "manageMembers");
+  const isFiltered = !!(q || roleFilter);
+
+  return (
+    <div className="space-y-5">
+      <PageHeader
+        title={t("title")}
+        subtitle={t("metaCount", { count: members.length })}
+      />
+
+      <RoleSummaryRow
+        adminCount={totalAdmins}
+        managerCount={totalManagers}
+        viewerCount={totalViewers}
+        labels={{
+          admins: t("summaryAdmins"),
+          managers: t("summaryManagers"),
+          viewers: t("summaryViewers"),
+          capAdmin: t("capAdmin"),
+          capManager: t("capManager"),
+          capViewer: t("capViewer"),
+        }}
+      />
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <RoleFilter
+          currentRole={role}
+          labels={{
+            all: t("filterAll"),
+            admins: t("filterAdmins"),
+            managers: t("filterManagers"),
+            viewers: t("filterViewers"),
+          }}
+        />
+      </div>
+
+      <MembersPageClient
+        members={members}
+        currentMemberId={member.id}
+        canManage={canManage}
+        departments={departments}
+        isFiltered={isFiltered}
+        currentQ={q}
+        labels={{
+          search: t("search"),
+          invite: t("invite"),
+          export: t("export"),
+          colMember: t("colMember"),
+          colRole: t("colRole"),
+          colDepartment: t("colDepartment"),
+          colDevicesManaged: t("colDevicesManaged"),
+          colLastActive: t("colLastActive"),
+          colStatus: t("colStatus"),
+          youPill: t("youPill"),
+          statusActive: t("statusActive"),
+          statusInvited: t("statusInvited"),
+          statusDisabled: t("statusDisabled"),
+          emptyTitle: t("emptyTitle"),
+          emptyDescription: t("emptyDescription"),
+          emptyAction: t("emptyAction"),
+          filteredEmptyTitle: t("filteredEmptyTitle"),
+          filteredEmptyDescription: t("filteredEmptyDescription"),
+          metaCount: t("metaCount", { count: members.length }),
+          bulk: {
+            selected: t("bulk.selected", { count: 0 }),
+            role: t("bulk.role"),
+            export: t("bulk.export"),
+            remove: t("bulk.remove"),
+            confirmRemoveTitle: t("bulk.confirmRemoveTitle", { count: 0 }),
+            confirmRemoveDescription: t("bulk.confirmRemoveDescription"),
+            confirmRemoveCta: t("bulk.confirmRemoveCta"),
+          },
+          toast: {
+            invitationSent: t("toast.invitationSent"),
+            roleUpdated: t("toast.roleUpdated"),
+            memberRemoved: t("toast.memberRemoved"),
+            actionFailed: t("toast.actionFailed"),
+            exportStub: t("toast.exportStub"),
+          },
+          inviteDialog: {
+            title: t("inviteDialog.title"),
+            description: t("inviteDialog.description"),
+            name: t("inviteDialog.name"),
+            email: t("inviteDialog.email"),
+            emailHelper: t("inviteDialog.emailHelper"),
+            role: t("inviteDialog.role"),
+            department: t("inviteDialog.department"),
+            departmentNone: t("inviteDialog.departmentNone"),
+            cancel: t("inviteDialog.cancel"),
+            submit: t("inviteDialog.submit"),
+          },
+          roleLabels: {
+            it_admin: t("roleItAdmin"),
+            manager: t("roleManager"),
+            viewer: t("roleViewer"),
+          },
+        }}
+      />
+    </div>
+  );
+}
