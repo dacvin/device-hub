@@ -9,6 +9,7 @@ import {
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
+  type RowSelectionState,
   type VisibilityState,
 } from "@tanstack/react-table";
 import {
@@ -52,6 +53,7 @@ import { GroupIcon } from "@/components/app/group-icon";
 import { StatusBadge } from "@/components/app/status-badge";
 import { FlagChip } from "@/components/app/flag-chip";
 import { ConditionBar } from "@/components/app/condition-bar";
+import { DeviceBulkActions } from "./device-bulk-actions";
 import {
   DEVICE_FLAGS,
   DEVICE_STATUSES,
@@ -157,6 +159,9 @@ export function DeviceListClient({
     }
   }, [columnVisibility]);
 
+  // Row selection
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const columns = useMemo<ColumnDef<DeviceWithFlags>[]>(
     () => buildColumns(lookups, tList, tCols),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,10 +171,20 @@ export function DeviceListClient({
   const table = useReactTable({
     data: devices,
     columns,
-    state: { columnVisibility },
+    state: { columnVisibility, rowSelection },
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const selectedIds = useMemo(() => {
+    return new Set(table.getSelectedRowModel().rows.map((r) => r.original.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection, devices]);
+
+  function clearSelection() {
+    setRowSelection({});
+  }
 
   const filterActive =
     !!(initialFilters.q ||
@@ -211,6 +226,8 @@ export function DeviceListClient({
           {tList("emptyState")}
         </div>
       )}
+
+      <DeviceBulkActions selected={selectedIds} onClear={clearSelection} />
     </div>
   );
 }

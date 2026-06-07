@@ -306,7 +306,24 @@
       "metaDepartment": "Department",
       "metaGroup": "Group",
       "metaLocation": "Location",
-      "metaQty": "Qty"
+      "metaQty": "Qty",
+      "bulk": {
+        "selected": "{count, plural, one {# selected} other {# selected}}",
+        "status": "Status",
+        "export": "Export",
+        "delete": "Delete",
+        "setStatus": "Set status",
+        "confirmDeleteTitle": "{count, plural, one {Delete # device?} other {Delete # devices?}}",
+        "confirmDeleteDescription": "This moves the selected devices to the recycle bin. You can restore within the retention window.",
+        "confirmDeleteCta": "Delete",
+        "toastStatusUpdated": "Status updated",
+        "toastStatusUpdatedDesc": "{count, plural, one {# device updated.} other {# devices updated.}}",
+        "toastExportStarted": "Export started",
+        "toastExportStartedDesc": "{count, plural, one {Preparing a CSV of # device…} other {Preparing a CSV of # devices…}}",
+        "toastDeleted": "Devices deleted",
+        "toastDeletedDesc": "{count, plural, one {# device moved to the recycle bin.} other {# devices moved to the recycle bin.}}",
+        "toastFailed": "Action failed"
+      }
     },
     "columns": {
       "typeIcon": "Type icon",

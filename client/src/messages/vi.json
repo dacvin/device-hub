@@ -306,7 +306,24 @@
       "metaDepartment": "Phòng ban",
       "metaGroup": "Nhóm",
       "metaLocation": "Địa điểm",
-      "metaQty": "SL"
+      "metaQty": "SL",
+      "bulk": {
+        "selected": "{count} đã chọn",
+        "status": "Trạng thái",
+        "export": "Xuất",
+        "delete": "Xóa",
+        "setStatus": "Đặt trạng thái",
+        "confirmDeleteTitle": "Xóa {count} thiết bị?",
+        "confirmDeleteDescription": "Thiết bị sẽ được chuyển vào thùng rác. Bạn có thể khôi phục trong thời gian lưu giữ.",
+        "confirmDeleteCta": "Xóa",
+        "toastStatusUpdated": "Đã cập nhật trạng thái",
+        "toastStatusUpdatedDesc": "Đã cập nhật {count} thiết bị.",
+        "toastExportStarted": "Bắt đầu xuất",
+        "toastExportStartedDesc": "Đang chuẩn bị CSV của {count} thiết bị…",
+        "toastDeleted": "Đã xóa thiết bị",
+        "toastDeletedDesc": "Đã chuyển {count} thiết bị vào thùng rác.",
+        "toastFailed": "Hành động thất bại"
+      }
     },
     "columns": {
       "typeIcon": "Biểu tượng",

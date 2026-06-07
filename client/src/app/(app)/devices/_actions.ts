@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { deviceFormSchema, type DeviceFormValues } from "@/lib/domain/devices";
+import { deviceFormSchema, type DeviceFormValues, type DeviceStatus } from "@/lib/domain/devices";
 import {
+  bulkSoftDeleteDevices,
+  bulkUpdateDeviceStatus,
   createDevice,
   deleteDocumentRow,
   deletePhotoRow,
@@ -124,6 +126,34 @@ export async function insertDocumentsAction(
 export async function removeDocumentAction(docId: string, storagePath: string) {
   await removeDocumentObject(storagePath);
   await deleteDocumentRow(docId);
+}
+
+export async function bulkUpdateStatusAction(ids: string[], status: DeviceStatus): Promise<ActionResult> {
+  try {
+    await bulkUpdateDeviceStatus(ids, status);
+    const me = await getCurrentMember();
+    await Promise.all(ids.map((id) =>
+      logActivity({ actorId: me?.id ?? null, action: "device.updated", entityType: "device", entityId: id, entityLabel: null })
+    ));
+    revalidatePath("/devices");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: await errorMessage(e) };
+  }
+}
+
+export async function bulkDeleteAction(ids: string[]): Promise<ActionResult> {
+  try {
+    await bulkSoftDeleteDevices(ids);
+    const me = await getCurrentMember();
+    await Promise.all(ids.map((id) =>
+      logActivity({ actorId: me?.id ?? null, action: "device.deleted", entityType: "device", entityId: id, entityLabel: null })
+    ));
+    revalidatePath("/devices");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: await errorMessage(e) };
+  }
 }
 
 async function errorMessage(e: unknown): Promise<string> {
