@@ -432,5 +432,88 @@
       "photosHint": "First photo is the cover · drag & drop or click · PNG, JPG, or WEBP, up to 5 MB each.",
       "documentsHint": "Invoices, warranty cards, manuals · PDF, DOCX, XLSX, images"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "permissionDeniedTitle": "Settings are admin-only",
+    "permissionDeniedDescription": "Workspace settings can only be changed by an IT Admin. Ask one of your admins to update settings on your behalf.",
+    "nav": {
+      "general": "General",
+      "appearance": "Appearance",
+      "inventory": "Inventory defaults",
+      "notifications": "Notifications",
+      "data": "Data & export",
+      "condition": "Condition thresholds",
+      "danger": "Danger zone"
+    },
+    "general": {
+      "title": "General",
+      "orgName": "Organization name",
+      "primarySite": "Primary site",
+      "primarySiteHelper": "Default location for new devices",
+      "dateFormat": "Date format"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "appearanceHint": "These preferences are personal to you and saved to your account.",
+      "theme": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "defaultDeviceView": "Default device view",
+      "viewTable": "Table",
+      "viewCards": "Cards",
+      "monoCodes": "Monospace device codes"
+    },
+    "inventory": {
+      "title": "Inventory defaults",
+      "subtitle": "Applied to new devices only. Existing devices are unchanged.",
+      "autoGenerate": "Auto-generate device codes",
+      "codePrefix": "Code prefix",
+      "codePrefixHelper": "e.g. DEV-",
+      "defaultCycle": "Default inventory cycle (months)"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "warranty": "Warranty expiring",
+      "warrantyDays": "Days before",
+      "inventoryOverdue": "Inventory overdue",
+      "weekly": "Weekly summary",
+      "newDevice": "New device added"
+    },
+    "data": {
+      "title": "Data & export",
+      "format": "Default export format",
+      "retention": "Retain deleted devices (days)",
+      "exportFull": "Export full inventory"
+    },
+    "condition": {
+      "title": "Condition thresholds",
+      "subtitle": "Drives the color of condition bars. Applied at display time; no data is changed.",
+      "good": "Good threshold (%)",
+      "fair": "Fair threshold (%)",
+      "hint": "Fair must be ≤ Good"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "purgeTitle": "Purge retired devices",
+      "purgeDescription": "Permanently delete devices marked as retired older than the retention window. This cannot be undone.",
+      "purgeButton": "Purge retired devices",
+      "purgeConfirmTitle": "Purge retired devices?",
+      "purgeConfirmDescription": "{count} or more retired devices may be permanently deleted. This cannot be undone.",
+      "purgeConfirmCta": "Purge"
+    },
+    "saveBar": {
+      "unsaved": "Unsaved changes",
+      "discard": "Discard",
+      "save": "Save changes"
+    },
+    "toast": {
+      "saved": "Settings saved",
+      "themeSaved": "Preference saved",
+      "purged": "Purged {count} devices",
+      "exportStub": "Export started",
+      "failed": "Save failed"
+    }
   }
 }

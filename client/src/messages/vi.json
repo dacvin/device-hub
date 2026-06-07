@@ -432,5 +432,88 @@
       "photosHint": "Ảnh đầu tiên là ảnh bìa · kéo thả hoặc nhấp · PNG, JPG hoặc WEBP, tối đa 5 MB mỗi ảnh.",
       "documentsHint": "Hoá đơn, phiếu bảo hành, tài liệu · PDF, DOCX, XLSX, ảnh"
     }
+  },
+  "settings": {
+    "title": "[vi] Settings",
+    "permissionDeniedTitle": "[vi] Settings are admin-only",
+    "permissionDeniedDescription": "[vi] Workspace settings can only be changed by an IT Admin. Ask one of your admins to update settings on your behalf.",
+    "nav": {
+      "general": "[vi] General",
+      "appearance": "[vi] Appearance",
+      "inventory": "[vi] Inventory defaults",
+      "notifications": "[vi] Notifications",
+      "data": "[vi] Data & export",
+      "condition": "[vi] Condition thresholds",
+      "danger": "[vi] Danger zone"
+    },
+    "general": {
+      "title": "[vi] General",
+      "orgName": "[vi] Organization name",
+      "primarySite": "[vi] Primary site",
+      "primarySiteHelper": "[vi] Default location for new devices",
+      "dateFormat": "[vi] Date format"
+    },
+    "appearance": {
+      "title": "[vi] Appearance",
+      "appearanceHint": "[vi] These preferences are personal to you and saved to your account.",
+      "theme": "[vi] Theme",
+      "themeLight": "[vi] Light",
+      "themeDark": "[vi] Dark",
+      "themeSystem": "[vi] System",
+      "defaultDeviceView": "[vi] Default device view",
+      "viewTable": "[vi] Table",
+      "viewCards": "[vi] Cards",
+      "monoCodes": "[vi] Monospace device codes"
+    },
+    "inventory": {
+      "title": "[vi] Inventory defaults",
+      "subtitle": "[vi] Applied to new devices only. Existing devices are unchanged.",
+      "autoGenerate": "[vi] Auto-generate device codes",
+      "codePrefix": "[vi] Code prefix",
+      "codePrefixHelper": "[vi] e.g. DEV-",
+      "defaultCycle": "[vi] Default inventory cycle (months)"
+    },
+    "notifications": {
+      "title": "[vi] Notifications",
+      "warranty": "[vi] Warranty expiring",
+      "warrantyDays": "[vi] Days before",
+      "inventoryOverdue": "[vi] Inventory overdue",
+      "weekly": "[vi] Weekly summary",
+      "newDevice": "[vi] New device added"
+    },
+    "data": {
+      "title": "[vi] Data & export",
+      "format": "[vi] Default export format",
+      "retention": "[vi] Retain deleted devices (days)",
+      "exportFull": "[vi] Export full inventory"
+    },
+    "condition": {
+      "title": "[vi] Condition thresholds",
+      "subtitle": "[vi] Drives the color of condition bars. Applied at display time; no data is changed.",
+      "good": "[vi] Good threshold (%)",
+      "fair": "[vi] Fair threshold (%)",
+      "hint": "[vi] Fair must be ≤ Good"
+    },
+    "danger": {
+      "title": "[vi] Danger zone",
+      "purgeTitle": "[vi] Purge retired devices",
+      "purgeDescription": "[vi] Permanently delete devices marked as retired older than the retention window. This cannot be undone.",
+      "purgeButton": "[vi] Purge retired devices",
+      "purgeConfirmTitle": "[vi] Purge retired devices?",
+      "purgeConfirmDescription": "[vi] {count} or more retired devices may be permanently deleted. This cannot be undone.",
+      "purgeConfirmCta": "[vi] Purge"
+    },
+    "saveBar": {
+      "unsaved": "[vi] Unsaved changes",
+      "discard": "[vi] Discard",
+      "save": "[vi] Save changes"
+    },
+    "toast": {
+      "saved": "[vi] Settings saved",
+      "themeSaved": "[vi] Preference saved",
+      "purged": "[vi] Purged {count} devices",
+      "exportStub": "[vi] Export started",
+      "failed": "[vi] Save failed"
+    }
   }
 }
