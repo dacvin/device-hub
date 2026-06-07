@@ -8,6 +8,7 @@ import {
   createDevice,
   deleteDocumentRow,
   deletePhotoRow,
+  getDeviceById,
   insertDocumentRows,
   insertPhotoRows,
   setCoverPhoto,
@@ -16,6 +17,8 @@ import {
   updatePhotoOrder,
 } from "@/lib/data/devices";
 import { removeDocumentObject, removePhotoObject } from "@/lib/data/storage";
+import { getCurrentMember } from "@/lib/data/auth";
+import { logActivity } from "@/lib/data/activity";
 
 export interface ActionResult {
   ok: boolean;
@@ -40,6 +43,14 @@ export async function createDeviceAction(values: unknown): Promise<ActionResult>
   if (!result.ok) return { ok: false, fieldErrors: result.fieldErrors };
   try {
     const device = await createDevice(result.values);
+    const me = await getCurrentMember();
+    await logActivity({
+      actorId: me?.id ?? null,
+      action: "device.created",
+      entityType: "device",
+      entityId: device.id,
+      entityLabel: device.name,
+    });
     revalidatePath("/devices");
     return { ok: true, deviceId: device.id, code: device.code };
   } catch (e) {
@@ -52,6 +63,14 @@ export async function updateDeviceAction(id: string, values: unknown): Promise<A
   if (!result.ok) return { ok: false, fieldErrors: result.fieldErrors };
   try {
     const device = await updateDevice(id, result.values);
+    const me = await getCurrentMember();
+    await logActivity({
+      actorId: me?.id ?? null,
+      action: "device.updated",
+      entityType: "device",
+      entityId: device.id,
+      entityLabel: device.name,
+    });
     revalidatePath("/devices");
     revalidatePath(`/devices/${device.code}`);
     return { ok: true, deviceId: device.id, code: device.code };
@@ -61,7 +80,15 @@ export async function updateDeviceAction(id: string, values: unknown): Promise<A
 }
 
 export async function deleteDeviceAction(id: string): Promise<void> {
+  const [device, me] = await Promise.all([getDeviceById(id), getCurrentMember()]);
   await softDeleteDevice(id);
+  await logActivity({
+    actorId: me?.id ?? null,
+    action: "device.deleted",
+    entityType: "device",
+    entityId: id,
+    entityLabel: device?.name ?? null,
+  });
   revalidatePath("/devices");
   redirect("/devices");
 }
