@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  /* ---- KPI stat cards ---- */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .kpi { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .kpi .khead { display: flex; align-items: center; justify-content: space-between; }
+  .kpi .klabel { font-size: 13px; color: var(--muted-foreground); font-weight: 500; }
+  .kpi .kic { width: 34px; height: 34px; border-radius: 9px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+  .kpi .kic svg { width: 17px; height: 17px; }
+  .kpi.alert .kic { background: oklch(0.96 0.05 85); color: oklch(0.48 0.10 70); }
+  .dark .kpi.alert .kic { background: oklch(0.34 0.06 75); color: oklch(0.84 0.12 85); }
+  .kpi .kval { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .kpi .ksub { font-size: 12.5px; color: var(--muted-foreground); }
+  .kpi .ksub b { color: var(--foreground); font-weight: 600; }
+
+  /* ---- Dashboard grid ---- */
+  .dash { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  @media (max-width: 1080px){ .dash { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2,1fr); } }
+
+  .card-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 0; }
+  .card-head .ct { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+  .card-head .cs { font-size: 12.5px; color: var(--muted-foreground); margin-top: 2px; }
+  .card-body { padding: 18px 20px 20px; }
+
+  /* ---- Lifecycle stacked bar ---- */
+  .lifebar { display: flex; height: 12px; border-radius: 9999px; overflow: hidden; background: var(--muted); margin-bottom: 16px; }
+  .lifebar span { display: block; height: 100%; }
+  .legend { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 18px; }
+  .legend .li { display: flex; align-items: center; gap: 9px; }
+  .legend .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .legend .lk { font-size: 13px; flex: 1; }
+  .legend .lv { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .legend .lp { font-size: 12px; color: var(--muted-foreground); width: 38px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---- Group bars ---- */
+  .grouprows { display: flex; flex-direction: column; gap: 13px; }
+  .grouprow { display: grid; grid-template-columns: 116px 1fr auto; align-items: center; gap: 12px; }
+  .grouprow .gname { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 500; }
+  .grouprow .gname .gic { width: 26px; height: 26px; border-radius: 7px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+  .grouprow .gname .gic svg { width: 14px; height: 14px; }
+  .grouprow .gtrack { display: block; height: 8px; border-radius: 9999px; background: var(--muted); overflow: hidden; }
+  .grouprow .gfill { display: block; height: 100%; border-radius: 9999px; background: var(--primary); }
+  .grouprow .gval { display: flex; align-items: baseline; gap: 6px; justify-content: flex-end; min-width: 64px; }
+  .grouprow .gv { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .grouprow .gpct { font-size: 11.5px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+
+  /* ---- Attention list ---- */
+  .attn { display: flex; flex-direction: column; }
+  .attn-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--border); transition: background .12s; cursor: pointer; }
+  .attn-row:hover { background: var(--muted); }
+  .attn-ic { width: 34px; height: 34px; border-radius: 9px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+  .attn-ic svg { width: 16px; height: 16px; }
+  .attn-meta { flex: 1; min-width: 0; }
+  .attn-name { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .attn-code { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted-foreground); }
+  .attn-empty { padding: 28px 20px; text-align: center; color: var(--muted-foreground); font-size: 13px; }
+  /* compact icon-only flag chips in the narrow rail so they never crowd the name */
+  .attn-row .flagrow { flex: none; }
+  .attn-row .flag-chip { padding: 0 7px; }
+  .attn-row .flag-lbl { display: none; }
+
+  /* ---- Timeline ---- */
+  .timeline { position: relative; padding: 4px 0 0; }
+  .tl-item { position: relative; padding: 0 0 18px 26px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item::before { content: ""; position: absolute; left: 5px; top: 16px; bottom: -2px; width: 1px; background: var(--border); }
+  .tl-item:last-child::before { display: none; }
+  .tl-dot { position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border-radius: 9999px; background: var(--card); border: 2px solid var(--primary); }
+  .tl-dot.muted { border-color: var(--muted-foreground); }
+  .tl-txt { font-size: 13px; line-height: 1.45; }
+  .tl-txt b { font-weight: 600; }
+  .tl-time { font-size: 11.5px; color: var(--muted-foreground); margin-top: 2px; }
+
+  .qa { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Overview" data-crumb="Fleet health across all departments" data-active="overview">
+    <template id="topbar-actions">
+      <a class="btn btn-outline" href="Device List.html"><i data-lucide="list"></i> View inventory</a>
+      <a class="btn btn-primary" href="Create Device.html"><i data-lucide="plus"></i> Add device</a>
+    </template>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="dash">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="ct">Lifecycle status</div>
+              <div class="cs">Every device sits in exactly one state</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="lifebar" id="lifebar"></div>
+            <div class="legend" id="legend"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="ct">Inventory by group</div>
+              <div class="cs">Share of all <span id="grp-total"></span> devices</div>
+            </div>
+            <a class="btn btn-ghost btn-sm" href="Groups.html">Manage groups</a>
+          </div>
+          <div class="card-body">
+            <div class="grouprows" id="grouprows"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="ct">Needs attention</div>
+              <div class="cs" id="attn-sub"></div>
+            </div>
+          </div>
+          <div class="attn" id="attn"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><div class="ct">Recent activity</div></div>
+          </div>
+          <div class="card-body">
+            <div class="timeline" id="timeline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script>
+    const GROUP_ICON = { Laptop:"laptop", Desktop:"monitor", Monitor:"monitor", Printer:"printer", Network:"network", Server:"server", Mobile:"smartphone", Peripheral:"webcam" };
+    const STATUS_COLOR = {
+      "in-use":  "var(--green-500)",
+      "storage": "oklch(0.70 0.10 230)",
+      "repair":  "oklch(0.78 0.13 75)",
+      "retired": "var(--muted-foreground)",
+    };
+
+    document.addEventListener("shell:ready", () => {
+      const devices = window.DEVICES;
+      const total = devices.length;
+      const totalUnits = devices.reduce((s,d)=>s+(d.qty||1),0);
+      const byStatus = (k)=>devices.filter(d=>d.status===k).length;
+      const flagged = devices.filter(d=>window.deviceFlags(d).length);
+      const avgCond = Math.round(devices.reduce((s,d)=>s+d.cond,0)/total);
+
+      /* ---- KPI cards ---- */
+      const kpis = [
+        { label:"Total devices", val:total, icon:"hard-drive", sub:`<b>${totalUnits}</b> units across <b>${LOOKUPS.departments.length}</b> departments` },
+        { label:"In use", val:byStatus("in-use"), icon:"circle-check-big", sub:`<b>${byStatus("storage")}</b> in storage · <b>${byStatus("retired")}</b> retired` },
+        { label:"Needs attention", val:flagged.length, icon:"triangle-alert", alert:flagged.length>0, sub:`Warranty &amp; inventory flags` },
+        { label:"In repair", val:byStatus("repair"), icon:"wrench", sub:`Avg. condition <b>${avgCond}%</b> fleet-wide` },
+      ];
+      document.getElementById("kpis").innerHTML = kpis.map(k=>`
+        <div class="card kpi ${k.alert?'alert':''}">
+          <div class="khead">
+            <span class="klabel">${k.label}</span>
+            <span class="kic"><i data-lucide="${k.icon}"></i></span>
+          </div>
+          <div class="kval">${k.val}</div>
+          <div class="ksub">${k.sub}</div>
+        </div>`).join("");
+
+      /* ---- Lifecycle stacked bar + legend ---- */
+      const lifeOrder = ["in-use","storage","repair","retired"];
+      document.getElementById("lifebar").innerHTML = lifeOrder.map(k=>{
+        const n = byStatus(k); if(!n) return "";
+        return `<span style="width:${(n/total*100)}%;background:${STATUS_COLOR[k]}"></span>`;
+      }).join("");
+      document.getElementById("legend").innerHTML = lifeOrder.map(k=>{
+        const n = byStatus(k);
+        const pct = Math.round(n/total*100);
+        return `<a class="li" href="Device List.html?status=${k}" style="color:inherit">
+          <span class="sw" style="background:${STATUS_COLOR[k]}"></span>
+          <span class="lk">${window.STATUS[k].label}</span>
+          <span class="lv">${n}</span><span class="lp">${pct}%</span>
+        </a>`;
+      }).join("");
+
+      /* ---- Devices by group ---- */
+      const counts = {};
+      devices.forEach(d=>counts[d.group]=(counts[d.group]||0)+1);
+      const groups = Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+      const gt = document.getElementById("grp-total"); if (gt) gt.textContent = total;
+      document.getElementById("grouprows").innerHTML = groups.map(g=>{
+        const pct = Math.round(counts[g]/total*100);
+        return `
+        <a class="grouprow" href="Device List.html?group=${encodeURIComponent(g)}" style="color:inherit">
+          <span class="gname"><span class="gic"><i data-lucide="${GROUP_ICON[g]||'hard-drive'}"></i></span>${g}</span>
+          <span class="gtrack"><span class="gfill" style="width:${counts[g]/total*100}%"></span></span>
+          <span class="gval"><span class="gv">${counts[g]}</span><span class="gpct">${pct}%</span></span>
+        </a>`;
+      }).join("");
+
+      /* ---- Needs attention ---- */
+      document.getElementById("attn-sub").textContent = flagged.length
+        ? `${flagged.length} device${flagged.length>1?'s':''} flagged · ${devices.filter(d=>d.status==='repair').length} in repair`
+        : "Everything is on track";
+      const attnEl = document.getElementById("attn");
+      if (!flagged.length) {
+        attnEl.innerHTML = `<div class="attn-empty">No devices need attention right now.</div>`;
+      } else {
+        attnEl.innerHTML = flagged.map(d=>{
+          const fl = window.deviceFlags(d);
+          const chips = fl.map(k=>{ const f=window.FLAGS[k];
+            return `<span class="flag-chip flag-${f.tone}" title="${f.label}"><i data-lucide="${f.icon}"></i><span class="flag-lbl">${f.label}</span></span>`; }).join("");
+          return `<a class="attn-row" href="Device Details.html">
+            <span class="attn-ic"><i data-lucide="${GROUP_ICON[d.group]||'hard-drive'}"></i></span>
+            <span class="attn-meta"><div class="attn-name">${d.name}</div><div class="attn-code">${d.code}</div></span>
+            <div class="flagrow">${chips}</div>
+          </a>`;
+        }).join("");
+      }
+
+      /* ---- Recent activity (illustrative) ---- */
+      const activity = [
+        { txt:`<b>Cisco Catalyst 9200</b> passed inventory check`, time:"Today · 09:24", active:true },
+        { txt:`<b>Dell OptiPlex 7010</b> moved to <b>In repair</b>`, time:"Yesterday · 16:02", active:true },
+        { txt:`<b>MacBook Pro 14 M3</b> allocated to Design`, time:"2 days ago", active:true },
+        { txt:`<b>Lenovo ThinkCentre M70q</b> marked retired`, time:"5 days ago", active:false },
+        { txt:`<b>3 monitors</b> imported from purchase order`, time:"1 week ago", active:false },
+      ];
+      document.getElementById("timeline").innerHTML = activity.map(a=>`
+        <div class="tl-item">
+          <span class="tl-dot ${a.active?'':'muted'}"></span>
+          <div class="tl-txt">${a.txt}</div>
+          <div class="tl-time">${a.time}</div>
+        </div>`).join("");
+
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

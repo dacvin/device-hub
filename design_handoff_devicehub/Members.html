@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Members</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cat-meta { font-size: 13px; color: var(--muted-foreground); margin-bottom: 12px; }
+
+  .table-scroll { overflow-x: auto; }
+  .table-scroll .table { min-width: 880px; }
+
+  .member { display: flex; align-items: center; gap: 12px; }
+  .member .avatar { width: 36px; height: 36px; font-size: 13px; }
+  .member .mname { font-size: 14px; font-weight: 500; line-height: 1.25; }
+  .member .memail { font-size: 12.5px; color: var(--muted-foreground); }
+
+  .role { display: inline-flex; align-items: center; gap: 6px; }
+  .role svg { width: 14px; height: 14px; }
+  .you { font-size: 11px; color: var(--muted-foreground); font-weight: 500; margin-left: 6px; }
+
+  .last { font-size: 13px; color: var(--muted-foreground); }
+  .devct { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; }
+
+  .actcol { width: 78px; }
+  .actcol .rowact { opacity: 0; transition: opacity .12s; justify-content: flex-end; display: flex; gap: 4px; }
+  tr:hover .actcol .rowact { opacity: 1; }
+
+  /* role summary cards */
+  .rolecards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .rolecard { padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
+  .rolecard .ric { width: 40px; height: 40px; border-radius: 11px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+  .rolecard .ric svg { width: 19px; height: 19px; }
+  .rolecard .rval { font-size: 22px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .rolecard .rlabel { font-size: 13px; font-weight: 500; margin-top: 4px; }
+  .rolecard .rdesc { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+  @media (max-width: 880px){ .rolecards { grid-template-columns: 1fr; } }
+
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--muted); border-radius: var(--radius-md); }
+  .seg button { padding: 6px 12px; border-radius: calc(var(--radius-md) - 2px); font-size: 13px; font-weight: 500; color: var(--muted-foreground); cursor: pointer; border: none; background: transparent; font-family: inherit; }
+  .seg button.active { background: var(--card); color: var(--foreground); box-shadow: 0 1px 2px rgba(16,24,40,.06); }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Members" data-crumb="People with access to DeviceHub" data-active="members">
+    <template id="topbar-actions">
+      <div class="searchbox"><i data-lucide="search"></i><input id="search" placeholder="Search members…" /></div>
+      <button class="btn btn-outline"><i data-lucide="download"></i> Export</button>
+      <button class="btn btn-primary" id="inviteBtn"><i data-lucide="user-plus"></i> Invite member</button>
+    </template>
+
+    <div class="rolecards" id="rolecards"></div>
+
+    <div class="toolbar">
+      <div class="seg" id="roleseg">
+        <button class="active" data-role="">All</button>
+        <button data-role="IT Admin">Admins</button>
+        <button data-role="Manager">Managers</button>
+        <button data-role="Viewer">Viewers</button>
+      </div>
+      <div class="grow" style="flex:1"></div>
+    </div>
+
+    <div class="cat-meta" id="meta"></div>
+
+    <div class="card empty-state" id="emptyState" style="display:none"></div>
+
+    <div class="card table-wrap" id="tableView">
+      <div class="table-scroll">
+        <table class="table" id="tbl"><thead>
+          <tr>
+            <th class="checkcol" style="width:40px;padding-right:0"><span class="checkbox"></span></th>
+            <th>Member</th>
+            <th>Role</th>
+            <th>Department</th>
+            <th>Devices managed</th>
+            <th>Last active</th>
+            <th>Status</th>
+            <th class="actcol"></th>
+          </tr>
+        </thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <!-- Invite dialog -->
+    <div class="dialog-overlay" id="inviteDlg">
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="dialog-head">
+        <div>
+          <div class="dialog-title">Invite member</div>
+          <div class="dialog-desc">They'll get an email to join with the role you pick.</div>
+        </div>
+        <button class="icon-btn" data-close><i data-lucide="x"></i></button>
+      </div>
+      <div class="dialog-body">
+        <div class="field">
+          <label class="label">Work email</label>
+          <input class="input" type="email" placeholder="name@sioux.asia" />
+          <span class="field-hint">Must be an IT-managed @sioux.asia account.</span>
+        </div>
+        <div class="row" style="gap:14px;align-items:flex-start">
+          <div class="field" style="flex:1">
+            <label class="label">Role</label>
+            <select class="select">
+              <option>Viewer</option>
+              <option>Manager</option>
+              <option>IT Admin</option>
+            </select>
+          </div>
+          <div class="field" style="flex:1">
+            <label class="label">Department</label>
+            <select class="select" id="dlg-dept"></select>
+          </div>
+        </div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn-outline" data-close>Cancel</button>
+        <button class="btn btn-primary" data-close><i data-lucide="send"></i> Send invite</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    const ROLE_META = {
+      "IT Admin": { icon:"shield-check", badge:"badge-primary", desc:"Full access — manage every device, catalog & member." },
+      "Manager":  { icon:"user-cog",     badge:"badge-secondary", desc:"Manage devices within their own department." },
+      "Viewer":   { icon:"eye",          badge:"badge-muted", desc:"Read-only access to the inventory." },
+    };
+
+    const MEMBERS = [
+      { name:"Anh Tran",     email:"anh.tran@sioux.asia",     role:"IT Admin", dept:"IT",          devices:42, last:"Active now",   status:"active", you:true },
+      { name:"Quan Bui",     email:"quan.bui@sioux.asia",     role:"IT Admin", dept:"IT",          devices:38, last:"2 hours ago",  status:"active" },
+      { name:"Mai Pham",     email:"mai.pham@sioux.asia",     role:"Manager",  dept:"Design",      devices:9,  last:"Yesterday",    status:"active" },
+      { name:"Khoa Le",      email:"khoa.le@sioux.asia",      role:"Manager",  dept:"Product",     devices:6,  last:"3 days ago",   status:"active" },
+      { name:"Hoa Nguyen",   email:"hoa.nguyen@sioux.asia",   role:"Manager",  dept:"Sales",       devices:7,  last:"1 week ago",   status:"active" },
+      { name:"Phuong Ho",    email:"phuong.ho@sioux.asia",    role:"Manager",  dept:"Operations",  devices:5,  last:"4 days ago",   status:"active" },
+      { name:"Tuan Vo",      email:"tuan.vo@sioux.asia",      role:"Viewer",   dept:"Finance",     devices:0,  last:"2 weeks ago",  status:"active" },
+      { name:"Linh Dang",    email:"linh.dang@sioux.asia",    role:"Viewer",   dept:"HR",          devices:0,  last:"—",            status:"invited" },
+    ];
+
+    let roleFilter = "", q = "";
+
+    function render(){
+      const list = MEMBERS.filter(m =>
+        (!roleFilter || m.role === roleFilter) &&
+        (!q || (m.name + m.email + m.dept).toLowerCase().includes(q.toLowerCase())));
+
+      document.getElementById("meta").textContent =
+        `${list.length} member${list.length!==1?'s':''}` +
+        (roleFilter ? "" : ` · ${MEMBERS.filter(m=>m.role==='IT Admin').length} admins · ${MEMBERS.filter(m=>m.status==='invited').length} pending invite`);
+
+      const empty = list.length === 0;
+      document.getElementById("tableView").style.display = empty ? "none" : "";
+      const es = document.getElementById("emptyState");
+      es.style.display = empty ? "" : "none";
+      if (empty) {
+        es.innerHTML = `
+          <div class="empty-ic"><i data-lucide="search-x"></i></div>
+          <div class="empty-title">No members match</div>
+          <div class="empty-desc">No one matches “${q || roleFilter}”. Try a different search or role filter.</div>
+          <div class="empty-actions"><button class="btn btn-outline" id="es-reset"><i data-lucide="x"></i> Reset filters</button></div>`;
+        lucide.createIcons();
+        const r = document.getElementById("es-reset");
+        r && r.addEventListener("click", () => {
+          q = ""; roleFilter = "";
+          document.getElementById("search").value = "";
+          document.querySelectorAll("#roleseg button").forEach(x=>x.classList.toggle("active", x.dataset.role===""));
+          render();
+        });
+        updateBulk();
+        return;
+      }
+
+      document.querySelector("#tbl tbody").innerHTML = list.map(m => {
+        const rm = ROLE_META[m.role];
+        const href = `Member Profile.html?email=${encodeURIComponent(m.email)}`;
+        return `
+        <tr data-email="${m.email}">
+          <td class="checkcol" style="width:40px;padding-right:0"><span class="checkbox" data-email="${m.email}"></span></td>
+          <td>
+            <a class="member" href="${href}" style="color:inherit">
+              <span class="avatar">${DH.initials(m.name)}</span>
+              <div class="col"><span class="mname">${m.name}${m.you?'<span class="you">You</span>':''}</span><span class="memail">${m.email}</span></div>
+            </a>
+          </td>
+          <td><span class="badge ${rm.badge} role"><i data-lucide="${rm.icon}"></i>${m.role}</span></td>
+          <td>${m.dept}</td>
+          <td>${m.role==='Viewer' ? '<span class="text-muted">—</span>' : `<span class="devct">${m.devices}</span>`}</td>
+          <td><span class="last">${m.last}</span></td>
+          <td>${m.status==='active'
+            ? '<span class="badge badge-success"><span class="dot"></span>Active</span>'
+            : '<span class="badge badge-warning"><span class="dot"></span>Invited</span>'}</td>
+          <td class="actcol"><div class="rowact"><a class="icon-btn" href="${href}" style="width:30px;height:30px;border:none" title="View profile"><i data-lucide="arrow-right"></i></a><button class="icon-btn" style="width:30px;height:30px;border:none" title="More"><i data-lucide="ellipsis"></i></button></div></td>
+        </tr>`;
+      }).join("");
+      lucide.createIcons();
+      syncChecks();
+    }
+
+    /* ---- Bulk selection ---- */
+    const selected = new Set();
+    let bulk;
+    function visibleMembers(){
+      return MEMBERS.filter(m =>
+        (!roleFilter || m.role === roleFilter) &&
+        (!q || (m.name + m.email + m.dept).toLowerCase().includes(q.toLowerCase())));
+    }
+    function syncChecks(){
+      document.querySelectorAll('#tbl tbody .checkbox[data-email]').forEach(box=>{
+        const on = selected.has(box.dataset.email);
+        box.classList.toggle('checked', on);
+        box.innerHTML = on ? '<i data-lucide="check"></i>' : '';
+        const tr = box.closest('tr'); if (tr) tr.classList.toggle('row-selected', on);
+      });
+      const head = document.querySelector('#tbl thead .checkbox');
+      if (head){
+        const vis = visibleMembers();
+        const sel = vis.filter(m=>selected.has(m.email)).length;
+        const allOn = sel>0 && sel===vis.length, part = sel>0 && sel<vis.length;
+        head.classList.toggle('checked', allOn);
+        head.classList.toggle('indeterminate', part);
+        head.innerHTML = allOn ? '<i data-lucide="check"></i>' : part ? '<i data-lucide="minus"></i>' : '';
+      }
+      lucide.createIcons();
+    }
+    function updateBulk(){ if (bulk) bulk.update(selected.size); }
+    function clearSel(){ selected.clear(); syncChecks(); updateBulk(); }
+
+    document.addEventListener("shell:ready", () => {
+      // role summary cards
+      const counts = { "IT Admin":0, "Manager":0, "Viewer":0 };
+      MEMBERS.forEach(m=>counts[m.role]++);
+      document.getElementById("rolecards").innerHTML = Object.keys(ROLE_META).map(r=>{
+        const rm = ROLE_META[r];
+        return `<div class="card rolecard">
+          <span class="ric"><i data-lucide="${rm.icon}"></i></span>
+          <div>
+            <div class="rval">${counts[r]}</div>
+            <div class="rlabel">${r}${counts[r]!==1?'s':''}</div>
+            <div class="rdesc">${rm.desc}</div>
+          </div>
+        </div>`;
+      }).join("");
+
+      // segmented role filter
+      document.querySelectorAll("#roleseg button").forEach(b => b.addEventListener("click", () => {
+        document.querySelectorAll("#roleseg button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        roleFilter = b.dataset.role; render();
+      }));
+      document.getElementById("search").addEventListener("input", e=>{ q=e.target.value; render(); });
+
+      // bulk selection bar
+      bulk = DH.bulkBar();
+      bulk.setActions(
+        `<button class="btn btn-outline btn-sm" id="bulk-role"><i data-lucide="user-cog"></i> Role</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-export"><i data-lucide="download"></i> Export</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-remove" style="color:var(--destructive)"><i data-lucide="user-minus"></i> Remove</button>`);
+      bulk.onClear(clearSel);
+      document.getElementById("tbl").addEventListener("click", e => {
+        const box = e.target.closest(".checkbox"); if (!box) return;
+        if (box.closest("thead")) {
+          const vis = visibleMembers();
+          const allOn = vis.length && vis.every(m=>selected.has(m.email));
+          vis.forEach(m => allOn ? selected.delete(m.email) : selected.add(m.email));
+        } else {
+          const em = box.dataset.email;
+          selected.has(em) ? selected.delete(em) : selected.add(em);
+        }
+        syncChecks(); updateBulk();
+      });
+      document.getElementById("bulk-role").addEventListener("click", e => {
+        DH.popoverMenu(e.currentTarget, Object.keys(ROLE_META).map(role => ({
+          label: role, icon: ROLE_META[role].icon,
+          onClick: () => { const n = selected.size; MEMBERS.forEach(m => { if (selected.has(m.email)) m.role = role; }); render(); DH.toast(`Role updated`, { desc: `${n} member${n>1?'s':''} set to ${role}.` }); }
+        })), { head: "Set role", above: true });
+      });
+      document.getElementById("bulk-export").addEventListener("click", () => { const n = selected.size; clearSel(); DH.toast(`Export started`, { type: "info", desc: `Preparing a CSV of ${n} member${n>1?'s':''}…` }); });
+      document.getElementById("bulk-remove").addEventListener("click", () => {
+        const n = selected.size;
+        DH.confirm({
+          title: `Remove ${n} member${n>1?'s':''}?`,
+          desc: `They'll immediately lose access to DeviceHub. Devices they managed stay in their department.`,
+          confirmLabel: "Remove", icon: "user-minus",
+          onConfirm: () => { for (let i = MEMBERS.length - 1; i >= 0; i--) if (selected.has(MEMBERS[i].email)) MEMBERS.splice(i, 1); clearSel(); render(); DH.toast(`${n} member${n>1?'s':''} removed`); }
+        });
+      });
+
+      // invite dialog
+      const dlg = document.getElementById("inviteDlg");
+      const deptSel = document.getElementById("dlg-dept");
+      LOOKUPS.departments.forEach(d=>deptSel.insertAdjacentHTML("beforeend",`<option>${d}</option>`));
+      const open = ()=>{ dlg.classList.add("open"); };
+      const close = ()=>{ dlg.classList.remove("open"); };
+      document.getElementById("inviteBtn").addEventListener("click", open);
+      dlg.querySelectorAll("[data-close]").forEach(el=>el.addEventListener("click", close));
+      const sendBtn = dlg.querySelector(".btn-primary[data-close]");
+      sendBtn && sendBtn.addEventListener("click", () => DH.toast("Invitation sent", { desc: "They'll get an email to join DeviceHub." }));
+      dlg.addEventListener("mousedown", e=>{ if(e.target===dlg) close(); });
+      document.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); });
+
+      render();
+    });
+  </script>
+</body>
+</html>

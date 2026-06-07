@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Overview (loading)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .dash { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .sk-card { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Overview" data-crumb="Fleet health across all departments" data-active="overview">
+    <div class="kpis" id="kpis"></div>
+    <div class="dash">
+      <div class="stack">
+        <div class="card sk-card"><span class="sk sk-line lg" style="width:30%"></span><span class="sk" style="height:12px;border-radius:9999px"></span><span class="sk sk-line" style="width:60%"></span><span class="sk sk-line" style="width:50%"></span></div>
+        <div class="card sk-card"><span class="sk sk-line lg" style="width:34%"></span><span class="sk sk-line" style="width:90%"></span><span class="sk sk-line" style="width:80%"></span><span class="sk sk-line" style="width:86%"></span><span class="sk sk-line" style="width:70%"></span></div>
+      </div>
+      <div class="stack">
+        <div class="card sk-card"><span class="sk sk-line lg" style="width:50%"></span><span class="sk sk-line" style="width:100%"></span><span class="sk sk-line" style="width:100%"></span></div>
+        <div class="card sk-card"><span class="sk sk-line lg" style="width:46%"></span><span class="sk sk-line" style="width:90%"></span><span class="sk sk-line" style="width:84%"></span></div>
+      </div>
+    </div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("kpis").innerHTML = DH.sk.kpis(4);
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

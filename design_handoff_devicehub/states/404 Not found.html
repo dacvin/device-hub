@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Page not found</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  html,body { height:100%; }
+  body { margin:0; font-family: var(--font-sans); background: var(--background); color: var(--foreground); display:grid; place-items:center; }
+  .wrap { text-align:center; padding:40px; max-width:460px; }
+  .mark { display:inline-flex; align-items:center; gap:9px; margin-bottom:36px; }
+  .mark .glyph { width:30px; height:30px; border-radius:9px; background:var(--primary); color:var(--primary-foreground); display:grid; place-items:center; }
+  .mark .glyph svg { width:17px; height:17px; }
+  .mark .wm { font-size:17px; font-weight:600; letter-spacing:-0.01em; }
+  .mark .wm b { color: var(--primary); font-weight:600; }
+  .big { font-size:72px; font-weight:600; letter-spacing:-0.03em; line-height:1; font-variant-numeric:tabular-nums; }
+  h1 { font-size:20px; font-weight:600; margin:18px 0 6px; }
+  p { font-size:14px; color:var(--muted-foreground); line-height:1.55; margin:0 0 24px; }
+  .acts { display:flex; gap:10px; justify-content:center; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <span class="mark"><span class="glyph"><i data-lucide="hard-drive"></i></span><span class="wm">Device<b>Hub</b></span></span>
+    <div class="big">404</div>
+    <h1>We couldn't find that page</h1>
+    <p>The page you're looking for may have been moved, retired, or never existed. Check the address or head back to your overview.</p>
+    <div class="acts">
+      <a class="btn btn-outline" href="Device List.html"><i data-lucide="list"></i> View devices</a>
+      <a class="btn btn-primary" href="Overview.html"><i data-lucide="arrow-left"></i> Back to overview</a>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

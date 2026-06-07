@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="theme/tokens.css" />
 <link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
 <link rel="stylesheet" href="theme/shell.css" />
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
@@ -20,7 +21,7 @@
 
   .table-wrap { overflow: hidden; }
   .table-scroll { overflow-x: auto; }
-  .table-scroll .table { min-width: 1080px; }
+  .table-scroll .table { min-width: 880px; }
   .codecell { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted-foreground); }
   .namecell { font-weight: 500; }
   .thumbcol { width: 52px; padding-right: 0; }
@@ -104,6 +105,8 @@
 
     <div class="resultcount" id="count"></div>
 
+    <div class="card empty-state" id="emptyState" style="display:none"></div>
+
     <div class="card table-wrap" id="tableView">
       <div class="table-scroll">
         <table class="table" id="tbl"><thead></thead><tbody></tbody></table>
@@ -124,6 +127,7 @@
 
   <script src="theme/data.js"></script>
   <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
   <script>
     const GROUP_ICON = { Laptop:"laptop", Desktop:"monitor", Monitor:"monitor", Printer:"printer", Network:"network", Server:"server", Mobile:"smartphone", Peripheral:"webcam" };
     let view = 0; // 0 comfortable, 1 compact, 2 cards
@@ -162,7 +166,9 @@
     ];
     const DEFAULT_COLS = COLUMNS.map(c=>c.key);
     // Persist HIDDEN columns (not visible), so columns added in future builds default to ON.
-    let hiddenCols = (()=>{ try{ const s=JSON.parse(localStorage.getItem("dh-cols-hidden")); return Array.isArray(s)?s:[]; }catch(_){ return []; } })();
+    // Default view hides the two widest, least-essential columns so the table fits a
+    // normal screen without horizontal scroll — both stay re-enableable via the Columns menu.
+    let hiddenCols = (()=>{ try{ const s=JSON.parse(localStorage.getItem("dh-cols-hidden")); return Array.isArray(s)?s:["mfr","loc"]; }catch(_){ return ["mfr","loc"]; } })();
     const isOn = (k)=>!hiddenCols.includes(k);
 
     function renderTable(list){
@@ -174,8 +180,8 @@
         + cols.map(c=>`<th class="${c.cls||''}">${c.th!==undefined?c.th:c.label}</th>`).join("")
         + `<th class="actcol"></th></tr>`;
       document.querySelector("#tbl tbody").innerHTML = list.map(d => `
-        <tr>
-          <td class="checkcol"><span class="checkbox"></span></td>
+        <tr data-code="${d.code}">
+          <td class="checkcol"><span class="checkbox" data-code="${d.code}"></span></td>
           ${cols.map(c=>`<td class="${c.cls||''}">${c.render(d)}</td>`).join("")}
           <td class="actcol"><div class="rowact row" style="gap:4px"><a class="icon-btn" href="Edit Device.html" style="width:30px;height:30px;border:none" title="Edit"><i data-lucide="pencil"></i></a><button class="icon-btn" style="width:30px;height:30px;border:none" title="More"><i data-lucide="ellipsis"></i></button></div></td>
         </tr>`).join("");
@@ -243,13 +249,59 @@
       const list = filtered();
       document.getElementById("count").textContent = `${list.length} of ${window.DEVICES.length} devices`;
       document.getElementById("pagecount").textContent = `Showing 1–${list.length} of ${list.length}`;
-      const showCards = view===2;
-      document.getElementById("tableView").style.display = showCards ? "none" : "";
-      document.getElementById("gridView").style.display = showCards ? "grid" : "none";
-      if (showCards) renderCards(list); else renderTable(list);
       const any = state.group||state.dept||state.status||state.mfr||state.flag||state.q;
+      const showCards = view===2;
+      const empty = list.length === 0;
+
+      // empty state replaces whichever view is active
+      const es = document.getElementById("emptyState");
+      es.style.display = empty ? "" : "none";
+      document.getElementById("tableView").style.display = (empty || showCards) ? "none" : "";
+      document.getElementById("gridView").style.display = (empty || !showCards) ? "none" : "grid";
+      if (empty) {
+        const noDevices = window.DEVICES.length === 0;
+        es.innerHTML = `
+          <div class="empty-ic"><i data-lucide="${any ? 'search-x' : 'hard-drive'}"></i></div>
+          <div class="empty-title">${any ? 'No devices match these filters' : 'No devices yet'}</div>
+          <div class="empty-desc">${any
+            ? 'Try removing a filter or searching for something else.'
+            : 'Register your first device to start tracking the fleet.'}</div>
+          <div class="empty-actions">${any
+            ? '<button class="btn btn-outline" id="es-clear"><i data-lucide="x"></i> Clear filters</button>'
+            : ''}<a class="btn btn-primary" href="Create Device.html"><i data-lucide="plus"></i> Add device</a></div>`;
+        lucide.createIcons();
+        const esc = document.getElementById("es-clear");
+        esc && esc.addEventListener("click", () => document.getElementById("clear").click());
+      } else if (showCards) renderCards(list); else renderTable(list);
+
+      if (!empty && !showCards) syncChecks();
       document.getElementById("clear").style.display = any ? "inline-flex" : "none";
     }
+
+    /* ---- Bulk selection ---- */
+    const selected = new Set();
+    let bulk;
+    function syncChecks(){
+      document.querySelectorAll('#tbl tbody .checkbox[data-code]').forEach(box=>{
+        const on = selected.has(box.dataset.code);
+        box.classList.toggle('checked', on);
+        box.innerHTML = on ? '<i data-lucide="check"></i>' : '';
+        const tr = box.closest('tr'); if (tr) tr.classList.toggle('row-selected', on);
+      });
+      const head = document.querySelector('#tbl thead .checkbox');
+      if (head){
+        const vis = filtered();
+        const sel = vis.filter(d=>selected.has(d.code)).length;
+        const allOn = sel>0 && sel===vis.length;
+        const part  = sel>0 && sel<vis.length;
+        head.classList.toggle('checked', allOn);
+        head.classList.toggle('indeterminate', part);
+        head.innerHTML = allOn ? '<i data-lucide="check"></i>' : part ? '<i data-lucide="minus"></i>' : '';
+      }
+      lucide.createIcons();
+    }
+    function updateBulk(){ if (bulk) bulk.update(selected.size); }
+    function clearSel(){ selected.clear(); syncChecks(); updateBulk(); }
 
     document.addEventListener("shell:ready", () => {
       // populate selects
@@ -281,6 +333,43 @@
 
       DH.variantSwitcher("View", ["Comfortable", "Cards"], (i)=>{ view = i===0 ? 0 : 2; render(); }, 0);
       document.getElementById("colBtn").addEventListener("click", e => toggleColMenu(e.currentTarget));
+
+      // bulk selection bar (raised so it clears the View switcher)
+      bulk = DH.bulkBar({ raised: true });
+      bulk.setActions(
+        `<button class="btn btn-outline btn-sm" id="bulk-status"><i data-lucide="circle-dot"></i> Status</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-export"><i data-lucide="download"></i> Export</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-delete" style="color:var(--destructive)"><i data-lucide="trash-2"></i> Delete</button>`);
+      bulk.onClear(clearSel);
+      document.getElementById("tbl").addEventListener("click", e => {
+        const box = e.target.closest(".checkbox"); if (!box) return;
+        if (box.closest("thead")) {
+          const vis = filtered();
+          const allOn = vis.length && vis.every(d=>selected.has(d.code));
+          vis.forEach(d => allOn ? selected.delete(d.code) : selected.add(d.code));
+        } else {
+          const c = box.dataset.code;
+          selected.has(c) ? selected.delete(c) : selected.add(c);
+        }
+        syncChecks(); updateBulk();
+      });
+      document.getElementById("bulk-status").addEventListener("click", e => {
+        DH.popoverMenu(e.currentTarget, Object.keys(window.STATUS).map(k => ({
+          label: window.STATUS[k].label, icon: "circle-dot",
+          onClick: () => { window.DEVICES.forEach(d => { if (selected.has(d.code)) d.status = k; }); const n = selected.size; render(); DH.toast(`Status updated`, { desc: `${n} device${n>1?'s':''} set to “${window.STATUS[k].label}”.` }); }
+        })), { head: "Set status", above: true });
+      });
+      document.getElementById("bulk-export").addEventListener("click", () => { const n = selected.size; clearSel(); DH.toast(`Export started`, { type: "info", desc: `Preparing a CSV of ${n} device${n>1?'s':''}…` }); });
+      document.getElementById("bulk-delete").addEventListener("click", () => {
+        const n = selected.size;
+        DH.confirm({
+          title: `Delete ${n} device${n>1?'s':''}?`,
+          desc: `This moves the selected device${n>1?'s':''} to the recycle bin. You can restore within the retention window.`,
+          confirmLabel: "Delete", icon: "trash-2",
+          onConfirm: () => { window.DEVICES = window.DEVICES.filter(d => !selected.has(d.code)); clearSel(); render(); DH.toast(`${n} device${n>1?'s':''} deleted`, { desc: "Moved to the recycle bin." }); }
+        });
+      });
+
       render();
     });
   </script>

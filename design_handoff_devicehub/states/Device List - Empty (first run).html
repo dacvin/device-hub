@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Device list (empty)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="page" data-title="Devices" data-crumb="All registered devices" data-active="devices">
+    <div id="c"></div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("c").innerHTML = DH.emptyState({
+        icon: "hard-drive",
+        title: "No devices yet",
+        desc: "Register your first device to start tracking the fleet. You can also bulk-import from a purchase order.",
+        actions: [
+          { label: "Import devices", icon: "upload", variant: "btn-outline" },
+          { label: "Add device", icon: "plus", variant: "btn-primary", href: "Create Device.html" }
+        ]
+      });
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

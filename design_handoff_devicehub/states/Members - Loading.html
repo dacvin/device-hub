@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Members (loading)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .rolecards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .rc { padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Members" data-crumb="People with access to DeviceHub" data-active="members">
+    <div class="rolecards" id="rc"></div>
+    <div class="card table-wrap"><div id="rows"></div></div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("rc").innerHTML = [0,1,2].map(()=>`
+        <div class="card rc">${DH.sk.circle(40)}<div style="flex:1"><span class="sk sk-line lg" style="width:30%;margin-bottom:8px"></span><span class="sk sk-line sm" style="width:55%;margin-bottom:6px"></span><span class="sk sk-line sm" style="width:80%"></span></div></div>`).join("");
+      document.getElementById("rows").innerHTML = DH.sk.table(8, "40px 1fr 110px 110px 90px 110px 90px");
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

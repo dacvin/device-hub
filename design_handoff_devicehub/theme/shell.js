@@ -1,13 +1,17 @@
 /* DeviceHub — shell builder + helpers for static mockups */
 (function () {
   const NAV_MAIN = [
-    { id: "overview", label: "Overview", icon: "layout-dashboard", href: "#" },
+    { id: "overview", label: "Overview", icon: "layout-dashboard", href: "Overview.html" },
     { id: "devices",  label: "Devices",  icon: "hard-drive", href: "Device List.html" },
   ];
   const NAV_CATALOG = [
     { id: "departments",  label: "Departments",  icon: "building-2", href: "Departments.html" },
     { id: "groups",       label: "Groups",        icon: "layers", href: "Groups.html" },
     { id: "manufacturers",label: "Manufacturers", icon: "factory", href: "Manufacturers.html" },
+  ];
+  const NAV_SYSTEM = [
+    { id: "members",  label: "Members",  icon: "users", href: "Members.html" },
+    { id: "settings", label: "Settings", icon: "settings", href: "Settings.html" },
   ];
 
   function navHTML(active) {
@@ -18,10 +22,7 @@
       <div class="nav-label">Catalog</div>
       <div class="nav">${NAV_CATALOG.map(item).join("")}</div>
       <div class="nav-label">System</div>
-      <div class="nav">
-        <a class="nav-item" href="#"><i data-lucide="users"></i><span>Members</span></a>
-        <a class="nav-item" href="#"><i data-lucide="settings"></i><span>Settings</span></a>
-      </div>`;
+      <div class="nav">${NAV_SYSTEM.map(item).join("")}</div>`;
   }
 
   function mount() {
@@ -40,7 +41,7 @@
           <div class="brand"><span class="glyph"><i data-lucide="hard-drive"></i></span>Device<span class="accent">Hub</span></div>
           ${navHTML(active)}
           <div class="foot">
-            <div class="userchip">
+            <div class="userchip" id="userchip">
               <span class="avatar">AT</span>
               <div class="col"><span class="nm">Anh Tran</span><span class="ml">IT Admin</span></div>
               <i data-lucide="chevrons-up-down" style="margin-left:auto;width:15px;height:15px;color:var(--muted-foreground)"></i>
@@ -76,6 +77,45 @@
       apply(dark);
     });
 
+    // user menu (avatar popover)
+    const chip = document.getElementById("userchip");
+    chip && chip.addEventListener("click", () => toggleUserMenu(chip));
+    function toggleUserMenu(anchor){
+      let m = document.getElementById("userMenu");
+      if (m) { m.remove(); return; }
+      const dark = document.documentElement.classList.contains("dark");
+      m = document.createElement("div");
+      m.id = "userMenu";
+      m.className = "usermenu";
+      m.innerHTML = `
+        <div class="um-head">
+          <span class="avatar">AT</span>
+          <div class="col" style="min-width:0"><span class="um-nm">Anh Tran</span><span class="um-em">anh.tran@sioux.asia</span></div>
+        </div>
+        <div class="um-sep"></div>
+        <a class="um-item" href="Member Profile.html?email=anh.tran@sioux.asia"><i data-lucide="user"></i>View profile</a>
+        <a class="um-item" href="Settings.html"><i data-lucide="settings"></i>Account settings</a>
+        <button class="um-item" id="um-theme"><i data-lucide="${dark?'sun':'moon'}"></i>${dark?'Light':'Dark'} mode</button>
+        <div class="um-sep"></div>
+        <a class="um-item danger" href="Login.html"><i data-lucide="log-out"></i>Sign out</a>`;
+      document.body.appendChild(m);
+      const r = anchor.getBoundingClientRect();
+      m.style.left = (r.left) + "px";
+      m.style.bottom = (window.innerHeight - r.top + 6) + "px";
+      m.style.width = r.width + "px";
+      window.lucide && lucide.createIcons();
+      const themeItem = document.getElementById("um-theme");
+      themeItem && themeItem.addEventListener("click", (e) => {
+        e.preventDefault();
+        const d = !document.documentElement.classList.contains("dark");
+        localStorage.setItem("dh-theme", d ? "dark" : "light");
+        apply(d); m.remove();
+      });
+      setTimeout(() => document.addEventListener("mousedown", function off(e){
+        if (!m.contains(e.target) && !anchor.contains(e.target)) { m.remove(); document.removeEventListener("mousedown", off); }
+      }), 0);
+    }
+
     window.lucide && lucide.createIcons();
     document.dispatchEvent(new Event("shell:ready"));
   }
@@ -96,6 +136,51 @@
       }).join("")}</div>`;
     },
     initials(name) { return name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase(); },
+    // floating bulk-selection bar (returns an API to drive it from a page)
+    bulkBar({ raised = false } = {}) {
+      const bar = document.createElement("div");
+      bar.className = "bulkbar" + (raised ? " bulkbar-raised" : "");
+      bar.innerHTML = `
+        <span class="bulk-count"><b class="bulk-n">0</b> selected</span>
+        <span class="bulk-sep"></span>
+        <div class="bulk-acts"></div>
+        <button class="bulk-clear" title="Clear selection"><i data-lucide="x"></i></button>`;
+      document.body.appendChild(bar);
+      window.lucide && lucide.createIcons();
+      return {
+        el: bar,
+        acts: bar.querySelector(".bulk-acts"),
+        clearBtn: bar.querySelector(".bulk-clear"),
+        setActions(html) { this.acts.innerHTML = html; window.lucide && lucide.createIcons(); },
+        update(n) { bar.querySelector(".bulk-n").textContent = n; bar.classList.toggle("show", n > 0); },
+        onClear(fn) { this.clearBtn.addEventListener("click", fn); },
+      };
+    },
+    // generic anchored popover menu. items: [{label, icon, danger, onClick}] (or {sep:true})
+    popoverMenu(anchor, items, opts = {}) {
+      const existing = document.getElementById("popMenu");
+      if (existing) { existing.remove(); if (existing.dataset.for === (anchor.id || "")) return; }
+      const menu = document.createElement("div");
+      menu.id = "popMenu"; menu.className = "popmenu"; menu.dataset.for = anchor.id || "";
+      menu.innerHTML = (opts.head ? `<div class="popmenu-head">${opts.head}</div>` : "")
+        + items.map((it, i) => it.sep ? `<div class="um-sep"></div>`
+            : `<button class="popmenu-item ${it.danger ? "danger" : ""}" data-i="${i}">${it.icon ? `<i data-lucide="${it.icon}"></i>` : ""}${it.label}</button>`).join("");
+      document.body.appendChild(menu);
+      const r = anchor.getBoundingClientRect();
+      const w = menu.offsetWidth || 180;
+      let left = r.left; if (left + w > window.innerWidth - 8) left = r.right - w;
+      menu.style.left = Math.max(8, left) + "px";
+      if (opts.above) menu.style.bottom = (window.innerHeight - r.top + 6) + "px";
+      else menu.style.top = (r.bottom + 6) + "px";
+      window.lucide && lucide.createIcons();
+      menu.querySelectorAll(".popmenu-item").forEach(el => el.addEventListener("click", () => {
+        const it = items[parseInt(el.dataset.i, 10)];
+        menu.remove(); it.onClick && it.onClick();
+      }));
+      setTimeout(() => document.addEventListener("mousedown", function off(e) {
+        if (!menu.contains(e.target) && e.target !== anchor && !anchor.contains(e.target)) { menu.remove(); document.removeEventListener("mousedown", off); }
+      }), 0);
+    },
     // floating variation switcher (mockup affordance)
     variantSwitcher(label, options, onChange, initial = 0) {
       const bar = document.createElement("div");

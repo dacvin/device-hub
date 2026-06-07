@@ -156,18 +156,25 @@ export const manufacturerFormSchema = z.object({
 });
 export type ManufacturerFormValues = z.infer<typeof manufacturerFormSchema>;
 
-/* ---------- Derived flags (mirror of the device_with_flags SQL view) ---------- */
+/* ---------- Derived flags (mirror of the devices_with_flags SQL function) ---------- */
 // Status is stored; condition is its own field. These are the only DERIVED bits.
+// The warranty window is configurable (org_settings.warranty_expiring_days) — pass it
+// in via opts so a settings change re-evaluates flags with no backfill. Defaults to 90.
+export interface DeriveFlagsOptions {
+  warrantyWindowDays?: number;
+  now?: Date;
+}
 export function deriveFlags(
   d: Pick<Device, "status" | "warrantyEnd" | "lastCheckDate" | "inventoryCycleMonths">,
-  now: Date = new Date()
+  opts: DeriveFlagsOptions = {}
 ): DeviceFlag[] {
+  const { warrantyWindowDays = 90, now = new Date() } = opts;
   const flags: DeviceFlag[] = [];
   if (d.status === "retired") return flags; // no alerts on retired gear
   if (d.warrantyEnd) {
     const end = new Date(d.warrantyEnd);
-    const in90 = new Date(now); in90.setDate(in90.getDate() + 90);
-    if (end >= now && end <= in90) flags.push("warranty-expiring");
+    const window = new Date(now); window.setDate(window.getDate() + warrantyWindowDays);
+    if (end >= now && end <= window) flags.push("warranty-expiring");
   }
   if (d.lastCheckDate) {
     const due = new Date(d.lastCheckDate);
@@ -176,6 +183,111 @@ export function deriveFlags(
   }
   return flags;
 }
+
+/* ---------- Settings row types (mirror of migration 004) ---------- */
+export interface OrgSettings {
+  orgName: string;
+  primarySite?: string | null;
+  dateFormat: string;
+  // write-time device defaults
+  codePrefix: string;
+  codeAutogenerate: boolean;
+  defaultInventoryCycleMonths: number;
+  // read-time thresholds
+  conditionGoodPct: number;
+  conditionFairPct: number;
+  warrantyExpiringDays: number;
+  // notifications (job config)
+  notifyWarranty: boolean;
+  notifyInventoryOverdue: boolean;
+  notifyWeeklySummary: boolean;
+  notifyNewDevice: boolean;
+  // data & export
+  exportFormat: "CSV" | "XLSX" | "PDF";
+  deletedRetentionDays: number;
+  updatedBy?: string | null;
+  updatedAt: string;
+}
+
+export interface UserPreference {
+  userId: string;
+  theme: "light" | "dark" | "system";
+  defaultDeviceView: "table" | "cards";
+  monoCodes: boolean;
+  updatedAt: string;
+}
+
+/* ---------- Members & access (mirror of migration 003) ---------- */
+export const MEMBER_ROLES = ["it_admin", "manager", "viewer"] as const;
+export type MemberRole = (typeof MEMBER_ROLES)[number];
+export const MEMBER_STATUSES = ["active", "invited", "disabled"] as const;
+export type MemberStatus = (typeof MEMBER_STATUSES)[number];
+
+/* role enum → display label (UI shows these; DB stores the enum) */
+export const ROLE_LABEL: Record<MemberRole, string> = {
+  it_admin: "IT Admin",
+  manager: "Manager",
+  viewer: "Viewer",
+};
+
+export interface Member {
+  id: string;
+  name: string;
+  email: string;                 // IT-managed @sioux.asia address
+  role: MemberRole;
+  status: MemberStatus;
+  departmentId?: string | null;
+  site?: string | null;
+  phone?: string | null;
+  reportsTo?: string | null;     // self-FK
+  joinedAt?: string | null;      // "Member since"
+  lastActiveAt?: string | null;  // drives "Last active"
+  invitedBy?: string | null;
+}
+
+/* Capability matrix — DERIVED from role, never stored. The profile's
+   "Permissions" card renders exactly this. */
+export type Capability =
+  | "view_inventory"
+  | "manage_dept_devices"
+  | "manage_all_devices"
+  | "manage_catalogs"
+  | "export_data"
+  | "manage_members"
+  | "manage_settings";
+
+export const CAPABILITY_LABEL: Record<Capability, string> = {
+  view_inventory: "View inventory",
+  manage_dept_devices: "Manage devices in dept",
+  manage_all_devices: "Manage all devices",
+  manage_catalogs: "Manage catalogs",
+  export_data: "Export data",
+  manage_members: "Manage members",
+  manage_settings: "Change workspace settings",
+};
+
+export const CAPABILITIES: Record<MemberRole, Record<Capability, boolean>> = {
+  it_admin: {
+    view_inventory: true, manage_dept_devices: true, manage_all_devices: true,
+    manage_catalogs: true, export_data: true, manage_members: true, manage_settings: true,
+  },
+  manager: {
+    view_inventory: true, manage_dept_devices: true, manage_all_devices: false,
+    manage_catalogs: false, export_data: true, manage_members: false, manage_settings: false,
+  },
+  viewer: {
+    view_inventory: true, manage_dept_devices: false, manage_all_devices: false,
+    manage_catalogs: false, export_data: false, manage_members: false, manage_settings: false,
+  },
+};
+export const can = (role: MemberRole, cap: Capability) => CAPABILITIES[role][cap];
+
+/* role → badge tone (matches .badge-* in the theme) */
+export const ROLE_TONE: Record<MemberRole, "primary" | "secondary" | "muted"> = {
+  it_admin: "primary",
+  manager: "secondary",
+  viewer: "muted",
+};
 
 /* status → badge tone (matches .badge-* in the theme) */
 export const STATUS_TONE: Record<DeviceStatus, "success" | "info" | "warning" | "muted"> = {
@@ -189,4 +301,42 @@ export const STATUS_TONE: Record<DeviceStatus, "success" | "info" | "warning" | 
 export const FLAG_META: Record<DeviceFlag, { label: string; icon: string }> = {
   "warranty-expiring": { label: "Warranty expiring", icon: "shield-alert" },
   "inventory-overdue": { label: "Inventory overdue", icon: "calendar-clock" },
+};
+
+/* ---------- Activity log (mirror of migration 005) ---------- */
+export type ActivityAction =
+  | "device.created" | "device.updated" | "device.status_changed"
+  | "device.deleted" | "device.restored"
+  | "device.inventory_checked" | "device.allocated"
+  | "member.invited" | "member.role_changed" | "member.removed"
+  | "catalog.created" | "catalog.updated" | "catalog.deleted"
+  | "settings.updated";
+
+export interface Activity {
+  id: string;
+  actorId?: string | null;          // null = system / scheduled job
+  action: ActivityAction;
+  entityType: "device" | "member" | "department" | "group" | "manufacturer" | "settings";
+  entityId?: string | null;
+  entityLabel?: string | null;      // denormalized for display
+  metadata: Record<string, unknown>; // e.g. { from: "in-storage", to: "in-repair" }
+  createdAt: string;
+}
+
+/* action → lucide icon + a phrase builder for the timeline rows */
+export const ACTIVITY_META: Record<ActivityAction, { icon: string; verb: string }> = {
+  "device.created":           { icon: "plus",            verb: "registered" },
+  "device.updated":           { icon: "pencil",          verb: "updated" },
+  "device.status_changed":    { icon: "circle-dot",      verb: "changed status of" },
+  "device.deleted":           { icon: "trash-2",         verb: "deleted" },
+  "device.restored":          { icon: "rotate-ccw",      verb: "restored" },
+  "device.inventory_checked": { icon: "clipboard-check", verb: "passed inventory check on" },
+  "device.allocated":         { icon: "user-check",      verb: "allocated" },
+  "member.invited":           { icon: "user-plus",       verb: "invited" },
+  "member.role_changed":      { icon: "user-cog",        verb: "changed the role of" },
+  "member.removed":           { icon: "user-minus",      verb: "removed" },
+  "catalog.created":          { icon: "plus",            verb: "added catalog entry" },
+  "catalog.updated":          { icon: "pencil",          verb: "updated catalog entry" },
+  "catalog.deleted":          { icon: "trash-2",         verb: "removed catalog entry" },
+  "settings.updated":         { icon: "settings",        verb: "updated settings" },
 };

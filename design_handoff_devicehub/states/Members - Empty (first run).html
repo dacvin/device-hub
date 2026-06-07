@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Members (empty)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="page" data-title="Members" data-crumb="People with access to DeviceHub" data-active="members">
+    <div id="c"></div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("c").innerHTML = DH.emptyState({
+        icon: "users",
+        title: "Just you so far",
+        desc: "Invite colleagues so they can manage devices in their department. Admins can manage everything.",
+        actions: [{ label: "Invite member", icon: "user-plus", variant: "btn-primary", id: "inv" }]
+      });
+      lucide.createIcons();
+      document.getElementById("inv").addEventListener("click", () => DH.toast("Invite flow", { type: "info", desc: "Opens the invite dialog." }));
+    });
+  </script>
+</body>
+</html>

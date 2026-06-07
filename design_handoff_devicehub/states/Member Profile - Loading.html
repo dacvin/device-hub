@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Member profile (loading)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .cols { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .sk-card { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .dhead { display: flex; gap: 18px; align-items: center; margin-bottom: 22px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Member profile" data-crumb="" data-active="members">
+    <div class="dhead">
+      <span class="sk sk-circle" style="width:56px;height:56px"></span>
+      <div style="flex:1"><span class="sk sk-line lg" style="width:220px;height:22px;margin-bottom:10px"></span><span class="sk sk-line sm" style="width:300px"></span></div>
+    </div>
+    <div class="cols">
+      <div class="stack">
+        <div class="card sk-card"><span class="sk sk-line" style="width:25%"></span><span class="sk sk-line" style="width:90%"></span><span class="sk sk-line" style="width:80%"></span><span class="sk sk-line" style="width:86%"></span></div>
+        <div class="card sk-card"><span class="sk sk-line" style="width:30%"></span><span class="sk sk-line" style="width:100%"></span><span class="sk sk-line" style="width:100%"></span></div>
+      </div>
+      <div class="stack">
+        <div class="card sk-card"><span class="sk sk-line" style="width:50%"></span><span class="sk sk-line lg" style="width:30%;height:28px"></span></div>
+        <div class="card sk-card"><span class="sk sk-line" style="width:80%"></span><span class="sk sk-line" style="width:70%"></span><span class="sk sk-line" style="width:75%"></span></div>
+      </div>
+    </div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>document.addEventListener("shell:ready", () => lucide.createIcons());</script>
+</body>
+</html>

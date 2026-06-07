@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Member profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .back { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted-foreground); margin-bottom:16px; }
+  .back:hover { color: var(--foreground); }
+  .back svg { width:15px; height:15px; }
+
+  .dhead { display:flex; align-items:flex-start; gap:18px; margin-bottom:22px; }
+  .pavatar { width:56px; height:56px; border-radius:9999px; font-size:19px; }
+  .dhead h1 { font-size:24px; font-weight:600; letter-spacing:-0.02em; display:flex; align-items:center; gap:10px; }
+  .dhead .you { font-size:11px; font-weight:600; color:var(--primary); background:var(--secondary); border-radius:9999px; padding:3px 8px; letter-spacing:.02em; }
+  .dhead .sub { display:flex; align-items:center; gap:10px; margin-top:7px; flex-wrap:wrap; }
+  .dhead .email { font-size:13.5px; color:var(--muted-foreground); }
+  .dhead .acts { margin-left:auto; display:flex; gap:8px; }
+  .role { display:inline-flex; align-items:center; gap:6px; }
+  .role svg { width:14px; height:14px; }
+
+  .cols { display:grid; grid-template-columns: 1fr 320px; gap:20px; align-items:start; }
+  .stack { display:flex; flex-direction:column; gap:20px; }
+  @media (max-width: 1080px){ .cols { grid-template-columns: 1fr; } }
+
+  .section-title { font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted-foreground); display:flex; align-items:center; gap:8px; }
+  .section-title svg { width:15px; height:15px; color:var(--primary); }
+  .card-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .view-all { display:inline-flex; align-items:center; gap:5px; font-size:13px; color:var(--primary); font-weight:500; }
+  .view-all svg { width:14px; height:14px; }
+
+  .dl { display:grid; grid-template-columns: 1fr 1fr; gap:18px 28px; margin-top:18px; }
+  .dl .k { font-size:12px; color:var(--muted-foreground); }
+  .dl .v { font-size:14px; font-weight:500; margin-top:3px; }
+  .dl .v.mono { font-family:var(--font-mono); font-weight:400; }
+
+  /* permissions */
+  .perms { margin-top:12px; }
+  .perm { display:flex; align-items:center; gap:11px; padding:11px 0; font-size:14px; border-bottom:1px solid var(--border); }
+  .perm:last-child { border-bottom:none; }
+  .perm .pic { width:22px; height:22px; border-radius:7px; display:grid; place-items:center; flex:none; }
+  .perm.yes .pic { background: color-mix(in oklch, var(--green-200) 55%, var(--card)); color: var(--green-700); }
+  .dark .perm.yes .pic { background: color-mix(in oklch, var(--green-800) 40%, var(--card)); color: var(--green-300); }
+  .perm.no { color: var(--muted-foreground); }
+  .perm.no .pic { background: var(--muted); color: var(--muted-foreground); }
+  .perm .pic svg { width:13px; height:13px; }
+
+  /* devices managed mini-list */
+  .dvlist { margin-top:6px; }
+  .dvrow { display:flex; align-items:center; gap:12px; padding:11px 4px; margin:0 -4px; border-bottom:1px solid var(--border); border-radius:var(--radius-md); transition:background .12s; }
+  .dvrow:last-child { border-bottom:none; }
+  .dvrow:hover { background: var(--muted); }
+  .dvic { width:34px; height:34px; border-radius:9px; background:var(--secondary); color:var(--secondary-foreground); display:grid; place-items:center; flex:none; }
+  .dvic svg { width:17px; height:17px; }
+  .dvmeta { flex:1; min-width:0; }
+  .dvname { font-size:14px; font-weight:500; }
+  .dvcode { font-family:var(--font-mono); font-size:12px; color:var(--muted-foreground); }
+  .dv-empty { padding:22px 0 6px; text-align:center; color:var(--muted-foreground); font-size:13.5px; }
+
+  /* right rail */
+  .rail-stat { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .rail-stat:last-child { border-bottom:none; }
+  .rail-stat .ic { width:34px; height:34px; border-radius:9px; background:var(--muted); display:grid; place-items:center; flex:none; color:var(--muted-foreground); }
+  .rail-stat .ic svg { width:17px; height:17px; }
+  .rail-stat .k { font-size:12px; color:var(--muted-foreground); }
+  .rail-stat .v { font-size:14px; font-weight:500; margin-top:1px; }
+  .rail-big { font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1; font-variant-numeric:tabular-nums; }
+
+  .timeline { margin-top:18px; display:flex; flex-direction:column; }
+  .tl-item { display:flex; gap:12px; padding-bottom:18px; position:relative; }
+  .tl-item:not(:last-child)::before { content:""; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:var(--border); }
+  .tl-item:last-child { padding-bottom:0; }
+  .tl-dot { width:24px; height:24px; border-radius:9999px; background:var(--secondary); color:var(--secondary-foreground); display:grid; place-items:center; flex:none; z-index:1; }
+  .tl-dot svg { width:13px; height:13px; }
+  .tl-item .ti { font-size:14px; font-weight:500; }
+  .tl-item .tm { font-size:12px; color:var(--muted-foreground); margin-top:1px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Member profile" data-crumb="" data-active="members">
+    <a class="back" href="Members.html"><i data-lucide="arrow-left"></i> Back to members</a>
+    <div id="body"></div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script>
+    const GROUP_ICON = { Laptop:"laptop", Desktop:"monitor", Monitor:"monitor", Printer:"printer", Network:"network", Server:"server", Mobile:"smartphone", Peripheral:"webcam" };
+
+    const ROLE_META = {
+      "IT Admin": { icon:"shield-check", badge:"badge-primary" },
+      "Manager":  { icon:"user-cog",     badge:"badge-secondary" },
+      "Viewer":   { icon:"eye",          badge:"badge-muted" },
+    };
+    // capability matrix per role — drives the Permissions card
+    const CAPS = [
+      ["View inventory",        { "IT Admin":1, "Manager":1, "Viewer":1 }],
+      ["Manage devices in dept",{ "IT Admin":1, "Manager":1, "Viewer":0 }],
+      ["Manage all devices",    { "IT Admin":1, "Manager":0, "Viewer":0 }],
+      ["Manage catalogs",       { "IT Admin":1, "Manager":0, "Viewer":0 }],
+      ["Export data",           { "IT Admin":1, "Manager":1, "Viewer":0 }],
+      ["Manage members",        { "IT Admin":1, "Manager":0, "Viewer":0 }],
+      ["Change workspace settings", { "IT Admin":1, "Manager":0, "Viewer":0 }],
+    ];
+
+    const MEMBERS = [
+      { name:"Anh Tran",   email:"anh.tran@sioux.asia",   role:"IT Admin", dept:"IT",         site:"HCMC",  phone:"+84 28 7100 1010", manager:"—",          joined:"2021-03-08", last:"Active now",  status:"active", you:true },
+      { name:"Quan Bui",   email:"quan.bui@sioux.asia",   role:"IT Admin", dept:"IT",         site:"HCMC",  phone:"+84 28 7100 1011", manager:"Anh Tran",   joined:"2021-09-14", last:"2 hours ago", status:"active" },
+      { name:"Mai Pham",   email:"mai.pham@sioux.asia",   role:"Manager",  dept:"Design",     site:"HCMC",  phone:"+84 28 7100 1042", manager:"Anh Tran",   joined:"2022-05-02", last:"Yesterday",   status:"active" },
+      { name:"Khoa Le",    email:"khoa.le@sioux.asia",    role:"Manager",  dept:"Product",    site:"Hanoi", phone:"+84 24 7100 2030", manager:"Anh Tran",   joined:"2022-11-21", last:"3 days ago",  status:"active" },
+      { name:"Hoa Nguyen", email:"hoa.nguyen@sioux.asia", role:"Manager",  dept:"Sales",      site:"Hanoi", phone:"+84 24 7100 2031", manager:"Anh Tran",   joined:"2023-01-09", last:"1 week ago",  status:"active" },
+      { name:"Phuong Ho",  email:"phuong.ho@sioux.asia",  role:"Manager",  dept:"Operations", site:"HCMC",  phone:"+84 28 7100 1050", manager:"Anh Tran",   joined:"2023-04-17", last:"4 days ago",  status:"active" },
+      { name:"Tuan Vo",    email:"tuan.vo@sioux.asia",    role:"Viewer",   dept:"Finance",    site:"HCMC",  phone:"+84 28 7100 1061", manager:"Phuong Ho",  joined:"2024-02-26", last:"2 weeks ago", status:"active" },
+      { name:"Linh Dang",  email:"linh.dang@sioux.asia",  role:"Viewer",   dept:"HR",         site:"HCMC",  phone:"—",                manager:"Phuong Ho",  joined:"—",          last:"—",           status:"invited" },
+    ];
+
+    function fmt(iso){ if(!iso || iso==="—") return "—"; const dt=new Date(iso); return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
+
+    function render(m){
+      const rm = ROLE_META[m.role];
+      const managed = window.DEVICES.filter(d => d.dept === m.dept);
+      const canManage = m.role !== "Viewer";
+
+      const statusBadge = m.status === "active"
+        ? '<span class="badge badge-success"><span class="dot"></span>Active</span>'
+        : '<span class="badge badge-warning"><span class="dot"></span>Invited</span>';
+
+      const details = `<div class="card" style="padding:22px">
+        <div class="section-title"><i data-lucide="id-card"></i>Details</div>
+        <div class="dl">
+          <div><div class="k">Role</div><div class="v"><span class="badge ${rm.badge} role"><i data-lucide="${rm.icon}"></i>${m.role}</span></div></div>
+          <div><div class="k">Department</div><div class="v">${m.dept}</div></div>
+          <div><div class="k">Primary site</div><div class="v">${m.site}</div></div>
+          <div><div class="k">Status</div><div class="v">${statusBadge}</div></div>
+          <div><div class="k">Phone</div><div class="v mono">${m.phone}</div></div>
+          <div><div class="k">Reports to</div><div class="v">${m.manager}</div></div>
+          <div><div class="k">Member since</div><div class="v">${fmt(m.joined)}</div></div>
+          <div><div class="k">Last active</div><div class="v" style="font-weight:400">${m.last}</div></div>
+        </div>
+      </div>`;
+
+      const perms = `<div class="card" style="padding:22px">
+        <div class="section-title"><i data-lucide="key-round"></i>Permissions</div>
+        <div class="perms">${CAPS.map(([label, by]) => {
+          const yes = !!by[m.role];
+          return `<div class="perm ${yes?'yes':'no'}"><span class="pic"><i data-lucide="${yes?'check':'minus'}"></i></span>${label}</div>`;
+        }).join("")}</div>
+      </div>`;
+
+      const devices = `<div class="card" style="padding:22px">
+        <div class="card-top">
+          <div class="section-title"><i data-lucide="hard-drive"></i>Devices managed</div>
+          ${managed.length ? `<a class="view-all" href="Device List.html?dept=${encodeURIComponent(m.dept)}">View all in ${m.dept} <i data-lucide="arrow-right"></i></a>` : ""}
+        </div>
+        ${!canManage
+          ? `<div class="dv-empty">Viewers have read-only access and don't manage devices.</div>`
+          : managed.length
+            ? `<div class="dvlist">${managed.slice(0,6).map(d => `
+                <a class="dvrow" href="Device Details.html">
+                  <span class="dvic"><i data-lucide="${GROUP_ICON[d.group]||'hard-drive'}"></i></span>
+                  <span class="dvmeta"><div class="dvname">${d.name}</div><div class="dvcode">${d.code}</div></span>
+                  ${DH.statusBadge(d.status)}
+                </a>`).join("")}</div>`
+            : `<div class="dv-empty">No devices are currently assigned to ${m.dept}.</div>`}
+      </div>`;
+
+      const rail = `
+        <div class="card" style="padding:22px">
+          <div class="section-title"><i data-lucide="hard-drive"></i>Managed devices</div>
+          <div class="rail-big" style="margin-top:14px">${canManage ? managed.length : "—"}</div>
+          <div style="font-size:12.5px;color:var(--muted-foreground);margin-top:6px">${canManage ? `Active devices in ${m.dept}` : "Read-only access"}</div>
+        </div>
+        <div class="card" style="padding:8px 22px">
+          <div class="rail-stat"><span class="ic"><i data-lucide="${rm.icon}"></i></span><div><div class="k">Role</div><div class="v">${m.role}</div></div></div>
+          <div class="rail-stat"><span class="ic"><i data-lucide="building-2"></i></span><div><div class="k">Department</div><div class="v">${m.dept}</div></div></div>
+          <div class="rail-stat"><span class="ic"><i data-lucide="map-pin"></i></span><div><div class="k">Site</div><div class="v">${m.site}</div></div></div>
+          <div class="rail-stat"><span class="ic"><i data-lucide="calendar-clock"></i></span><div><div class="k">Member since</div><div class="v">${fmt(m.joined)}</div></div></div>
+        </div>
+        <div class="card" style="padding:22px">
+          <div class="section-title"><i data-lucide="history"></i>Recent activity</div>
+          <div class="timeline">
+            ${m.status === "invited"
+              ? `<div class="tl-item"><span class="tl-dot"><i data-lucide="mail"></i></span><div><div class="ti">Invitation sent</div><div class="tm">by Anh Tran · awaiting acceptance</div></div></div>`
+              : `<div class="tl-item"><span class="tl-dot"><i data-lucide="log-in"></i></span><div><div class="ti">Signed in</div><div class="tm">${m.last}</div></div></div>
+                 ${canManage ? `<div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Updated a device record</div><div class="tm">${m.dept} · recently</div></div></div>` : ""}
+                 <div class="tl-item"><span class="tl-dot"><i data-lucide="user-plus"></i></span><div><div class="ti">Joined the workspace</div><div class="tm">${fmt(m.joined)}</div></div></div>`}
+          </div>
+        </div>`;
+
+      document.getElementById("body").innerHTML = `
+        <div class="dhead">
+          <span class="avatar pavatar">${DH.initials(m.name)}</span>
+          <div>
+            <h1>${m.name}${m.you?'<span class="you">You</span>':''}</h1>
+            <div class="sub">
+              <span class="email">${m.email}</span>
+              <span class="sep-v" style="height:14px"></span>
+              <span class="badge ${rm.badge} role"><i data-lucide="${rm.icon}"></i>${m.role}</span>
+              ${statusBadge}
+            </div>
+          </div>
+          <div class="acts">
+            <button class="btn btn-outline"><i data-lucide="mail"></i> Message</button>
+            <button class="btn btn-outline btn-icon"><i data-lucide="ellipsis"></i></button>
+            <button class="btn btn-primary"><i data-lucide="pencil"></i> Edit member</button>
+          </div>
+        </div>
+        <div class="cols">
+          <div class="stack">${details}${devices}${perms}</div>
+          <div class="stack">${rail}</div>
+        </div>`;
+      lucide.createIcons();
+    }
+
+    document.addEventListener("shell:ready", () => {
+      const email = new URLSearchParams(location.search).get("email");
+      const m = MEMBERS.find(x => x.email === email) || MEMBERS[0];
+      render(m);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Access denied</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="page" data-title="Settings" data-crumb="Configure DeviceHub for your organization" data-active="settings">
+    <div id="c"></div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("c").innerHTML = DH.permissionDenied({
+        what: "workspace settings", need: "IT Admin", role: "Viewer"
+      });
+      lucide.createIcons();
+      document.getElementById("req-access").addEventListener("click", () => DH.toast("Request sent", { desc: "An IT Admin will review your access request." }));
+    });
+  </script>
+</body>
+</html>

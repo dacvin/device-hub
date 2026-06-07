@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<base href="../" />
+<title>DeviceHub — Device list (loading)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Devices" data-crumb="All registered devices" data-active="devices">
+    <div class="toolbar" id="tb"></div>
+    <div class="card table-wrap"><div id="rows"></div></div>
+  </div>
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      document.getElementById("tb").innerHTML =
+        DH.sk.block("150px","36px",8) + DH.sk.block("130px","36px",8) + DH.sk.block("130px","36px",8) + `<span style="flex:1"></span>` + DH.sk.block("120px","36px",8);
+      document.getElementById("rows").innerHTML =
+        `<div class="sk-row" style="grid-template-columns:40px 28px 120px 1fr 90px 110px 80px 90px;border-top:none"><span class="sk sk-line sm" style="width:60%"></span><span class="sk sk-line sm" style="width:80%"></span><span class="sk sk-line sm" style="width:70%"></span><span class="sk sk-line sm" style="width:50%"></span><span class="sk sk-line sm" style="width:60%"></span><span class="sk sk-line sm" style="width:55%"></span><span class="sk sk-line sm" style="width:70%"></span><span class="sk sk-line sm" style="width:50%"></span></div>`
+        + DH.sk.table(9, "40px 28px 120px 1fr 90px 110px 80px 90px");
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

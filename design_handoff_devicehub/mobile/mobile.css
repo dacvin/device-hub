@@ -1,0 +1,244 @@
+/* DeviceHub — MOBILE design language (namespaced under .mob).
+   Renders inside the iOS bezel; uses DeviceHub tokens (tokens.css) + Geist.
+   Status bar (~58px) overlays the top, home indicator (~34px) the bottom. */
+
+.mob {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--background); color: var(--foreground);
+  font-family: "Geist", system-ui, sans-serif;
+  font-size: 15px; line-height: 1.45; letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+.mob *, .mob *::before, .mob *::after { box-sizing: border-box; }
+.mob .mono { font-family: "Geist Mono", ui-monospace, monospace; }
+
+/* ---- App header (sticky; clears the status bar) ---- */
+.mob-head {
+  flex: none; padding: 60px 18px 12px; background: var(--background);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; gap: 12px;
+}
+.mob-head.scrolled { box-shadow: 0 2px 10px rgba(16,24,40,.05); }
+.mob-head .ht { flex: 1; min-width: 0; }
+.mob-head h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.mob-head .sub { font-size: 12.5px; color: var(--muted-foreground); margin-top: 3px; }
+.mob-head .acts { display: flex; gap: 8px; align-items: center; }
+.mob-head.back h1 { font-size: 19px; }
+
+/* circular header icon button + avatar */
+.mob-iconbtn { width: 38px; height: 38px; border-radius: 9999px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); display: grid; place-items: center; flex: none; }
+.mob-iconbtn svg { width: 18px; height: 18px; }
+.mob-iconbtn.primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.mob-avatar { width: 38px; height: 38px; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; font-size: 14px; font-weight: 600; flex: none; }
+.mob-back { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; margin-left: -8px; border-radius: 9999px; color: var(--foreground); flex: none; }
+.mob-back svg { width: 22px; height: 22px; }
+
+/* ---- Scroll body ---- */
+.mob-body { flex: 1; overflow: auto; padding: 16px 16px 108px; display: flex; flex-direction: column; gap: 14px; -webkit-overflow-scrolling: touch; }
+.mob-body::-webkit-scrollbar { width: 0; }
+.mob-section-label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-foreground); margin: 4px 2px -4px; }
+
+/* ---- Card ---- */
+.mob-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+.mob-card.pad { padding: 16px; }
+
+/* ---- KPI grid (Overview) ---- */
+.mob-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mob-kpi { padding: 14px; }
+.mob-kpi .kh { display: flex; align-items: center; justify-content: space-between; }
+.mob-kpi .kl { font-size: 12px; color: var(--muted-foreground); font-weight: 500; }
+.mob-kpi .kic { width: 28px; height: 28px; border-radius: 8px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; }
+.mob-kpi .kic svg { width: 15px; height: 15px; }
+.mob-kpi.alert .kic { background: oklch(0.96 0.05 85); color: oklch(0.48 0.10 70); }
+.dark .mob-kpi.alert .kic { background: oklch(0.34 0.06 75); color: oklch(0.84 0.12 85); }
+.mob-kpi .kv { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; margin-top: 12px; font-variant-numeric: tabular-nums; }
+.mob-kpi .ks { font-size: 11px; color: var(--muted-foreground); margin-top: 5px; }
+
+/* ---- Bars (lifecycle + group share) ---- */
+.mob-lifebar { display: flex; height: 12px; border-radius: 9999px; overflow: hidden; background: var(--muted); }
+.mob-lifebar span { display: block; height: 100%; }
+.mob-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 16px; margin-top: 14px; }
+.mob-legend .li { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.mob-legend .sw { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.mob-legend .lv { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mob-grouprow { display: grid; grid-template-columns: 92px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); }
+.mob-grouprow:first-child { border-top: none; }
+.mob-grouprow .gn { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+.mob-grouprow .gn .gi { width: 24px; height: 24px; border-radius: 6px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+.mob-grouprow .gn .gi svg { width: 13px; height: 13px; }
+.mob-grouprow .gt { display: block; height: 7px; border-radius: 9999px; background: var(--muted); overflow: hidden; }
+.mob-grouprow .gf { display: block; height: 100%; border-radius: 9999px; background: var(--primary); }
+.mob-grouprow .gv { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* ---- Card section header ---- */
+.mob-ctop { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 0; }
+.mob-ctop .ct { font-size: 15px; font-weight: 600; }
+.mob-ctop .cs { font-size: 12px; color: var(--muted-foreground); margin-top: 1px; }
+.mob-ctop .link { font-size: 13px; color: var(--primary); font-weight: 500; }
+
+/* ---- List rows (devices / members / catalogs / attention) ---- */
+.mob-row { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--border); }
+.mob-row:first-child { border-top: none; }
+.mob-row .ric { width: 38px; height: 38px; border-radius: 10px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+.mob-row .ric svg { width: 18px; height: 18px; }
+.mob-row .rm { flex: 1; min-width: 0; }
+.mob-row .rt { font-size: 14.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mob-row .rsub { font-size: 12px; color: var(--muted-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mob-row .rsub.mono { font-size: 11.5px; }
+.mob-row .chev { color: var(--muted-foreground); flex: none; }
+.mob-row .chev svg { width: 16px; height: 16px; }
+.mob-row .ravatar { width: 38px; height: 38px; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; font-size: 13px; font-weight: 600; flex: none; }
+
+/* ---- Badges (reuse desktop tones, mobile sizing) ---- */
+.mob-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 9999px; font-size: 11.5px; font-weight: 500; line-height: 1; white-space: nowrap; }
+.mob-badge .dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
+.mob-badge svg { width: 12px; height: 12px; }
+.mob-badge.success { background: var(--secondary); color: var(--primary); }
+.mob-badge.info { background: oklch(0.94 0.04 230); color: oklch(0.45 0.12 235); }
+.dark .mob-badge.info { background: oklch(0.30 0.05 235); color: oklch(0.82 0.10 230); }
+.mob-badge.warning { background: oklch(0.95 0.06 85); color: oklch(0.48 0.10 70); }
+.dark .mob-badge.warning { background: oklch(0.33 0.06 75); color: oklch(0.85 0.11 85); }
+.mob-badge.muted { background: var(--muted); color: var(--muted-foreground); }
+.mob-badge.primary { background: var(--primary); color: var(--primary-foreground); }
+.mob-badge.secondary { background: var(--secondary); color: var(--secondary-foreground); }
+
+/* ---- Condition bar ---- */
+.mob-cond { display: flex; align-items: center; gap: 8px; }
+.mob-cond .ct { width: 52px; height: 6px; border-radius: 9999px; background: var(--muted); overflow: hidden; }
+.mob-cond .cf { display: block; height: 100%; border-radius: 9999px; }
+.mob-cond .cv { font-size: 11.5px; font-weight: 600; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+
+/* ---- Filter chips (horizontal scroll) ---- */
+.mob-chips { display: flex; gap: 8px; padding: 12px 16px 0; overflow-x: auto; }
+.mob-chips::-webkit-scrollbar { height: 0; }
+.mob-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 9999px; border: 1px solid var(--border); background: var(--card); font-size: 13px; font-weight: 500; color: var(--foreground); }
+.mob-chip svg { width: 14px; height: 14px; }
+.mob-chip.on { background: var(--secondary); color: var(--secondary-foreground); border-color: transparent; }
+.mob-chip.search { flex: 1; min-width: 120px; color: var(--muted-foreground); }
+
+/* ---- Search field ---- */
+.mob-search { margin: 12px 16px 0; display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 13px; border-radius: 12px; background: var(--muted); color: var(--muted-foreground); font-size: 14px; }
+.mob-search svg { width: 17px; height: 17px; }
+
+/* ---- Segmented control ---- */
+.mob-seg { display: flex; gap: 2px; padding: 3px; background: var(--muted); border-radius: 11px; }
+.mob-seg button { flex: 1; padding: 8px 6px; border: none; background: transparent; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--muted-foreground); }
+.mob-seg button.on { background: var(--card); color: var(--foreground); box-shadow: 0 1px 2px rgba(16,24,40,.08); }
+
+/* ---- Definition list (details / profile) ---- */
+.mob-dl { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; padding: 16px; }
+.mob-dl .k { font-size: 11.5px; color: var(--muted-foreground); }
+.mob-dl .v { font-size: 14px; font-weight: 500; margin-top: 3px; }
+.mob-sechead { display: flex; align-items: center; gap: 8px; padding: 14px 16px 0; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted-foreground); }
+.mob-sechead svg { width: 14px; height: 14px; color: var(--primary); }
+
+/* ---- Form fields ---- */
+.mob-field { padding: 0 16px; }
+.mob-field + .mob-field { margin-top: 14px; }
+.mob-label { display: block; font-size: 12.5px; font-weight: 500; margin-bottom: 6px; }
+.mob-label .req { color: var(--destructive); }
+.mob-input, .mob-select { width: 100%; height: 44px; padding: 0 13px; border-radius: 11px; border: 1px solid var(--input); background: var(--card); font-family: inherit; font-size: 15px; color: var(--foreground); display: flex; align-items: center; }
+.mob-input.invalid, .mob-select.invalid { border-color: var(--destructive); box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive) 16%, transparent); }
+.mob-ferr { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--destructive); margin-top: 5px; }
+.mob-ferr svg { width: 12px; height: 12px; }
+.mob-select { justify-content: space-between; color: var(--muted-foreground); }
+.mob-select svg { width: 16px; height: 16px; }
+
+/* switch */
+.mob-switch { width: 44px; height: 26px; border-radius: 9999px; background: var(--muted); position: relative; flex: none; transition: background .15s; }
+.mob-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 9999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .15s; }
+.mob-switch.on { background: var(--primary); }
+.mob-switch.on::after { left: 21px; }
+
+/* permission rows */
+.mob-perm { display: flex; align-items: center; gap: 11px; padding: 11px 16px; border-top: 1px solid var(--border); font-size: 14px; }
+.mob-perm:first-child { border-top: none; }
+.mob-perm .pic { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; flex: none; }
+.mob-perm .pic svg { width: 13px; height: 13px; }
+.mob-perm.yes .pic { background: var(--secondary); color: var(--primary); }
+.mob-perm.no { color: var(--muted-foreground); }
+.mob-perm.no .pic { background: var(--muted); color: var(--muted-foreground); }
+
+/* timeline */
+.mob-tl { padding: 14px 16px; display: flex; flex-direction: column; }
+.mob-tlrow { display: flex; gap: 11px; padding-bottom: 16px; position: relative; }
+.mob-tlrow:not(:last-child)::before { content: ""; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--border); }
+.mob-tlrow:last-child { padding-bottom: 0; }
+.mob-tldot { width: 23px; height: 23px; border-radius: 9999px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; z-index: 1; }
+.mob-tldot svg { width: 12px; height: 12px; }
+.mob-tlrow .ti { font-size: 13.5px; }
+.mob-tlrow .ti b { font-weight: 600; }
+.mob-tlrow .tm { font-size: 11.5px; color: var(--muted-foreground); margin-top: 1px; }
+
+/* ---- Sticky bottom action bar (Create/Edit) ---- */
+.mob-actionbar { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px 30px; background: var(--background); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+.mob-btn { flex: 1; height: 46px; border-radius: 12px; border: none; font-family: inherit; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.mob-btn svg { width: 17px; height: 17px; }
+.mob-btn.primary { background: var(--primary); color: var(--primary-foreground); }
+.mob-btn.outline { background: var(--card); color: var(--foreground); border: 1px solid var(--border); }
+.mob-btn.ghostdanger { background: transparent; color: var(--destructive); flex: 0 0 auto; width: 46px; border: 1px solid color-mix(in oklch,var(--destructive) 30%, var(--border)); }
+
+/* ---- Bottom tab bar ---- */
+.mob-tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding: 8px 8px 22px; background: var(--card); border-top: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-around; z-index: 30; }
+.mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 7px; color: var(--muted-foreground); }
+.mob-tab svg { width: 24px; height: 24px; }
+.mob-tab span { font-size: 10.5px; font-weight: 500; letter-spacing: -0.01em; }
+.mob-tab.on { color: var(--primary); }
+/* center Add FAB (option B) */
+.mob-tab.fab { flex: 0 0 auto; }
+.mob-fab { width: 52px; height: 52px; margin-top: -14px; border-radius: 16px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; box-shadow: 0 6px 16px color-mix(in oklch, var(--primary) 45%, transparent); }
+.mob-fab svg { width: 26px; height: 26px; }
+
+/* FAB floating (option A, on Device list) */
+.mob-floatfab { position: absolute; right: 18px; bottom: 100px; width: 54px; height: 54px; border-radius: 17px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; box-shadow: 0 8px 20px color-mix(in oklch, var(--primary) 45%, transparent); z-index: 25; }
+.mob-floatfab svg { width: 26px; height: 26px; }
+
+/* empty/login helpers */
+.mob-login { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 32px; gap: 6px; }
+.mob-login .glyph { width: 56px; height: 56px; border-radius: 16px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; margin-bottom: 18px; }
+.mob-login .glyph svg { width: 28px; height: 28px; }
+.mob-login h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.mob-login p { font-size: 14px; color: var(--muted-foreground); line-height: 1.5; }
+.mob-googlebtn { margin-top: 22px; width: 100%; height: 50px; border-radius: 13px; border: 1px solid var(--border); background: var(--card); display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--foreground); }
+.mob-note { margin-top: 14px; display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 12px; background: var(--secondary); color: var(--secondary-foreground); font-size: 12.5px; text-align: left; }
+.mob-note svg { width: 16px; height: 16px; flex: none; }
+
+/* member profile header */
+.mob-phead { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 8px 16px 4px; }
+.mob-phead .pa { width: 72px; height: 72px; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; font-size: 26px; font-weight: 600; }
+.mob-phead .pn { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-top: 6px; }
+.mob-phead .pe { font-size: 13px; color: var(--muted-foreground); }
+.mob-phead .pb { display: flex; gap: 6px; margin-top: 8px; }
+
+/* device detail hero */
+.mob-hero { display: flex; align-items: center; gap: 14px; padding: 4px 2px 6px; }
+.mob-hero .hic { width: 56px; height: 56px; border-radius: 14px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+.mob-hero .hic svg { width: 26px; height: 26px; }
+.mob-hero .hn { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
+.mob-hero .hc { font-size: 12.5px; color: var(--muted-foreground); }
+.mob-hero .hb { display: flex; gap: 6px; margin-top: 7px; }
+
+/* ============================================================
+   iOS phone bezel (plain CSS — no React) + gallery layout
+   ============================================================ */
+.phone { position: relative; width: 390px; height: 844px; border-radius: 46px; overflow: hidden; background: var(--background); box-shadow: 0 26px 60px rgba(0,0,0,.20), 0 0 0 10px #0b0b0c, 0 0 0 11px rgba(255,255,255,.06); flex: none; }
+.phone .mob { font-family: "Geist", system-ui, sans-serif; }
+.m-island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 120px; height: 34px; border-radius: 20px; background: #000; z-index: 40; }
+.m-statusbar { position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 35; display: flex; align-items: center; justify-content: space-between; padding: 17px 30px 0; pointer-events: none; font-family: -apple-system, "SF Pro", system-ui; font-weight: 600; font-size: 15px; color: var(--foreground); }
+.m-statusbar .sb-r { display: flex; align-items: center; gap: 6px; }
+.m-statusbar svg { display: block; }
+.m-homebar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 138px; height: 5px; border-radius: 9999px; background: color-mix(in oklch, var(--foreground) 32%, transparent); z-index: 45; }
+
+/* gallery page */
+.gallery { min-height: 100vh; background: #f0eee9; padding: 48px 56px 80px; font-family: "Geist", system-ui, sans-serif; }
+.dark.gallery, .gallery.dark { background: #0c100f; }
+.gallery-top { max-width: 1100px; margin: 0 auto 40px; }
+.gallery-top h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: #28231d; }
+.gallery-top p { font-size: 15px; color: rgba(60,50,40,.65); margin-top: 6px; max-width: 680px; line-height: 1.55; }
+.g-section { max-width: 1280px; margin: 0 auto 56px; }
+.g-section h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: rgba(40,30,20,.9); }
+.g-section .gs-sub { font-size: 14px; color: rgba(60,50,40,.6); margin-top: 4px; margin-bottom: 26px; }
+.g-row { display: flex; flex-wrap: wrap; gap: 40px 36px; }
+.g-item { display: flex; flex-direction: column; gap: 12px; }
+.g-item .g-label { font-size: 13px; font-weight: 500; color: rgba(60,50,40,.7); padding-left: 4px; }
