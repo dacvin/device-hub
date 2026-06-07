@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getOrgSettings } from "@/lib/data/settings";
 import {
   type DeviceFlag,
   type DeviceFormValues,
@@ -26,8 +27,9 @@ export interface DeviceListFilters {
 
 export async function listDevices(filters: DeviceListFilters = {}): Promise<DeviceWithFlags[]> {
   const supabase = await createClient();
+  const settings = await getOrgSettings();
   let q = supabase
-    .from("device_with_flags")
+    .rpc("devices_with_flags", { p_warranty_days: settings.warrantyExpiringDays })
     .select("*")
     .is("deleted_at", null)
     .order("updated_at", { ascending: false });
@@ -54,8 +56,9 @@ export async function listDevices(filters: DeviceListFilters = {}): Promise<Devi
 
 export async function getDeviceWithFlagsByCode(code: string): Promise<DeviceWithFlags | null> {
   const supabase = await createClient();
+  const settings = await getOrgSettings();
   const { data, error } = await supabase
-    .from("device_with_flags")
+    .rpc("devices_with_flags", { p_warranty_days: settings.warrantyExpiringDays })
     .select("*")
     .eq("code", code)
     .is("deleted_at", null)

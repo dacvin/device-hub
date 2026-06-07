@@ -195,7 +195,7 @@ export const FLAG_META: Record<DeviceFlag, { icon: string }> = {
 
 /* ---------- Row -> domain mappers ---------- */
 type DeviceRow = Tables<"device">;
-type DeviceWithFlagsRow = Database["public"]["Views"]["device_with_flags"]["Row"];
+type DeviceWithFlagsRow = Database["public"]["Functions"]["devices_with_flags"]["Returns"][number];
 type DepartmentRow = Tables<"department">;
 type DeviceGroupRow = Tables<"device_group">;
 type ManufacturerRow = Tables<"manufacturer">;
