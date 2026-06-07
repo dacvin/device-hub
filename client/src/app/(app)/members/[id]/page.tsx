@@ -40,13 +40,12 @@ export default async function MemberProfilePage({
       <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
         <div className="space-y-6">
           <DetailsCard member={member} />
-          {member.role !== "viewer" ? (
-            <DevicesManaged
-              devices={managedDevices}
-              departmentId={member.departmentId}
-              departmentName={member.departmentName}
-            />
-          ) : null}
+          <DevicesManaged
+            devices={managedDevices}
+            departmentId={member.departmentId}
+            departmentName={member.departmentName}
+            isViewer={member.role === "viewer"}
+          />
           <PermissionsCard role={member.role} />
         </div>
         <div className="space-y-6">

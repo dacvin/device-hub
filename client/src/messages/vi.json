@@ -229,7 +229,7 @@
     "detailsTitle": "[vi] Details",
     "role": "[vi] Role",
     "department": "[vi] Department",
-    "site": "[vi] Site",
+    "site": "[vi] Primary site",
     "status": "[vi] Status",
     "phone": "[vi] Phone",
     "reportsTo": "[vi] Reports to",
@@ -239,6 +239,7 @@
     "devicesManagedSubtitle": "[vi] in {department}",
     "viewAllInDept": "[vi] View all in {department}",
     "devicesManagedEmpty": "[vi] No devices in this department yet.",
+    "viewerReadOnly": "[vi] Viewers have read-only access and don't manage devices.",
     "permissionsTitle": "[vi] Permissions",
     "permissions": {
       "viewInventory": "[vi] View inventory",

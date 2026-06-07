@@ -3,19 +3,12 @@ import { HardDrive, ShieldCheck, UserCog, Eye, Building2, MapPin, CalendarClock 
 import { Card } from "@/components/ui/card";
 import { getTranslations } from "next-intl/server";
 import type { Member, MemberRole } from "@/lib/domain/members";
-import { ROLE_LABEL, ROLE_TONE } from "@/lib/domain/members";
-import { cn } from "@/lib/utils";
+import { ROLE_LABEL } from "@/lib/domain/members";
 
 const ROLE_ICON: Record<MemberRole, React.ElementType> = {
   it_admin: ShieldCheck,
   manager: UserCog,
   viewer: Eye,
-};
-
-const ROLE_BADGE_CLASSES: Record<"primary" | "secondary" | "muted", string> = {
-  primary: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary border-transparent",
-  secondary: "bg-secondary text-secondary-foreground border-transparent",
-  muted: "bg-muted text-muted-foreground border-transparent",
 };
 
 function formatDate(iso: string | null): string {
@@ -31,7 +24,6 @@ interface ProfileStatsCardProps {
 export async function ProfileStatsCard({ member, managedCount }: ProfileStatsCardProps) {
   const t = await getTranslations("memberProfile");
   const RoleIcon = ROLE_ICON[member.role];
-  const tone = ROLE_TONE[member.role];
   const canManage = member.role !== "viewer";
 
   return (
@@ -63,17 +55,7 @@ export async function ProfileStatsCard({ member, managedCount }: ProfileStatsCar
           </span>
           <div>
             <div className="text-[12px] text-muted-foreground">{t("role")}</div>
-            <div className="text-[14px] font-medium mt-px">
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full px-2.5 h-[22px] text-xs font-medium leading-none border",
-                  ROLE_BADGE_CLASSES[tone]
-                )}
-              >
-                <RoleIcon className="size-3.5" />
-                {ROLE_LABEL[member.role]}
-              </span>
-            </div>
+            <div className="text-[14px] font-medium mt-px">{ROLE_LABEL[member.role]}</div>
           </div>
         </div>
 

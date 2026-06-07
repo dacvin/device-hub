@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Mail, Pencil, ShieldCheck, UserCog, Eye } from "lucide-react";
+import { ArrowLeft, Mail, Pencil, Ellipsis, ShieldCheck, UserCog, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getTranslations } from "next-intl/server";
 import type { Member, MemberRole, MemberStatus } from "@/lib/domain/members";
@@ -106,6 +106,9 @@ export async function ProfileHeader({ member, isYou }: ProfileHeaderProps) {
               <Mail className="size-4" />
               {t("message")}
             </a>
+          </Button>
+          <Button variant="outline" size="sm" className="px-2">
+            <Ellipsis className="size-4" />
           </Button>
           <Button size="sm">
             <Pencil className="size-4" />

@@ -9,9 +9,15 @@ interface DevicesManagedProps {
   devices: DeviceWithFlags[];
   departmentId: string | null;
   departmentName: string | null;
+  isViewer?: boolean;
 }
 
-export async function DevicesManaged({ devices, departmentId, departmentName }: DevicesManagedProps) {
+export async function DevicesManaged({
+  devices,
+  departmentId,
+  departmentName,
+  isViewer = false,
+}: DevicesManagedProps) {
   const t = await getTranslations("memberProfile");
   const deptLabel = departmentName ?? "—";
 
@@ -21,13 +27,8 @@ export async function DevicesManaged({ devices, departmentId, departmentName }: 
         <div className="text-[13px] font-semibold tracking-[0.04em] uppercase text-muted-foreground flex items-center gap-2">
           <HardDrive className="size-[15px] text-primary" />
           {t("devicesManagedTitle")}
-          {departmentName && (
-            <span className="text-[12px] font-normal normal-case tracking-normal text-muted-foreground">
-              {t("devicesManagedSubtitle", { department: departmentName })}
-            </span>
-          )}
         </div>
-        {devices.length > 0 && departmentId && (
+        {!isViewer && devices.length > 0 && departmentId && (
           <Link
             href={`/devices?dept=${departmentId}`}
             className="inline-flex items-center gap-1 text-[13px] text-primary font-medium"
@@ -38,7 +39,11 @@ export async function DevicesManaged({ devices, departmentId, departmentName }: 
         )}
       </div>
 
-      {devices.length === 0 ? (
+      {isViewer ? (
+        <div className="pt-[22px] pb-1.5 text-center text-muted-foreground text-[13.5px]">
+          {t("viewerReadOnly")}
+        </div>
+      ) : devices.length === 0 ? (
         <div className="pt-[22px] pb-1.5 text-center text-muted-foreground text-[13.5px]">
           {t("devicesManagedEmpty")}
         </div>
