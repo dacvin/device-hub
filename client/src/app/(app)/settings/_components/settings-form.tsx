@@ -4,14 +4,12 @@ import { useState, useMemo } from "react";
 import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { AlertCircle, Download, Sun, Moon, Monitor, Table2, LayoutGrid } from "lucide-react";
+import { AlertCircle, CheckCircle2, Download, Sun, Moon, Monitor, Table2, LayoutGrid } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -155,8 +153,6 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
             inventory: t("nav.inventory"),
             notifications: t("nav.notifications"),
             data: t("nav.data"),
-            condition: t("nav.condition"),
-            danger: t("nav.danger"),
           }}
         />
       </div>
@@ -316,7 +312,6 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
             <SettingRow
               label={t("inventory.defaultCycle")}
               description="How often a device is due for a physical check."
-              last
             >
               <div className="flex items-center gap-2">
                 <Input
@@ -328,6 +323,32 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
                   className="w-[84px] h-[34px] text-center"
                 />
                 <span className="text-[13px] text-muted-foreground">months</span>
+              </div>
+            </SettingRow>
+            <SettingRow
+              label={t("condition.title")}
+              description={t("condition.hint")}
+              last
+            >
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={settings.conditionGoodPct}
+                  onChange={(e) =>
+                    updateSettings({ conditionGoodPct: Number(e.target.value) })
+                  }
+                  className="w-[84px] h-[34px] text-center"
+                />
+                <span className="text-[13px] text-muted-foreground">good %</span>
+                <Input
+                  type="number"
+                  value={settings.conditionFairPct}
+                  onChange={(e) =>
+                    updateSettings({ conditionFairPct: Number(e.target.value) })
+                  }
+                  className="w-[84px] h-[34px] text-center"
+                />
+                <span className="text-[13px] text-muted-foreground">fair %</span>
               </div>
             </SettingRow>
           </CardContent>
@@ -457,44 +478,6 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
           </CardContent>
         </Card>
 
-        {/* Condition thresholds */}
-        <Card id="condition">
-          <CardHeader className="px-[22px] py-5 border-b">
-            <p className="text-[15px] font-semibold tracking-tight">{t("condition.title")}</p>
-            <p className="text-[12.5px] text-muted-foreground mt-0.5">
-              {t("condition.subtitle")}
-            </p>
-          </CardHeader>
-          <CardContent className="p-0">
-            <SettingRow
-              label="Condition thresholds"
-              description={t("condition.hint")}
-              last
-            >
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={settings.conditionGoodPct}
-                  onChange={(e) =>
-                    updateSettings({ conditionGoodPct: Number(e.target.value) })
-                  }
-                  className="w-[84px] h-[34px] text-center"
-                />
-                <span className="text-[13px] text-muted-foreground">good %</span>
-                <Input
-                  type="number"
-                  value={settings.conditionFairPct}
-                  onChange={(e) =>
-                    updateSettings({ conditionFairPct: Number(e.target.value) })
-                  }
-                  className="w-[84px] h-[34px] text-center"
-                />
-                <span className="text-[13px] text-muted-foreground">fair %</span>
-              </div>
-            </SettingRow>
-          </CardContent>
-        </Card>
-
         {/* Danger zone */}
         <Card id="danger" className="border-destructive/35">
           <CardHeader className="px-[22px] py-5 border-b border-destructive/35">
@@ -519,25 +502,29 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
         </Card>
       </div>
 
-      {/* Save bar */}
-      {dirty && (
-        <div className="fixed left-[248px] right-0 bottom-0 z-40 flex items-center justify-end gap-2.5 px-7 py-[14px] bg-background/90 backdrop-blur-sm border-t max-[980px]:left-0">
-          <span className="mr-auto flex items-center gap-2 text-[13px] text-muted-foreground">
-            <AlertCircle className="size-[15px]" />
-            {t("saveBar.unsaved")}
-          </span>
-          <Button variant="outline" size="sm" onClick={handleDiscard} disabled={saving}>
-            {t("saveBar.discard")}
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : t("saveBar.save")}
-          </Button>
-        </div>
-      )}
+      {/* Save bar — always visible */}
+      <div className="fixed left-[248px] right-0 bottom-0 z-40 flex items-center justify-end gap-2.5 px-7 py-[14px] bg-background/[0.9] backdrop-blur-sm border-t max-[980px]:left-0">
+        <span className="mr-auto flex items-center gap-2 text-[13px] text-muted-foreground">
+          {dirty ? (
+            <>
+              <AlertCircle className="size-[15px]" />
+              {t("saveBar.unsaved")}
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="size-[15px]" />
+              All changes saved
+            </>
+          )}
+        </span>
+        <Button variant="outline" size="sm" onClick={handleDiscard} disabled={!dirty || saving}>
+          {t("saveBar.discard")}
+        </Button>
+        <Button size="sm" onClick={handleSave} disabled={!dirty || saving}>
+          {saving ? "Saving…" : t("saveBar.save")}
+        </Button>
+      </div>
 
-      {/* Hidden labels for a11y (Label component usage satisfies lint) */}
-      <Label className="sr-only" htmlFor="settings-form">Settings</Label>
-      <Separator className="sr-only" />
     </div>
   );
 }

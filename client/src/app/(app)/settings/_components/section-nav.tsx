@@ -7,8 +7,6 @@ import {
   Boxes,
   Bell,
   Database,
-  Gauge,
-  TriangleAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,8 +23,6 @@ interface SectionNavProps {
     inventory: string;
     notifications: string;
     data: string;
-    condition: string;
-    danger: string;
   };
 }
 
@@ -40,8 +36,6 @@ export function SectionNav({ labels }: SectionNavProps) {
     { id: "inventory", label: labels.inventory, icon: <Boxes className="size-4" /> },
     { id: "notifications", label: labels.notifications, icon: <Bell className="size-4" /> },
     { id: "data", label: labels.data, icon: <Database className="size-4" /> },
-    { id: "condition", label: labels.condition, icon: <Gauge className="size-4" /> },
-    { id: "danger", label: labels.danger, icon: <TriangleAlert className="size-4" /> },
   ];
 
   useEffect(() => {
