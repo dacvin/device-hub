@@ -60,6 +60,7 @@
   },
   "overview": {
     "title": "[vi] Overview",
+    "subtitle": "[vi] Fleet health across all departments",
     "kpiTotalDevices": "[vi] Total devices",
     "kpiInUse": "[vi] In use",
     "kpiNeedsAttention": "[vi] Needs attention",
@@ -80,7 +81,10 @@
     "attentionSubtitle": "[vi] {count, plural, one {# device flagged} other {# devices flagged}} · {repair} in repair",
     "attentionOnTrack": "[vi] Everything is on track",
     "attentionEmpty": "[vi] No devices need attention right now.",
-    "activityTitle": "[vi] Recent activity"
+    "activityTitle": "[vi] Recent activity",
+    "groupShareManage": "[vi] Manage groups",
+    "viewInventory": "[vi] View inventory",
+    "addDevice": "[vi] Add device"
   },
   "states": {
     "errorTitle": "[vi] Something went wrong",

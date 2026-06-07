@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { HardDrive } from "lucide-react";
 
 export interface GroupShareRow {
   groupId: string;
@@ -32,7 +33,7 @@ export function GroupShareBars({
         </div>
         <Link
           href={manageHref}
-          className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+          className="text-[13px] text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           {manageLabel}
         </Link>
@@ -49,8 +50,11 @@ export function GroupShareBars({
                 className="grid items-center gap-3"
                 style={{ gridTemplateColumns: "116px 1fr auto", color: "inherit" }}
               >
-                <span className="flex items-center gap-[9px] text-[13px] font-medium truncate">
-                  {r.groupName}
+                <span className="flex items-center gap-[9px] text-[13px] font-medium min-w-0">
+                  <span className="size-[26px] rounded-[7px] bg-secondary text-secondary-foreground flex items-center justify-center flex-none">
+                    <HardDrive className="size-[14px]" aria-hidden />
+                  </span>
+                  <span className="truncate">{r.groupName}</span>
                 </span>
                 <span className="block h-2 rounded-full bg-muted overflow-hidden">
                   <span

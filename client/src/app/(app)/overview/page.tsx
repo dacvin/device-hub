@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { HardDrive, CircleCheckBig, TriangleAlert, Wrench } from "lucide-react";
+import { HardDrive, CircleCheckBig, TriangleAlert, Wrench, List, Plus } from "lucide-react";
+import Link from "next/link";
 import { getCurrentMember } from "@/lib/data/auth";
 import { listDevices } from "@/lib/data/devices";
 import { listGroups } from "@/lib/data/groups";
 import { listRecentActivity } from "@/lib/data/activity";
+import { PageHeader } from "@/components/app/page-header";
+import { Button } from "@/components/ui/button";
 import { KpiCard } from "./_components/kpi-card";
 import { LifecycleBar, type LifecycleSegment } from "./_components/lifecycle-bar";
 import { GroupShareBars, type GroupShareRow } from "./_components/group-share-bars";
@@ -65,6 +68,20 @@ export default async function OverviewPage() {
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        title={t("title")}
+        subtitle={t("subtitle")}
+        actions={
+          <>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/devices"><List className="size-4 mr-1.5" />{t("viewInventory")}</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/devices/new"><Plus className="size-4 mr-1.5" />{t("addDevice")}</Link>
+            </Button>
+          </>
+        }
+      />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           icon={HardDrive}
@@ -105,7 +122,7 @@ export default async function OverviewPage() {
             total={total}
             title={t("groupShareTitle")}
             subtitle={t("groupShareSubtitle", { total })}
-            manageLabel="Manage groups"
+            manageLabel={t("groupShareManage")}
             manageHref="/groups"
           />
         </div>

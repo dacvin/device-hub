@@ -60,6 +60,7 @@
   },
   "overview": {
     "title": "Overview",
+    "subtitle": "Fleet health across all departments",
     "kpiTotalDevices": "Total devices",
     "kpiInUse": "In use",
     "kpiNeedsAttention": "Needs attention",
@@ -80,7 +81,10 @@
     "attentionSubtitle": "{count, plural, one {# device flagged} other {# devices flagged}} · {repair} in repair",
     "attentionOnTrack": "Everything is on track",
     "attentionEmpty": "No devices need attention right now.",
-    "activityTitle": "Recent activity"
+    "activityTitle": "Recent activity",
+    "groupShareManage": "Manage groups",
+    "viewInventory": "View inventory",
+    "addDevice": "Add device"
   },
   "states": {
     "errorTitle": "Something went wrong",
