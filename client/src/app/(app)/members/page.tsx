@@ -4,7 +4,7 @@ import { getCurrentMember } from "@/lib/data/auth";
 import { listMembers } from "@/lib/data/members";
 import { listDepartments } from "@/lib/data/departments";
 import { can } from "@/lib/domain/members";
-import { PageHeader } from "@/components/app/page-header";
+import { PageShell } from "@/components/app/page-shell";
 import { RoleSummaryRow } from "./_components/role-summary-row";
 import { MembersPageClient } from "./_components/members-page-client";
 
@@ -38,11 +38,8 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
   const isFiltered = !!(q || roleFilter);
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title={t("title")}
-        subtitle={t("metaCount", { count: members.length })}
-      />
+    <PageShell title={t("title")} crumb={t("subtitle")}>
+      <div className="space-y-5">
 
       <RoleSummaryRow
         adminCount={totalAdmins}
@@ -114,5 +111,6 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
         }}
       />
     </div>
+    </PageShell>
   );
 }

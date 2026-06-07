@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getCurrentMember } from "@/lib/data/auth";
 import { getOrgSettings, getUserPreference } from "@/lib/data/settings";
 import { can } from "@/lib/domain/members";
+import { PageShell } from "@/components/app/page-shell";
 import { PermissionDenied } from "@/components/app/states/permission-denied";
 import { SettingsForm } from "./_components/settings-form";
 
@@ -27,10 +28,12 @@ export default async function SettingsPage() {
   ]);
 
   return (
-    <SettingsForm
-      initialSettings={settings}
-      initialPrefs={prefs}
-      memberId={me.id}
-    />
+    <PageShell title={t("title")}>
+      <SettingsForm
+        initialSettings={settings}
+        initialPrefs={prefs}
+        memberId={me.id}
+      />
+    </PageShell>
   );
 }

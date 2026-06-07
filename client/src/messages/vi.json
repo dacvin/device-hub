@@ -43,7 +43,12 @@
     "accountSettings": "Cài đặt tài khoản",
     "lightMode": "Giao diện sáng",
     "darkMode": "Giao diện tối",
+    "language": "Ngôn ngữ",
     "signOut": "Đăng xuất"
+  },
+  "mobileNav": {
+    "more": "Khác",
+    "moreTitle": "Khác"
   },
   "common": {
     "save": "Lưu",
@@ -108,7 +113,7 @@
   },
   "departments": {
     "title": "Phòng ban",
-    "subtitle": "Nơi thiết bị được phân bổ",
+    "subtitle": "Đơn vị tổ chức được phân bổ thiết bị",
     "addAction": "Thêm phòng ban",
     "tableName": "Tên",
     "tableManager": "Quản lý",
@@ -126,7 +131,7 @@
   },
   "groups": {
     "title": "Nhóm",
-    "subtitle": "Phân loại thiết bị",
+    "subtitle": "Danh mục thiết bị và chu kỳ kiểm kê",
     "addAction": "Thêm nhóm",
     "tableName": "Tên",
     "tableCycle": "Chu kỳ kiểm kê mặc định",
@@ -144,7 +149,7 @@
   },
   "manufacturers": {
     "title": "Nhà sản xuất",
-    "subtitle": "Nhà cung cấp các thiết bị đã đăng ký",
+    "subtitle": "Nhà cung cấp thiết bị cho tổ chức",
     "addAction": "Thêm nhà sản xuất",
     "tableName": "Tên",
     "tableSupport": "Liên hệ hỗ trợ",
@@ -160,6 +165,7 @@
   },
   "members": {
     "title": "Thành viên",
+    "subtitle": "Người có quyền truy cập DeviceHub",
     "search": "Tìm thành viên",
     "invite": "Mời thành viên",
     "export": "Xuất",

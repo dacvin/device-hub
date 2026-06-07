@@ -4,6 +4,8 @@ import { getCurrentMember } from "@/lib/data/auth";
 import { getMemberById } from "@/lib/data/members";
 import { listDevices } from "@/lib/data/devices";
 import { listActivityByActor } from "@/lib/data/activity";
+import { PageShell } from "@/components/app/page-shell";
+import { ROLE_LABEL } from "@/lib/domain/members";
 import { ProfileHeader } from "./_components/profile-header";
 import { DetailsCard } from "./_components/details-card";
 import { DevicesManaged } from "./_components/devices-managed";
@@ -34,8 +36,11 @@ export default async function MemberProfilePage({
 
   const managedCount = managedDevices.length;
 
+  const roleCrumb = [ROLE_LABEL[member.role], member.departmentName].filter(Boolean).join(" · ");
+
   return (
-    <div className="space-y-6">
+    <PageShell title={member.name} crumb={roleCrumb || undefined}>
+      <div className="space-y-6">
       <ProfileHeader member={member} isYou={me.id === member.id} />
       <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
         <div className="space-y-6">
@@ -54,5 +59,6 @@ export default async function MemberProfilePage({
         </div>
       </div>
     </div>
+    </PageShell>
   );
 }

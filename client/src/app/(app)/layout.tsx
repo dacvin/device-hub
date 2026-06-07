@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar, type SidebarUser } from "@/components/app/sidebar";
-import { Topbar } from "@/components/app/topbar";
+import { AvatarMenu } from "@/components/app/avatar-menu";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfirmProvider } from "@/hooks/use-confirm";
+import { MobileBottomNav } from "@/components/app/mobile-bottom-nav";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -27,14 +28,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex bg-background text-foreground">
       <Sidebar user={sidebarUser} />
       <div className="flex-1 min-w-0 flex flex-col">
-        <Topbar />
         <ConfirmProvider>
-          <main className="flex-1 px-7 py-7">
+          <main className="flex-1 min-w-0 pb-20 min-[980px]:pb-0">
             <div className="max-w-[1320px] mx-auto">{children}</div>
           </main>
         </ConfirmProvider>
       </div>
+      <div className="fixed top-3 right-3 z-30 min-[980px]:hidden">
+        <AvatarMenu variant="icon" user={sidebarUser} />
+      </div>
       <Toaster richColors position="bottom-right" />
+      <MobileBottomNav />
     </div>
   );
 }

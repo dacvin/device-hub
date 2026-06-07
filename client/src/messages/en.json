@@ -43,7 +43,12 @@
     "accountSettings": "Account settings",
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
+    "language": "Language",
     "signOut": "Sign out"
+  },
+  "mobileNav": {
+    "more": "More",
+    "moreTitle": "More"
   },
   "common": {
     "save": "Save",
@@ -108,7 +113,7 @@
   },
   "departments": {
     "title": "Departments",
-    "subtitle": "Where devices are allocated",
+    "subtitle": "Org units that devices are allocated to",
     "addAction": "Add department",
     "tableName": "Name",
     "tableManager": "Manager",
@@ -126,7 +131,7 @@
   },
   "groups": {
     "title": "Groups",
-    "subtitle": "Categories of devices",
+    "subtitle": "Device categories and their inventory cadence",
     "addAction": "Add group",
     "tableName": "Name",
     "tableCycle": "Default inventory cycle",
@@ -144,7 +149,7 @@
   },
   "manufacturers": {
     "title": "Manufacturers",
-    "subtitle": "Vendors of catalogued devices",
+    "subtitle": "Vendors supplying the device fleet",
     "addAction": "Add manufacturer",
     "tableName": "Name",
     "tableSupport": "Support contact",
@@ -160,6 +165,7 @@
   },
   "members": {
     "title": "Members",
+    "subtitle": "People with access to DeviceHub",
     "search": "Search members",
     "invite": "Invite member",
     "export": "Export",

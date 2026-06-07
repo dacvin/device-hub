@@ -2,7 +2,7 @@ import { listDevices, type DeviceListFilters } from "@/lib/data/devices";
 import { listDepartments } from "@/lib/data/departments";
 import { listGroups } from "@/lib/data/groups";
 import { listManufacturers } from "@/lib/data/manufacturers";
-import { PageHeader } from "@/components/app/page-header";
+import { PageShell } from "@/components/app/page-shell";
 import { Button } from "@/components/ui/button";
 import { Download, Plus } from "lucide-react";
 import Link from "next/link";
@@ -44,23 +44,22 @@ export default async function DevicesPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <>
-      <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
-        actions={
-          <>
-            <Button variant="outline" size="sm">
-              <Download className="size-4" /> {t("export")}
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/devices/new">
-                <Plus className="size-4" /> {t("addDevice")}
-              </Link>
-            </Button>
-          </>
-        }
-      />
+    <PageShell
+      title={t("title")}
+      crumb={t("subtitle")}
+      actions={
+        <>
+          <Button variant="outline" size="sm">
+            <Download className="size-4" /> {t("export")}
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/devices/new">
+              <Plus className="size-4" /> {t("addDevice")}
+            </Link>
+          </Button>
+        </>
+      }
+    >
       <DeviceListClient
         devices={devices}
         groups={groups}
@@ -69,6 +68,6 @@ export default async function DevicesPage({ searchParams }: PageProps) {
         initialFilters={filters}
         initialView={view}
       />
-    </>
+    </PageShell>
   );
 }

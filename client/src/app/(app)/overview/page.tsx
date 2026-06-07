@@ -6,7 +6,7 @@ import { getCurrentMember } from "@/lib/data/auth";
 import { listDevices } from "@/lib/data/devices";
 import { listGroups } from "@/lib/data/groups";
 import { listRecentActivity } from "@/lib/data/activity";
-import { PageHeader } from "@/components/app/page-header";
+import { PageShell } from "@/components/app/page-shell";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "./_components/kpi-card";
 import { LifecycleBar, type LifecycleSegment } from "./_components/lifecycle-bar";
@@ -67,21 +67,21 @@ export default async function OverviewPage() {
     : t("attentionOnTrack");
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title={t("title")}
-        subtitle={t("subtitle")}
-        actions={
-          <>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/devices"><List className="size-4 mr-1.5" />{t("viewInventory")}</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/devices/new"><Plus className="size-4 mr-1.5" />{t("addDevice")}</Link>
-            </Button>
-          </>
-        }
-      />
+    <PageShell
+      title={t("title")}
+      crumb={t("subtitle")}
+      actions={
+        <>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/devices"><List className="size-4 mr-1.5" />{t("viewInventory")}</Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/devices/new"><Plus className="size-4 mr-1.5" />{t("addDevice")}</Link>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           icon={HardDrive}
@@ -140,5 +140,6 @@ export default async function OverviewPage() {
         </div>
       </div>
     </div>
+    </PageShell>
   );
 }

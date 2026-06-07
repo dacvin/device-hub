@@ -43,7 +43,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { PageHeader } from "@/components/app/page-header";
+import { PageTopbar } from "@/components/app/page-topbar";
 import { GroupIcon } from "@/components/app/group-icon";
 import { Required } from "@/components/app/required";
 import { createClient } from "@/lib/supabase/client";
@@ -234,7 +234,12 @@ export function DeviceForm(props: DeviceFormProps) {
 
   return (
     <>
-      {props.mode === "edit" ? (
+      <PageTopbar
+        title={props.pageTitle}
+        crumb={props.mode === "create" ? props.pageSubtitle : undefined}
+      />
+      <div className="px-7 py-7">
+      {props.mode === "edit" && (
         <div className="flex items-center gap-3.5 mb-[22px]">
           <GroupIcon icon={props.headerGroupIcon ?? null} size="lg" />
           <div className="min-w-0">
@@ -248,8 +253,6 @@ export function DeviceForm(props: DeviceFormProps) {
             )}
           </div>
         </div>
-      ) : (
-        <PageHeader title={props.pageTitle} subtitle={props.pageSubtitle} />
       )}
 
       <Link
@@ -797,6 +800,7 @@ export function DeviceForm(props: DeviceFormProps) {
           </div>
         </div>
       </form>
+      </div>
     </>
   );
 }

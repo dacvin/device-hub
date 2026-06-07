@@ -33,7 +33,7 @@ import { GroupIcon } from "@/components/app/group-icon";
 import { StatusBadge } from "@/components/app/status-badge";
 import { FlagChip } from "@/components/app/flag-chip";
 import { ConditionRing } from "@/components/app/condition-ring";
-import { PageHeader } from "@/components/app/page-header";
+import { PageTopbar } from "@/components/app/page-topbar";
 import { formatBytes } from "@/lib/domain/devices";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +80,8 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
 
   return (
     <>
-      <PageHeader title={t("pageTitle")} />
+      <PageTopbar title={t("pageTitle")} />
+      <div className="px-7 py-7">
 
       <Link
         href="/devices"
@@ -324,6 +325,7 @@ export default async function DeviceDetailsPage({ params }: PageProps) {
           </Card>
         </aside>
       </div>
+    </div>
     </>
   );
 }

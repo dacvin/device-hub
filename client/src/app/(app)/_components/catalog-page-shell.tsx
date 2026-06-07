@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PageHeader } from "@/components/app/page-header";
+import { PageTopbar } from "@/components/app/page-topbar";
 
 interface Props {
   title: string;
@@ -31,9 +31,9 @@ export function CatalogPageShell({
   const tCommon = useTranslations("common");
   return (
     <>
-      <PageHeader
+      <PageTopbar
         title={title}
-        subtitle={subtitle}
+        crumb={subtitle}
         actions={
           <>
             <div className="relative">
@@ -54,8 +54,10 @@ export function CatalogPageShell({
           </>
         }
       />
-      <div className="text-[13px] text-muted-foreground mb-3">{metaLine}</div>
-      {children}
+      <div className="px-7 py-7">
+        <div className="text-[13px] text-muted-foreground mb-3">{metaLine}</div>
+        {children}
+      </div>
     </>
   );
 }
