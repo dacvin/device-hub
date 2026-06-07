@@ -10,6 +10,9 @@ export async function RecentActivityList({ items, title }: { items: Activity[]; 
         <div className="text-[15px] font-semibold tracking-tight">{title}</div>
       </div>
       <div className="px-5 pt-[18px] pb-5">
+        {items.length === 0 ? (
+          <p className="text-[13px] text-muted-foreground text-center py-4">No recent activity yet.</p>
+        ) : null}
         <div className="relative pt-1">
           {items.map((a, i) => {
             const meta = ACTIVITY_META[a.action];

@@ -38,8 +38,8 @@ export default async function OverviewPage() {
 
   const segments: LifecycleSegment[] = [
     { key: "in-use",     label: t("statusInUse"),     count: inUse,     colorVar: "--green-500" },
-    { key: "in-storage", label: t("statusInStorage"), count: inStorage, colorVar: "--chart-2" },
-    { key: "in-repair",  label: t("statusInRepair"),  count: inRepair,  colorVar: "--chart-3" },
+    { key: "in-storage", label: t("statusInStorage"), count: inStorage, colorVar: "--status-storage" },
+    { key: "in-repair",  label: t("statusInRepair"),  count: inRepair,  colorVar: "--status-repair" },
     { key: "retired",    label: t("statusRetired"),   count: retired,   colorVar: "--muted-foreground" },
   ];
 
