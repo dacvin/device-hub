@@ -100,3 +100,9 @@ UPDATE device d
 SET cover_photo_id = ph.id
 FROM device_photo ph
 WHERE ph.device_id = d.id AND ph.sort_order = 0 AND d.cover_photo_id IS NULL;
+
+-- ---- Org settings (singleton) ----
+-- The schema's INSERT runs only when the table is created from schema files,
+-- not when applied via a migration. Seed it here so first sign-in / Overview
+-- / Settings can always read the singleton.
+INSERT INTO org_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING;
