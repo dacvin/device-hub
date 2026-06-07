@@ -86,6 +86,22 @@
     "errorTitle": "Something went wrong",
     "errorDescription": "We couldn't load this view. Try again or come back later."
   },
+  "activity": {
+    "deviceCreated": "created device",
+    "deviceUpdated": "updated device",
+    "deviceStatusChanged": "changed status of",
+    "deviceDeleted": "deleted device",
+    "deviceRestored": "restored device",
+    "deviceInventoryChecked": "checked inventory of",
+    "deviceAllocated": "allocated device",
+    "memberInvited": "invited",
+    "memberRoleChanged": "changed role of",
+    "memberRemoved": "removed",
+    "catalogCreated": "added to catalog",
+    "catalogUpdated": "updated in catalog",
+    "catalogDeleted": "removed from catalog",
+    "settingsUpdated": "updated workspace settings"
+  },
   "departments": {
     "title": "Departments",
     "subtitle": "Where devices are allocated",

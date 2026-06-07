@@ -86,6 +86,22 @@
     "errorTitle": "[vi] Something went wrong",
     "errorDescription": "[vi] We couldn't load this view. Try again or come back later."
   },
+  "activity": {
+    "deviceCreated": "[vi] created device",
+    "deviceUpdated": "[vi] updated device",
+    "deviceStatusChanged": "[vi] changed status of",
+    "deviceDeleted": "[vi] deleted device",
+    "deviceRestored": "[vi] restored device",
+    "deviceInventoryChecked": "[vi] checked inventory of",
+    "deviceAllocated": "[vi] allocated device",
+    "memberInvited": "[vi] invited",
+    "memberRoleChanged": "[vi] changed role of",
+    "memberRemoved": "[vi] removed",
+    "catalogCreated": "[vi] added to catalog",
+    "catalogUpdated": "[vi] updated in catalog",
+    "catalogDeleted": "[vi] removed from catalog",
+    "settingsUpdated": "[vi] updated workspace settings"
+  },
   "departments": {
     "title": "Phòng ban",
     "subtitle": "Nơi thiết bị được phân bổ",

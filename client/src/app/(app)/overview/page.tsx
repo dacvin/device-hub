@@ -7,6 +7,9 @@ import { listGroups } from "@/lib/data/groups";
 import { listRecentActivity } from "@/lib/data/activity";
 import { KpiCard } from "./_components/kpi-card";
 import { LifecycleBar, type LifecycleSegment } from "./_components/lifecycle-bar";
+import { GroupShareBars, type GroupShareRow } from "./_components/group-share-bars";
+import { AttentionRail } from "./_components/attention-rail";
+import { RecentActivityList } from "./_components/recent-activity";
 
 export default async function OverviewPage() {
   const member = await getCurrentMember();
@@ -37,9 +40,28 @@ export default async function OverviewPage() {
     { key: "retired",    label: t("statusRetired"),   count: retired,   colorVar: "--muted-foreground" },
   ];
 
-  // suppress unused-var warnings until Task 6.2 wires these in
-  void groups;
-  void activity;
+  // Build group share rows sorted descending by count
+  const groupCountMap = new Map<string, number>();
+  for (const d of devices) {
+    groupCountMap.set(d.groupId, (groupCountMap.get(d.groupId) ?? 0) + 1);
+  }
+  const groupShareRows: GroupShareRow[] = Array.from(groupCountMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([groupId, count]) => {
+      const group = groups.find((g) => g.id === groupId);
+      return {
+        groupId,
+        groupName: group?.name ?? groupId,
+        groupIcon: group?.icon ?? null,
+        count,
+      };
+    });
+
+  const attentionDevices = devices.filter((d) => d.flags.length > 0);
+
+  const attentionSubtitle = attentionDevices.length > 0
+    ? t("attentionSubtitle", { count: attentionDevices.length, repair: inRepair })
+    : t("attentionOnTrack");
 
   return (
     <div className="space-y-5">
@@ -78,10 +100,26 @@ export default async function OverviewPage() {
             title={t("lifecycleTitle")}
             subtitle={t("lifecycleSubtitle")}
           />
-          {/* GroupShareBars added in Task 6.2 */}
+          <GroupShareBars
+            rows={groupShareRows}
+            total={total}
+            title={t("groupShareTitle")}
+            subtitle={t("groupShareSubtitle", { total })}
+            manageLabel="Manage groups"
+            manageHref="/groups"
+          />
         </div>
         <div className="space-y-5">
-          {/* AttentionRail + RecentActivity added in Task 6.2 */}
+          <AttentionRail
+            devices={attentionDevices}
+            title={t("attentionTitle")}
+            subtitle={attentionSubtitle}
+            emptyText={t("attentionEmpty")}
+          />
+          <RecentActivityList
+            items={activity}
+            title={t("activityTitle")}
+          />
         </div>
       </div>
     </div>
