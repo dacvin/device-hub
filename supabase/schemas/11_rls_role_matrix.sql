@@ -37,6 +37,8 @@ create policy user_pref_self_insert on user_preference for insert with check (us
 create policy user_pref_self_update on user_preference for update using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 create policy activity_read_all on activity for select using (auth.role() = 'authenticated');
+create policy activity_insert_authenticated on activity for insert
+  with check (auth.role() = 'authenticated');
 
 -- ============================================================
 -- Tighten device + catalog write policies to the role matrix
