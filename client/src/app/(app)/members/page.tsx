@@ -6,7 +6,6 @@ import { listDepartments } from "@/lib/data/departments";
 import { can } from "@/lib/domain/members";
 import { PageHeader } from "@/components/app/page-header";
 import { RoleSummaryRow } from "./_components/role-summary-row";
-import { RoleFilter } from "./_components/role-filter";
 import { MembersPageClient } from "./_components/members-page-client";
 
 interface MembersPageProps {
@@ -59,18 +58,6 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
         }}
       />
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <RoleFilter
-          currentRole={role}
-          labels={{
-            all: t("filterAll"),
-            admins: t("filterAdmins"),
-            managers: t("filterManagers"),
-            viewers: t("filterViewers"),
-          }}
-        />
-      </div>
-
       <MembersPageClient
         members={members}
         currentMemberId={member.id}
@@ -78,10 +65,15 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
         departments={departments}
         isFiltered={isFiltered}
         currentQ={q}
+        currentRole={role}
         labels={{
           search: t("search"),
           invite: t("invite"),
           export: t("export"),
+          filterAll: t("filterAll"),
+          filterAdmins: t("filterAdmins"),
+          filterManagers: t("filterManagers"),
+          filterViewers: t("filterViewers"),
           colMember: t("colMember"),
           colRole: t("colRole"),
           colDepartment: t("colDepartment"),
@@ -98,21 +90,9 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
           filteredEmptyTitle: t("filteredEmptyTitle"),
           filteredEmptyDescription: t("filteredEmptyDescription"),
           metaCount: t("metaCount", { count: members.length }),
-          bulk: {
-            selected: t("bulk.selected", { count: 0 }),
-            role: t("bulk.role"),
-            export: t("bulk.export"),
-            remove: t("bulk.remove"),
-            confirmRemoveTitle: t("bulk.confirmRemoveTitle", { count: 0 }),
-            confirmRemoveDescription: t("bulk.confirmRemoveDescription"),
-            confirmRemoveCta: t("bulk.confirmRemoveCta"),
-          },
           toast: {
             invitationSent: t("toast.invitationSent"),
-            roleUpdated: t("toast.roleUpdated"),
-            memberRemoved: t("toast.memberRemoved"),
             actionFailed: t("toast.actionFailed"),
-            exportStub: t("toast.exportStub"),
           },
           inviteDialog: {
             title: t("inviteDialog.title"),

@@ -52,7 +52,7 @@ export function RoleSummaryRow({ adminCount, managerCount, viewerCount, labels }
         count={adminCount}
         label={labels.admins}
         description={labels.capAdmin}
-        iconClass="bg-primary/10 text-primary"
+        iconClass="bg-secondary text-secondary-foreground"
       />
       <RoleCard
         icon={<UserCog className="size-[19px]" aria-hidden />}
@@ -66,7 +66,7 @@ export function RoleSummaryRow({ adminCount, managerCount, viewerCount, labels }
         count={viewerCount}
         label={labels.viewers}
         description={labels.capViewer}
-        iconClass="bg-muted text-muted-foreground"
+        iconClass="bg-secondary text-secondary-foreground"
       />
     </div>
   );

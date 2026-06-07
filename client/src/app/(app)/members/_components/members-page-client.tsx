@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 import { Search, UserPlus, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import type { Member } from "@/lib/domain/members";
 import type { Department } from "@/lib/domain/devices";
 import { MembersTable } from "./members-table";
 import { InviteDialog } from "./invite-dialog";
+import { RoleFilter } from "./role-filter";
 
 interface MembersPageClientProps {
   members: Member[];
@@ -17,10 +17,16 @@ interface MembersPageClientProps {
   canManage: boolean;
   departments: Department[];
   isFiltered: boolean;
+  currentQ?: string;
+  currentRole?: string;
   labels: {
     search: string;
     invite: string;
     export: string;
+    filterAll: string;
+    filterAdmins: string;
+    filterManagers: string;
+    filterViewers: string;
     colMember: string;
     colRole: string;
     colDepartment: string;
@@ -37,21 +43,9 @@ interface MembersPageClientProps {
     filteredEmptyTitle: string;
     filteredEmptyDescription: string;
     metaCount: string;
-    bulk: {
-      selected: string;
-      role: string;
-      export: string;
-      remove: string;
-      confirmRemoveTitle: string;
-      confirmRemoveDescription: string;
-      confirmRemoveCta: string;
-    };
     toast: {
       invitationSent: string;
-      roleUpdated: string;
-      memberRemoved: string;
       actionFailed: string;
-      exportStub: string;
     };
     inviteDialog: {
       title: string;
@@ -71,7 +65,6 @@ interface MembersPageClientProps {
       viewer: string;
     };
   };
-  currentQ?: string;
 }
 
 export function MembersPageClient({
@@ -82,6 +75,7 @@ export function MembersPageClient({
   isFiltered,
   labels,
   currentQ,
+  currentRole,
 }: MembersPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -104,17 +98,27 @@ export function MembersPageClient({
 
   return (
     <>
+      {/* Toolbar: filter left, search + actions right — matches mock toolbar layout */}
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-[320px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" aria-hidden />
-          <Input
-            className="pl-8 h-9 text-sm"
-            placeholder={labels.search}
-            defaultValue={currentQ}
-            onChange={handleSearch}
-          />
-        </div>
-        <div className="flex items-center gap-2 ml-auto">
+        <RoleFilter
+          currentRole={currentRole}
+          labels={{
+            all: labels.filterAll,
+            admins: labels.filterAdmins,
+            managers: labels.filterManagers,
+            viewers: labels.filterViewers,
+          }}
+        />
+        <div className="flex items-center gap-2 ml-auto flex-wrap">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" aria-hidden />
+            <Input
+              className="pl-8 h-9 text-sm w-[220px]"
+              placeholder={labels.search}
+              defaultValue={currentQ}
+              onChange={handleSearch}
+            />
+          </div>
           <Button variant="outline" size="sm">
             <Download className="size-3.5 mr-1.5" aria-hidden />
             {labels.export}

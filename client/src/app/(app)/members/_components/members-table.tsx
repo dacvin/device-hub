@@ -93,21 +93,6 @@ interface MembersTableProps {
     filteredEmptyTitle: string;
     filteredEmptyDescription: string;
     metaCount: string;
-    bulk: {
-      selected: string;
-      role: string;
-      export: string;
-      remove: string;
-      confirmRemoveTitle: string;
-      confirmRemoveDescription: string;
-      confirmRemoveCta: string;
-    };
-    toast: {
-      roleUpdated: string;
-      memberRemoved: string;
-      actionFailed: string;
-      exportStub: string;
-    };
   };
   isFiltered: boolean;
   onInviteClick?: () => void;
@@ -318,8 +303,6 @@ export function MembersTable({
         <BulkActions
           selected={selected}
           onClear={() => setSelected(new Set())}
-          labels={labels.bulk}
-          toastLabels={labels.toast}
         />
       )}
     </>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { UserCog, Download, UserMinus, ShieldCheck, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -19,21 +20,6 @@ import { ROLE_LABEL } from "@/lib/domain/members";
 interface BulkActionsProps {
   selected: Set<string>;
   onClear: () => void;
-  labels: {
-    selected: string;
-    role: string;
-    export: string;
-    remove: string;
-    confirmRemoveTitle: string;
-    confirmRemoveDescription: string;
-    confirmRemoveCta: string;
-  };
-  toastLabels: {
-    roleUpdated: string;
-    memberRemoved: string;
-    actionFailed: string;
-    exportStub: string;
-  };
 }
 
 const ROLE_ICONS: Record<MemberRole, React.ElementType> = {
@@ -42,9 +28,10 @@ const ROLE_ICONS: Record<MemberRole, React.ElementType> = {
   viewer: Eye,
 };
 
-export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActionsProps) {
+export function BulkActions({ selected, onClear }: BulkActionsProps) {
   const router = useRouter();
   const confirm = useConfirm();
+  const t = useTranslations("members");
   const [rolePopoverOpen, setRolePopoverOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -58,9 +45,9 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
       const results = await Promise.all(ids.map((id) => updateMemberRoleAction(id, role)));
       const failed = results.filter((r) => !r.ok).length;
       if (failed > 0) {
-        toast.error(toastLabels.actionFailed);
+        toast.error(t("toast.actionFailed"));
       } else {
-        toast.success(toastLabels.roleUpdated);
+        toast.success(t("toast.roleUpdated"));
       }
       onClear();
       router.refresh();
@@ -70,15 +57,15 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
   }
 
   async function handleExport() {
-    toast.success(toastLabels.exportStub);
+    toast.success(t("toast.exportStub"));
     onClear();
   }
 
   async function handleRemove() {
     const ok = await confirm({
-      title: labels.confirmRemoveTitle.replace("{count}", String(count)),
-      description: labels.confirmRemoveDescription,
-      confirmLabel: labels.confirmRemoveCta,
+      title: t("bulk.confirmRemoveTitle", { count }),
+      description: t("bulk.confirmRemoveDescription"),
+      confirmLabel: t("bulk.confirmRemoveCta"),
       tone: "destructive",
     });
     if (!ok) return;
@@ -89,9 +76,9 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
       const results = await Promise.all(ids.map((id) => removeMemberAction(id)));
       const failed = results.filter((r) => !r.ok).length;
       if (failed > 0) {
-        toast.error(toastLabels.actionFailed);
+        toast.error(t("toast.actionFailed"));
       } else {
-        toast.success(toastLabels.memberRemoved);
+        toast.success(t("toast.memberRemoved"));
       }
       onClear();
       router.refresh();
@@ -104,13 +91,13 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
     <BulkActionBar
       selectedCount={count}
       onClear={onClear}
-      countLabel={(n) => labels.selected.replace("{count}", String(n))}
+      countLabel={(n) => t("bulk.selected", { count: n })}
     >
       <Popover open={rolePopoverOpen} onOpenChange={setRolePopoverOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" disabled={loading}>
             <UserCog className="size-3.5 mr-1.5" aria-hidden />
-            {labels.role}
+            {t("bulk.role")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-44 p-1" align="center" side="top">
@@ -133,7 +120,7 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
 
       <Button variant="outline" size="sm" onClick={handleExport} disabled={loading}>
         <Download className="size-3.5 mr-1.5" aria-hidden />
-        {labels.export}
+        {t("bulk.export")}
       </Button>
 
       <Button
@@ -144,7 +131,7 @@ export function BulkActions({ selected, onClear, labels, toastLabels }: BulkActi
         disabled={loading}
       >
         <UserMinus className="size-3.5 mr-1.5" aria-hidden />
-        {labels.remove}
+        {t("bulk.remove")}
       </Button>
     </BulkActionBar>
   );
