@@ -221,6 +221,38 @@
       "confirmRemoveCta": "Remove members"
     }
   },
+  "memberProfile": {
+    "back": "Back to members",
+    "youPill": "You",
+    "message": "Message",
+    "editMember": "Edit member",
+    "detailsTitle": "Details",
+    "role": "Role",
+    "department": "Department",
+    "site": "Site",
+    "status": "Status",
+    "phone": "Phone",
+    "reportsTo": "Reports to",
+    "memberSince": "Member since",
+    "lastActive": "Last active",
+    "devicesManagedTitle": "Devices managed",
+    "devicesManagedSubtitle": "in {department}",
+    "viewAllInDept": "View all in {department}",
+    "devicesManagedEmpty": "No devices in this department yet.",
+    "permissionsTitle": "Permissions",
+    "permissions": {
+      "viewInventory": "View inventory",
+      "manageOwnDept": "Manage devices in own department",
+      "manageAllDevices": "Manage all devices",
+      "manageCatalogs": "Manage catalogs (departments, groups, manufacturers)",
+      "exportData": "Export data",
+      "manageMembers": "Manage members",
+      "changeSettings": "Change workspace settings"
+    },
+    "statsTitle": "Summary",
+    "devicesCount": "{count} devices",
+    "activityTitle": "Activity"
+  },
   "devices": {
     "status": {
       "in-use": "In use",

@@ -221,6 +221,38 @@
       "confirmRemoveCta": "[vi] Remove members"
     }
   },
+  "memberProfile": {
+    "back": "[vi] Back to members",
+    "youPill": "[vi] You",
+    "message": "[vi] Message",
+    "editMember": "[vi] Edit member",
+    "detailsTitle": "[vi] Details",
+    "role": "[vi] Role",
+    "department": "[vi] Department",
+    "site": "[vi] Site",
+    "status": "[vi] Status",
+    "phone": "[vi] Phone",
+    "reportsTo": "[vi] Reports to",
+    "memberSince": "[vi] Member since",
+    "lastActive": "[vi] Last active",
+    "devicesManagedTitle": "[vi] Devices managed",
+    "devicesManagedSubtitle": "[vi] in {department}",
+    "viewAllInDept": "[vi] View all in {department}",
+    "devicesManagedEmpty": "[vi] No devices in this department yet.",
+    "permissionsTitle": "[vi] Permissions",
+    "permissions": {
+      "viewInventory": "[vi] View inventory",
+      "manageOwnDept": "[vi] Manage devices in own department",
+      "manageAllDevices": "[vi] Manage all devices",
+      "manageCatalogs": "[vi] Manage catalogs (departments, groups, manufacturers)",
+      "exportData": "[vi] Export data",
+      "manageMembers": "[vi] Manage members",
+      "changeSettings": "[vi] Change workspace settings"
+    },
+    "statsTitle": "[vi] Summary",
+    "devicesCount": "[vi] {count} devices",
+    "activityTitle": "[vi] Activity"
+  },
   "devices": {
     "status": {
       "in-use": "Đang sử dụng",
