@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar, type SidebarUser } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
+import { Toaster } from "@/components/ui/sonner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -29,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="max-w-[1320px] mx-auto">{children}</div>
         </main>
       </div>
+      <Toaster richColors position="bottom-right" />
     </div>
   );
 }
