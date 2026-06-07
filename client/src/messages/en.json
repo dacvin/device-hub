@@ -58,6 +58,34 @@
     "export": "Export",
     "search": "Search…"
   },
+  "overview": {
+    "title": "Overview",
+    "kpiTotalDevices": "Total devices",
+    "kpiInUse": "In use",
+    "kpiNeedsAttention": "Needs attention",
+    "kpiInRepair": "In repair",
+    "kpiTotalSubtitle": "{quantity} units · {departments} departments",
+    "kpiInUseSubtitle": "{storage} in storage · {retired} retired",
+    "kpiAttentionSubtitle": "Warranty & inventory flags",
+    "kpiInRepairSubtitle": "Avg. condition {avg}%",
+    "lifecycleTitle": "Lifecycle status",
+    "lifecycleSubtitle": "Every device sits in exactly one state",
+    "statusInUse": "In use",
+    "statusInStorage": "In storage",
+    "statusInRepair": "In repair",
+    "statusRetired": "Retired",
+    "groupShareTitle": "Inventory by group",
+    "groupShareSubtitle": "Share of all {total} devices",
+    "attentionTitle": "Needs attention",
+    "attentionSubtitle": "{count, plural, one {# device flagged} other {# devices flagged}} · {repair} in repair",
+    "attentionOnTrack": "Everything is on track",
+    "attentionEmpty": "No devices need attention right now.",
+    "activityTitle": "Recent activity"
+  },
+  "states": {
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We couldn't load this view. Try again or come back later."
+  },
   "departments": {
     "title": "Departments",
     "subtitle": "Where devices are allocated",

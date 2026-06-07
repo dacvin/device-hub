@@ -58,6 +58,34 @@
     "export": "Xuất",
     "search": "Tìm kiếm…"
   },
+  "overview": {
+    "title": "[vi] Overview",
+    "kpiTotalDevices": "[vi] Total devices",
+    "kpiInUse": "[vi] In use",
+    "kpiNeedsAttention": "[vi] Needs attention",
+    "kpiInRepair": "[vi] In repair",
+    "kpiTotalSubtitle": "[vi] {quantity} units · {departments} departments",
+    "kpiInUseSubtitle": "[vi] {storage} in storage · {retired} retired",
+    "kpiAttentionSubtitle": "[vi] Warranty & inventory flags",
+    "kpiInRepairSubtitle": "[vi] Avg. condition {avg}%",
+    "lifecycleTitle": "[vi] Lifecycle status",
+    "lifecycleSubtitle": "[vi] Every device sits in exactly one state",
+    "statusInUse": "[vi] In use",
+    "statusInStorage": "[vi] In storage",
+    "statusInRepair": "[vi] In repair",
+    "statusRetired": "[vi] Retired",
+    "groupShareTitle": "[vi] Inventory by group",
+    "groupShareSubtitle": "[vi] Share of all {total} devices",
+    "attentionTitle": "[vi] Needs attention",
+    "attentionSubtitle": "[vi] {count, plural, one {# device flagged} other {# devices flagged}} · {repair} in repair",
+    "attentionOnTrack": "[vi] Everything is on track",
+    "attentionEmpty": "[vi] No devices need attention right now.",
+    "activityTitle": "[vi] Recent activity"
+  },
+  "states": {
+    "errorTitle": "[vi] Something went wrong",
+    "errorDescription": "[vi] We couldn't load this view. Try again or come back later."
+  },
   "departments": {
     "title": "Phòng ban",
     "subtitle": "Nơi thiết bị được phân bổ",
