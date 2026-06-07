@@ -197,7 +197,7 @@
       "description": "Send an invitation to join DeviceHub. They'll receive access on first sign-in.",
       "name": "Name",
       "email": "Work email",
-      "emailHelper": "Must be an @sioux.asia address",
+      "emailHelper": "We'll email an invitation to this address.",
       "role": "Role",
       "department": "Department",
       "departmentNone": "No department",

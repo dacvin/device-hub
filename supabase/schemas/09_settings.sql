@@ -5,7 +5,7 @@
 create table org_settings (
   id                              boolean primary key default true check (id),
 
-  org_name                        text not null default 'Sioux Asia',
+  org_name                        text not null default 'DeviceHub',
   primary_site                    text,
   date_format                     text not null default 'DD MMM YYYY',
 

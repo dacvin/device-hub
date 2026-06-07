@@ -92,7 +92,7 @@ export function mapMemberRow(row: MemberJoinedRow): Member {
 
 export const inviteMemberSchema = z.object({
   name: z.string().min(1).max(120),
-  email: z.string().email().regex(/@sioux\.asia$/i, "Email must be a @sioux.asia address"),
+  email: z.string().email(),
   role: z.enum(["it_admin", "manager", "viewer"]),
   departmentId: z.string().uuid().nullable(),
 });

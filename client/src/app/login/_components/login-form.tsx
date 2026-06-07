@@ -11,7 +11,7 @@ export function LoginForm() {
   const t = useTranslations("login");
   const params = useSearchParams();
   const error = params.get("error");
-  const next = params.get("next") ?? "/devices";
+  const next = params.get("next") ?? "/overview";
   const [loading, setLoading] = useState(false);
 
   async function onGoogle() {

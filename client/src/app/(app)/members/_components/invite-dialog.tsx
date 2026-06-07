@@ -120,7 +120,7 @@ export function InviteDialog({
             <Input
               id="invite-email"
               type="email"
-              placeholder="name@sioux.asia"
+              placeholder="name@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

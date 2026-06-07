@@ -1,8 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const SIOUX_DOMAIN = /@sioux\.asia$/i;
-
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -23,10 +21,9 @@ export async function GET(request: NextRequest) {
   }
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !user.email || !SIOUX_DOMAIN.test(user.email)) {
-    await supabase.auth.signOut();
+  if (!user || !user.email) {
     url.pathname = "/login";
-    url.search = "?error=domain";
+    url.search = "?error=oauth";
     return NextResponse.redirect(url);
   }
 
