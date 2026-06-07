@@ -6,8 +6,10 @@ import { useTranslations } from "next-intl";
 import { BrandMark } from "@/components/app/brand-mark";
 import { NAV_GROUPS } from "@/components/app/nav-items";
 import { cn } from "@/lib/utils";
+import { AvatarMenu } from "@/components/app/avatar-menu";
 
 export interface SidebarUser {
+  id: string;
   name: string;
   email: string;
   initials: string;
@@ -70,21 +72,7 @@ export function Sidebar({ user }: { user: SidebarUser }) {
       </nav>
 
       <div className="mt-auto p-3 border-t border-sidebar-border">
-        <div className="flex items-center gap-2.5 p-2 rounded-md">
-          <div
-            className={cn(
-              "size-8 rounded-full bg-primary text-primary-foreground",
-              "flex items-center justify-center text-xs font-semibold"
-            )}
-            aria-hidden
-          >
-            {user.initials}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-medium leading-tight truncate">{user.name}</div>
-            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
-          </div>
-        </div>
+        <AvatarMenu user={user} />
       </div>
     </aside>
   );

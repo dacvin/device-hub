@@ -38,6 +38,13 @@
       "inventoryAccuracyLabel": "Độ chính xác kiểm kê"
     }
   },
+  "avatarMenu": {
+    "viewProfile": "[vi] View profile",
+    "accountSettings": "[vi] Account settings",
+    "lightMode": "[vi] Light mode",
+    "darkMode": "[vi] Dark mode",
+    "signOut": "[vi] Sign out"
+  },
   "common": {
     "save": "Lưu",
     "create": "Tạo",

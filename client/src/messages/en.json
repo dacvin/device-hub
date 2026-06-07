@@ -38,6 +38,13 @@
       "inventoryAccuracyLabel": "Inventory accuracy"
     }
   },
+  "avatarMenu": {
+    "viewProfile": "View profile",
+    "accountSettings": "Account settings",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode",
+    "signOut": "Sign out"
+  },
   "common": {
     "save": "Save",
     "create": "Create",
