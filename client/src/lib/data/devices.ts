@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getOrgSettings } from "@/lib/data/settings";
+import { escapePostgrestFilter } from "@/lib/data/_filter";
 import {
   type DeviceFlag,
   type DeviceFormValues,
@@ -43,8 +44,9 @@ export async function listDevices(filters: DeviceListFilters = {}): Promise<Devi
   if (filters.q) {
     const term = filters.q.trim();
     if (term) {
+      const safe = escapePostgrestFilter(term);
       q = q.or(
-        `name.ilike.%${term}%,code.ilike.%${term}%,serial_number.ilike.%${term}%,model.ilike.%${term}%`
+        `name.ilike.%${safe}%,code.ilike.%${safe}%,serial_number.ilike.%${safe}%,model.ilike.%${safe}%`
       );
     }
   }

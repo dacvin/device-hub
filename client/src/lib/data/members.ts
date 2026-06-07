@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { mapMemberRow, type Member, type MemberRole, type MemberRow } from "@/lib/domain/members";
+import { escapePostgrestFilter } from "@/lib/data/_filter";
 
 type MemberJoinedRow = MemberRow & {
   department: { name: string } | null;
@@ -28,7 +29,8 @@ export async function listMembers(filters: MemberListFilters = {}): Promise<Memb
   if (filters.q) {
     const term = filters.q.trim();
     if (term) {
-      q = q.or(`name.ilike.%${term}%,email.ilike.%${term}%`);
+      const safe = escapePostgrestFilter(term);
+      q = q.or(`name.ilike.%${safe}%,email.ilike.%${safe}%`);
     }
   }
   const { data, error } = await q;
