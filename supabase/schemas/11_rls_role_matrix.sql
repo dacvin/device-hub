@@ -29,6 +29,17 @@ create policy member_update_self on member for update
   );
 create policy member_delete_admin on member for delete using (app_role() = 'it_admin');
 
+-- Self-insert: a user signing in for the first time creates their own
+-- member row (the auth callback does this). id must equal auth.uid();
+-- role defaults to 'viewer', so no privilege escalation possible.
+create policy member_self_insert on member for insert
+  with check (id = auth.uid());
+
+-- Self-claim of an invited row: lets the auth callback delete a stale
+-- invited record that shares the user's email but has a placeholder id.
+create policy member_self_claim_delete on member for delete
+  using (email = (select auth.jwt() ->> 'email'));
+
 create policy org_settings_read  on org_settings for select using (auth.role() = 'authenticated');
 create policy org_settings_write on org_settings for update using (app_role() = 'it_admin') with check (app_role() = 'it_admin');
 
