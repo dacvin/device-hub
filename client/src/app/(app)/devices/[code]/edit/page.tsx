@@ -1,42 +1,56 @@
+"use client";
+
+import { use } from "react";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import {
-  getDeviceWithFlagsByCode,
-  listDeviceDocuments,
-  listDevicePhotos,
-} from "@/lib/data/devices";
-import { listDepartments } from "@/lib/data/departments";
-import { listGroups } from "@/lib/data/groups";
-import { listManufacturers } from "@/lib/data/manufacturers";
-import { signedDocumentUrls, signedPhotoUrls } from "@/lib/data/storage";
+import { useTranslations } from "next-intl";
+import { useDeviceByCode } from "@/features/devices/hooks/use-device";
+import { useDevicePhotos } from "@/features/devices/hooks/use-device-photos";
+import { useDeviceDocuments } from "@/features/devices/hooks/use-device-documents";
+import { useSignedPhotoUrls } from "@/features/devices/hooks/use-signed-photo-urls";
+import { useSignedDocumentUrls } from "@/features/devices/hooks/use-signed-document-urls";
+import { useGroups } from "@/features/groups/hooks/use-groups";
+import { useDepartments } from "@/features/departments/hooks/use-departments";
+import { useManufacturers } from "@/features/manufacturers/hooks/use-manufacturers";
 import { DeviceForm } from "@/app/(app)/devices/_components/device-form";
+import { DeviceFormSkeleton } from "@/app/(app)/devices/_components/device-form-skeleton";
 import type { DeviceFormValues } from "@/lib/domain/devices";
 import type { PhotoItem } from "@/app/(app)/devices/_components/photo-gallery";
 import type { DocumentItem } from "@/app/(app)/devices/_components/document-list";
-
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ code: string }>;
 }
 
-export default async function EditDevicePage({ params }: PageProps) {
-  const { code } = await params;
+export default function EditDevicePage({ params }: PageProps) {
+  const { code } = use(params);
   const decodedCode = decodeURIComponent(code);
-  const device = await getDeviceWithFlagsByCode(decodedCode);
-  if (!device) notFound();
+  const tForm = useTranslations("devices.form");
 
-  const [groups, departments, manufacturers, photoRows, docRows, tForm] = await Promise.all([
-    listGroups(),
-    listDepartments(),
-    listManufacturers(),
-    listDevicePhotos(device.id),
-    listDeviceDocuments(device.id),
-    getTranslations("devices.form"),
-  ]);
+  const deviceQ = useDeviceByCode(decodedCode);
+  const groups = useGroups();
+  const depts = useDepartments();
+  const mfrs = useManufacturers();
+  const photosQ = useDevicePhotos(deviceQ.data?.id ?? "");
+  const docsQ = useDeviceDocuments(deviceQ.data?.id ?? "");
 
-  const photoUrlMap = await signedPhotoUrls(photoRows.map((p) => p.url));
-  const docUrlMap = await signedDocumentUrls(docRows.map((d) => d.url));
+  const photoPaths = (photosQ.data ?? []).map((p) => p.url);
+  const docPaths = (docsQ.data ?? []).map((d) => d.url);
+  const photoUrlsQ = useSignedPhotoUrls(photoPaths);
+  const docUrlsQ = useSignedDocumentUrls(docPaths);
+
+  if (
+    deviceQ.isPending || groups.isPending || depts.isPending || mfrs.isPending ||
+    photosQ.isPending || docsQ.isPending
+  ) {
+    return <DeviceFormSkeleton pageTitle={tForm("editPageTitle", { name: "" })} />;
+  }
+  if (!deviceQ.data) notFound();
+
+  const device = deviceQ.data;
+  const photoRows = photosQ.data ?? [];
+  const docRows = docsQ.data ?? [];
+  const photoUrlMap = photoUrlsQ.data ?? {};
+  void (docUrlsQ.data ?? {});
 
   const initialPhotos: PhotoItem[] = photoRows.map((p) => ({
     key: p.id,
@@ -46,7 +60,6 @@ export default async function EditDevicePage({ params }: PageProps) {
     fileName: p.fileName,
     sizeBytes: p.sizeBytes,
   }));
-
   const initialDocuments: DocumentItem[] = docRows.map((d) => ({
     key: d.id,
     dbId: d.id,
@@ -55,7 +68,6 @@ export default async function EditDevicePage({ params }: PageProps) {
     mimeType: d.mimeType,
     sizeBytes: d.sizeBytes,
   }));
-  void docUrlMap; // not displayed here; details page handles document open links
 
   const initialValues: DeviceFormValues = {
     name: device.name,
@@ -80,7 +92,7 @@ export default async function EditDevicePage({ params }: PageProps) {
     warrantyEnd: device.warrantyEnd,
   };
 
-  const headerGroupIcon = groups.find((g) => g.id === device.groupId)?.icon ?? null;
+  const headerGroupIcon = (groups.data ?? []).find((g) => g.id === device.groupId)?.icon ?? null;
 
   return (
     <DeviceForm
@@ -89,9 +101,9 @@ export default async function EditDevicePage({ params }: PageProps) {
       initialValues={initialValues}
       initialPhotos={initialPhotos}
       initialDocuments={initialDocuments}
-      groups={groups}
-      departments={departments}
-      manufacturers={manufacturers}
+      groups={groups.data ?? []}
+      departments={depts.data ?? []}
+      manufacturers={mfrs.data ?? []}
       pageTitle={tForm("editPageTitle", { name: device.name })}
       pageSubtitle={device.code}
       headerGroupIcon={headerGroupIcon}

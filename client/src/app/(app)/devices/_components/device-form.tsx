@@ -58,16 +58,14 @@ import {
   type DeviceGroup,
   type Manufacturer,
 } from "@/lib/domain/devices";
-import {
-  createDeviceAction,
-  deleteDeviceAction,
-  insertDocumentsAction,
-  insertPhotosAction,
-  removeDocumentAction,
-  removePhotoAction,
-  reorderPhotosAction,
-  updateDeviceAction,
-} from "@/app/(app)/devices/_actions";
+import { useCreateDevice } from "@/features/devices/hooks/use-create-device";
+import { useUpdateDevice } from "@/features/devices/hooks/use-update-device";
+import { useDeleteDevice } from "@/features/devices/hooks/use-delete-device";
+import { useInsertPhotos } from "@/features/devices/hooks/use-insert-photos";
+import { useReorderPhotos } from "@/features/devices/hooks/use-reorder-photos";
+import { useRemovePhoto } from "@/features/devices/hooks/use-remove-photo";
+import { useInsertDocuments } from "@/features/devices/hooks/use-insert-documents";
+import { useRemoveDocument } from "@/features/devices/hooks/use-remove-document";
 import {
   PhotoGallery,
   type PhotoItem,
@@ -109,6 +107,15 @@ export function DeviceForm(props: DeviceFormProps) {
   const [pending, startTransition] = useTransition();
   const [activeSection, setActiveSection] = useState<string>("general");
 
+  const createDevice = useCreateDevice();
+  const updateDevice = useUpdateDevice();
+  const deleteDevice = useDeleteDevice();
+  const insertPhotos = useInsertPhotos();
+  const reorderPhotos = useReorderPhotos();
+  const removePhoto = useRemovePhoto();
+  const insertDocuments = useInsertDocuments();
+  const removeDocument = useRemoveDocument();
+
   const tForm = useTranslations("devices.form");
   const tCommon = useTranslations("common");
   const tStatus = useTranslations("devices.status");
@@ -130,16 +137,12 @@ export function DeviceForm(props: DeviceFormProps) {
     onSubmit: async ({ value }) => {
       startTransition(async () => {
         try {
-          const action =
+          const device =
             props.mode === "create"
-              ? await createDeviceAction(value)
-              : await updateDeviceAction(props.deviceId!, value);
-          if (!action.ok) {
-            toast.error(action.error ?? tForm("couldNotSave"));
-            return;
-          }
-          const deviceId = action.deviceId!;
-          const code = action.code!;
+              ? await createDevice.mutateAsync(value)
+              : await updateDevice.mutateAsync({ id: props.deviceId!, values: value });
+          const deviceId = device.id;
+          const code = device.code;
           await persistUploads(deviceId);
           toast.success(props.mode === "create" ? tForm("createdToast") : tForm("updatedToast"));
           router.push(`/devices/${encodeURIComponent(code)}`);
@@ -178,7 +181,7 @@ export function DeviceForm(props: DeviceFormProps) {
       });
     }
     if (newPhotos.length > 0) {
-      await insertPhotosAction(deviceId, newPhotos);
+      await insertPhotos.mutateAsync({ deviceId, photos: newPhotos });
     }
 
     // Reorder persisted photos that moved.
@@ -187,7 +190,7 @@ export function DeviceForm(props: DeviceFormProps) {
       .filter((x): x is { id: string; sortOrder: number } => x !== null);
     const orderChanged = persistedOrder.some((p, idx) => p.id !== originalPhotoOrder[idx]);
     if (orderChanged && persistedOrder.length > 0) {
-      await reorderPhotosAction(persistedOrder);
+      await reorderPhotos.mutateAsync({ deviceId, rows: persistedOrder });
     }
 
     // Upload pending documents.
@@ -213,7 +216,7 @@ export function DeviceForm(props: DeviceFormProps) {
       });
     }
     if (newDocs.length > 0) {
-      await insertDocumentsAction(deviceId, newDocs);
+      await insertDocuments.mutateAsync({ deviceId, docs: newDocs });
     }
   }
 
@@ -711,7 +714,11 @@ export function DeviceForm(props: DeviceFormProps) {
                   onChange={setPhotos}
                   onRemovePersisted={async (item) => {
                     if (item.dbId && item.storagePath) {
-                      await removePhotoAction(item.dbId, item.storagePath);
+                      try {
+                        await removePhoto.mutateAsync({ deviceId: props.deviceId ?? "", photoId: item.dbId, storagePath: item.storagePath });
+                      } catch (e) {
+                        toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
+                      }
                     }
                   }}
                 />
@@ -723,7 +730,11 @@ export function DeviceForm(props: DeviceFormProps) {
                   onChange={setDocuments}
                   onRemovePersisted={async (item) => {
                     if (item.dbId && item.storagePath) {
-                      await removeDocumentAction(item.dbId, item.storagePath);
+                      try {
+                        await removeDocument.mutateAsync({ deviceId: props.deviceId ?? "", docId: item.dbId, storagePath: item.storagePath });
+                      } catch (e) {
+                        toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
+                      }
                     }
                   }}
                 />
@@ -768,7 +779,12 @@ export function DeviceForm(props: DeviceFormProps) {
                     <AlertDialogAction
                       onClick={() => {
                         startTransition(async () => {
-                          await deleteDeviceAction(props.deviceId!);
+                          try {
+                            await deleteDevice.mutateAsync(props.deviceId!);
+                            router.push("/devices");
+                          } catch (e) {
+                            toast.error(e instanceof Error ? e.message : tCommon("deleteFailed"));
+                          }
                         });
                       }}
                     >

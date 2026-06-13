@@ -1,5 +1,8 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { use } from "react";
 import { notFound } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -20,48 +23,65 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  getDeviceWithFlagsByCode,
-  listDeviceDocuments,
-  listDevicePhotos,
-} from "@/lib/data/devices";
-import { getGroupById } from "@/lib/data/groups";
-import { getDepartmentById } from "@/lib/data/departments";
-import { getManufacturerById } from "@/lib/data/manufacturers";
-import { signedPhotoUrls, signedDocumentUrls } from "@/lib/data/storage";
+import { useDeviceByCode } from "@/features/devices/hooks/use-device";
+import { useDevicePhotos } from "@/features/devices/hooks/use-device-photos";
+import { useDeviceDocuments } from "@/features/devices/hooks/use-device-documents";
+import { useGroupById } from "@/features/groups/hooks/use-group";
+import { useDepartmentById } from "@/features/departments/hooks/use-department";
+import { useManufacturerById } from "@/features/manufacturers/hooks/use-manufacturer";
+import { useSignedPhotoUrls } from "@/features/devices/hooks/use-signed-photo-urls";
+import { useSignedDocumentUrls } from "@/features/devices/hooks/use-signed-document-urls";
 import { GroupIcon } from "@/components/app/group-icon";
 import { StatusBadge } from "@/components/app/status-badge";
 import { FlagChip } from "@/components/app/flag-chip";
 import { ConditionRing } from "@/components/app/condition-ring";
 import { PageTopbar } from "@/components/app/page-topbar";
 import { formatBytes } from "@/lib/domain/devices";
-
-export const dynamic = "force-dynamic";
+import { DeviceDetailSkeleton } from "./_components/page-skeleton";
 
 interface PageProps {
   params: Promise<{ code: string }>;
 }
 
-export default async function DeviceDetailsPage({ params }: PageProps) {
-  const { code } = await params;
+export default function DeviceDetailsPage({ params }: PageProps) {
+  const { code } = use(params);
   const decodedCode = decodeURIComponent(code);
-  const device = await getDeviceWithFlagsByCode(decodedCode);
-  if (!device) notFound();
+  const t = useTranslations("devices.details");
+  const tSource = useTranslations("devices.source");
+  const tUnit = useTranslations("devices.unit");
 
-  const [group, dept, mfr, photos, documents] = await Promise.all([
-    getGroupById(device.groupId),
-    getDepartmentById(device.departmentId),
-    device.manufacturerId ? getManufacturerById(device.manufacturerId) : null,
-    listDevicePhotos(device.id),
-    listDeviceDocuments(device.id),
-  ]);
+  const deviceQ = useDeviceByCode(decodedCode);
+  const photosQ = useDevicePhotos(deviceQ.data?.id ?? "");
+  const docsQ = useDeviceDocuments(deviceQ.data?.id ?? "");
+  const groupQ = useGroupById(deviceQ.data?.groupId ?? "");
+  const deptQ = useDepartmentById(deviceQ.data?.departmentId ?? "");
+  const mfrQ = useManufacturerById(deviceQ.data?.manufacturerId ?? "");
 
-  const photoUrlMap = await signedPhotoUrls(photos.map((p) => p.url));
-  const docUrlMap = await signedDocumentUrls(documents.map((d) => d.url));
+  const photoPaths = (photosQ.data ?? []).map((p) => p.url);
+  const docPaths = (docsQ.data ?? []).map((d) => d.url);
+  const photoUrlsQ = useSignedPhotoUrls(photoPaths);
+  const docUrlsQ = useSignedDocumentUrls(docPaths);
 
-  const t = await getTranslations("devices.details");
-  const tSource = await getTranslations("devices.source");
-  const tUnit = await getTranslations("devices.unit");
+  if (
+    deviceQ.isPending ||
+    photosQ.isPending ||
+    docsQ.isPending ||
+    groupQ.isLoading ||
+    deptQ.isLoading ||
+    mfrQ.isLoading
+  ) {
+    return <DeviceDetailSkeleton />;
+  }
+  if (!deviceQ.data) notFound();
+
+  const device = deviceQ.data;
+  const photos = photosQ.data ?? [];
+  const documents = docsQ.data ?? [];
+  const group = groupQ.data;
+  const dept = deptQ.data;
+  const mfr = mfrQ.data;
+  const photoUrlMap = photoUrlsQ.data ?? {};
+  const docUrlMap = docUrlsQ.data ?? {};
 
   const now = new Date();
   const warrantyDaysLeft = device.warrantyEnd
