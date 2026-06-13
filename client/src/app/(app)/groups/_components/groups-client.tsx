@@ -2,7 +2,7 @@
 
 /* eslint-disable react/no-children-prop */
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -32,8 +32,9 @@ import { CountLink } from "@/app/(app)/_components/catalog-link";
 import { GroupIcon } from "@/components/app/group-icon";
 import { Required } from "@/components/app/required";
 import { groupFormSchema, type GroupFormValues } from "@/lib/domain/devices";
-import { deleteGroupAction, saveGroupAction } from "@/app/(app)/groups/_actions";
-import type { GroupWithCount } from "@/lib/data/groups";
+import { useSaveGroup } from "@/features/groups/hooks/use-save-group";
+import { useDeleteGroup } from "@/features/groups/hooks/use-delete-group";
+import type { GroupWithCount } from "@/features/groups/api/list-groups-with-counts";
 import { cn } from "@/lib/utils";
 
 const ICON_OPTIONS = [
@@ -59,7 +60,8 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
   const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
-  const [, startTransition] = useTransition();
+  const saveGroup = useSaveGroup();
+  const deleteGroup = useDeleteGroup();
 
   const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
@@ -117,9 +119,8 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
                         disabled={r.deviceCount > 0}
                         title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
-                          startTransition(async () => {
-                            const res = await deleteGroupAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
+                          deleteGroup.mutate(r.id, {
+                            onError: (e) => toast.error(e instanceof Error ? e.message : tCommon("deleteFailed")),
                           });
                         }}
                       >
@@ -147,12 +148,12 @@ export function GroupsClient({ rows }: { rows: GroupWithCount[] }) {
               defaultInventoryCycleMonths: editing.defaultInventoryCycleMonths,
             } : empty}
             onSubmit={async (values) => {
-              const res = await saveGroupAction(editing?.id ?? null, values);
-              if (res.ok) {
+              try {
+                await saveGroup.mutateAsync({ id: editing?.id ?? null, values });
                 setOpenId(null);
                 toast.success(editing ? t("updated") : t("added"));
-              } else {
-                toast.error(res.error ?? tCommon("saveFailed"));
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
