@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HardDrive, ShieldCheck, UserCog, Eye, Building2, MapPin, CalendarClock } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { Member, MemberRole } from "@/lib/domain/members";
 import { ROLE_LABEL } from "@/lib/domain/members";
 
@@ -21,8 +21,8 @@ interface ProfileStatsCardProps {
   managedCount: number;
 }
 
-export async function ProfileStatsCard({ member, managedCount }: ProfileStatsCardProps) {
-  const t = await getTranslations("memberProfile");
+export function ProfileStatsCard({ member, managedCount }: ProfileStatsCardProps) {
+  const t = useTranslations("memberProfile");
   const RoleIcon = ROLE_ICON[member.role];
   const canManage = member.role !== "viewer";
 

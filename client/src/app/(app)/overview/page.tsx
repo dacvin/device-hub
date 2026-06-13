@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import { HardDrive, CircleCheckBig, TriangleAlert, Wrench, List, Plus } from "lucide-react";
 import Link from "next/link";
-import { getCurrentMember } from "@/lib/data/auth";
-import { listDevices } from "@/lib/data/devices";
-import { listGroups } from "@/lib/data/groups";
-import { listRecentActivity } from "@/lib/data/activity";
+import { useDevices } from "@/features/devices/hooks/use-devices";
+import { useGroups } from "@/features/groups/hooks/use-groups";
+import { useRecentActivity } from "@/features/activity/hooks/use-recent-activity";
 import { PageShell } from "@/components/app/page-shell";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "./_components/kpi-card";
@@ -13,18 +13,21 @@ import { LifecycleBar, type LifecycleSegment } from "./_components/lifecycle-bar
 import { GroupShareBars, type GroupShareRow } from "./_components/group-share-bars";
 import { AttentionRail } from "./_components/attention-rail";
 import { RecentActivityList } from "./_components/recent-activity";
+import { OverviewPageSkeleton } from "./_components/page-skeleton";
 
-export default async function OverviewPage() {
-  const member = await getCurrentMember();
-  if (!member) redirect("/login");
+export default function OverviewPage() {
+  const t = useTranslations("overview");
+  const devicesQ = useDevices();
+  const groupsQ = useGroups();
+  const activityQ = useRecentActivity(5);
 
-  const t = await getTranslations("overview");
+  if (devicesQ.isPending || groupsQ.isPending || activityQ.isPending) {
+    return <OverviewPageSkeleton />;
+  }
 
-  const [devices, groups, activity] = await Promise.all([
-    listDevices(),
-    listGroups(),
-    listRecentActivity(5),
-  ]);
+  const devices = devicesQ.data ?? [];
+  const groups = groupsQ.data ?? [];
+  const activity = activityQ.data ?? [];
 
   const total = devices.length;
   const inUse = devices.filter((d) => d.status === "in-use").length;
@@ -43,7 +46,6 @@ export default async function OverviewPage() {
     { key: "retired",    label: t("statusRetired"),   count: retired,   colorVar: "--muted-foreground" },
   ];
 
-  // Build group share rows sorted descending by count
   const groupCountMap = new Map<string, number>();
   for (const d of devices) {
     groupCountMap.set(d.groupId, (groupCountMap.get(d.groupId) ?? 0) + 1);
@@ -61,7 +63,6 @@ export default async function OverviewPage() {
     });
 
   const attentionDevices = devices.filter((d) => d.flags.length > 0);
-
   const attentionSubtitle = attentionDevices.length > 0
     ? t("attentionSubtitle", { count: attentionDevices.length, repair: inRepair })
     : t("attentionOnTrack");
@@ -82,64 +83,64 @@ export default async function OverviewPage() {
       }
     >
       <div className="space-y-5">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard
-          icon={HardDrive}
-          label={t("kpiTotalDevices")}
-          value={total}
-          subtitle={t("kpiTotalSubtitle", { quantity: totalQuantity, departments: distinctDepts })}
-        />
-        <KpiCard
-          icon={CircleCheckBig}
-          label={t("kpiInUse")}
-          value={inUse}
-          subtitle={t("kpiInUseSubtitle", { storage: inStorage, retired })}
-        />
-        <KpiCard
-          icon={TriangleAlert}
-          label={t("kpiNeedsAttention")}
-          value={needsAttention}
-          tone={needsAttention > 0 ? "alert" : "default"}
-          subtitle={t("kpiAttentionSubtitle")}
-        />
-        <KpiCard
-          icon={Wrench}
-          label={t("kpiInRepair")}
-          value={inRepair}
-          subtitle={t("kpiInRepairSubtitle", { avg: avgCondition })}
-        />
-      </div>
-      <div className="grid lg:grid-cols-[1fr_340px] gap-5">
-        <div className="space-y-5">
-          <LifecycleBar
-            segments={segments}
-            total={total}
-            title={t("lifecycleTitle")}
-            subtitle={t("lifecycleSubtitle")}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <KpiCard
+            icon={HardDrive}
+            label={t("kpiTotalDevices")}
+            value={total}
+            subtitle={t("kpiTotalSubtitle", { quantity: totalQuantity, departments: distinctDepts })}
           />
-          <GroupShareBars
-            rows={groupShareRows}
-            total={total}
-            title={t("groupShareTitle")}
-            subtitle={t("groupShareSubtitle", { total })}
-            manageLabel={t("groupShareManage")}
-            manageHref="/groups"
+          <KpiCard
+            icon={CircleCheckBig}
+            label={t("kpiInUse")}
+            value={inUse}
+            subtitle={t("kpiInUseSubtitle", { storage: inStorage, retired })}
+          />
+          <KpiCard
+            icon={TriangleAlert}
+            label={t("kpiNeedsAttention")}
+            value={needsAttention}
+            tone={needsAttention > 0 ? "alert" : "default"}
+            subtitle={t("kpiAttentionSubtitle")}
+          />
+          <KpiCard
+            icon={Wrench}
+            label={t("kpiInRepair")}
+            value={inRepair}
+            subtitle={t("kpiInRepairSubtitle", { avg: avgCondition })}
           />
         </div>
-        <div className="space-y-5">
-          <AttentionRail
-            devices={attentionDevices}
-            title={t("attentionTitle")}
-            subtitle={attentionSubtitle}
-            emptyText={t("attentionEmpty")}
-          />
-          <RecentActivityList
-            items={activity}
-            title={t("activityTitle")}
-          />
+        <div className="grid lg:grid-cols-[1fr_340px] gap-5">
+          <div className="space-y-5">
+            <LifecycleBar
+              segments={segments}
+              total={total}
+              title={t("lifecycleTitle")}
+              subtitle={t("lifecycleSubtitle")}
+            />
+            <GroupShareBars
+              rows={groupShareRows}
+              total={total}
+              title={t("groupShareTitle")}
+              subtitle={t("groupShareSubtitle", { total })}
+              manageLabel={t("groupShareManage")}
+              manageHref="/groups"
+            />
+          </div>
+          <div className="space-y-5">
+            <AttentionRail
+              devices={attentionDevices}
+              title={t("attentionTitle")}
+              subtitle={attentionSubtitle}
+              emptyText={t("attentionEmpty")}
+            />
+            <RecentActivityList
+              items={activity}
+              title={t("activityTitle")}
+            />
+          </div>
         </div>
       </div>
-    </div>
     </PageShell>
   );
 }

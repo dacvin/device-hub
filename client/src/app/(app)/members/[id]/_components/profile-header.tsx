@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Mail, Pencil, Ellipsis, ShieldCheck, UserCog, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { Member, MemberRole, MemberStatus } from "@/lib/domain/members";
 import { ROLE_LABEL, ROLE_TONE } from "@/lib/domain/members";
 import { cn } from "@/lib/utils";
@@ -40,8 +40,8 @@ interface ProfileHeaderProps {
   isYou: boolean;
 }
 
-export async function ProfileHeader({ member, isYou }: ProfileHeaderProps) {
-  const t = await getTranslations("memberProfile");
+export function ProfileHeader({ member, isYou }: ProfileHeaderProps) {
+  const t = useTranslations("memberProfile");
   const RoleIcon = ROLE_ICON[member.role];
   const tone = ROLE_TONE[member.role];
 

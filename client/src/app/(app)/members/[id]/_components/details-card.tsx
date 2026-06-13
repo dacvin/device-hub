@@ -1,6 +1,6 @@
 import { IdCard } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { Member, MemberRole, MemberStatus } from "@/lib/domain/members";
 import { ROLE_LABEL, ROLE_TONE } from "@/lib/domain/members";
 import { ShieldCheck, UserCog, Eye } from "lucide-react";
@@ -51,8 +51,8 @@ interface DetailsCardProps {
   member: Member;
 }
 
-export async function DetailsCard({ member }: DetailsCardProps) {
-  const t = await getTranslations("memberProfile");
+export function DetailsCard({ member }: DetailsCardProps) {
+  const t = useTranslations("memberProfile");
   const RoleIcon = ROLE_ICON[member.role];
   const tone = ROLE_TONE[member.role];
 

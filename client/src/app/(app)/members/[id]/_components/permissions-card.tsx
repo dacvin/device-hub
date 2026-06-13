@@ -1,6 +1,6 @@
 import { KeyRound, Check, Minus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { MemberRole, Capability } from "@/lib/domain/members";
 import { CAPABILITIES } from "@/lib/domain/members";
 import { cn } from "@/lib/utils";
@@ -19,8 +19,8 @@ interface PermissionsCardProps {
   role: MemberRole;
 }
 
-export async function PermissionsCard({ role }: PermissionsCardProps) {
-  const t = await getTranslations("memberProfile");
+export function PermissionsCard({ role }: PermissionsCardProps) {
+  const t = useTranslations("memberProfile");
   const caps = CAPABILITIES[role];
 
   return (

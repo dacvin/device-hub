@@ -1,9 +1,9 @@
 import { Card } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import { type Activity, ACTIVITY_META } from "@/lib/domain/activity";
 
-export async function RecentActivityList({ items, title }: { items: Activity[]; title: string }) {
-  const t = await getTranslations("activity");
+export function RecentActivityList({ items, title }: { items: Activity[]; title: string }) {
+  const t = useTranslations("activity");
   return (
     <Card>
       <div className="px-5 pt-[18px] pb-0">

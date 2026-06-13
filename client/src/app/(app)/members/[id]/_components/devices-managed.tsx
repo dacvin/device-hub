@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { HardDrive, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import type { DeviceWithFlags } from "@/lib/domain/devices";
 import { StatusBadge } from "@/components/app/status-badge";
 
@@ -12,13 +12,13 @@ interface DevicesManagedProps {
   isViewer?: boolean;
 }
 
-export async function DevicesManaged({
+export function DevicesManaged({
   devices,
   departmentId,
   departmentName,
   isViewer = false,
 }: DevicesManagedProps) {
-  const t = await getTranslations("memberProfile");
+  const t = useTranslations("memberProfile");
   const deptLabel = departmentName ?? "—";
 
   return (
