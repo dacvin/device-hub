@@ -2,7 +2,7 @@
 
 /* eslint-disable react/no-children-prop */
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -34,11 +34,9 @@ import {
   manufacturerFormSchema,
   type ManufacturerFormValues,
 } from "@/lib/domain/devices";
-import {
-  deleteManufacturerAction,
-  saveManufacturerAction,
-} from "@/app/(app)/manufacturers/_actions";
-import type { ManufacturerWithCount } from "@/lib/data/manufacturers";
+import { useSaveManufacturer } from "@/features/manufacturers/hooks/use-save-manufacturer";
+import { useDeleteManufacturer } from "@/features/manufacturers/hooks/use-delete-manufacturer";
+import type { ManufacturerWithCount } from "@/features/manufacturers/api/list-manufacturers-with-counts";
 
 const empty: ManufacturerFormValues = { name: "", supportContact: "" };
 
@@ -47,7 +45,8 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
   const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
-  const [, startTransition] = useTransition();
+  const saveManufacturer = useSaveManufacturer();
+  const deleteManufacturer = useDeleteManufacturer();
 
   const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
@@ -110,9 +109,8 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
                         disabled={r.deviceCount > 0}
                         title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
-                          startTransition(async () => {
-                            const res = await deleteManufacturerAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
+                          deleteManufacturer.mutate(r.id, {
+                            onError: (e) => toast.error(e instanceof Error ? e.message : tCommon("deleteFailed")),
                           });
                         }}
                       >
@@ -139,12 +137,12 @@ export function ManufacturersClient({ rows }: { rows: ManufacturerWithCount[] })
               supportContact: editing.supportContact ?? "",
             } : empty}
             onSubmit={async (values) => {
-              const res = await saveManufacturerAction(editing?.id ?? null, values);
-              if (res.ok) {
+              try {
+                await saveManufacturer.mutateAsync({ id: editing?.id ?? null, values });
                 setOpenId(null);
                 toast.success(editing ? t("updated") : t("added"));
-              } else {
-                toast.error(res.error ?? tCommon("saveFailed"));
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
