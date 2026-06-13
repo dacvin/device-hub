@@ -12,11 +12,66 @@
 
 **Notes:**
 
-- No automated tests exist in this project. Verification per task is: `pnpm --filter client build` succeeds, then `pnpm --filter client dev` and exercise the page in a browser. Each task documents a smoke-test checklist.
+- No automated tests exist in this project. Verification per task is multi-agent (see Verification protocol below).
 - Each task ends with a commit, so the tree stays bisectable.
 - `lib/data/auth.ts` stays untouched — it's used by `app/(app)/layout.tsx` (server) for the gate.
 - After every page is migrated, Task 11 deletes the orphaned `lib/data/*.ts` files in one sweep.
 - Always run commands from the repo root unless noted.
+- **Local DB writes are allowed** for seeding/exercising the migrated pages. The local Supabase instance under `supabase/` is fair game. Do not touch any non-local environment.
+- **Skeleton fidelity rule:** every PageSkeleton in this plan mirrors the real page's structure — same grid, same component dimensions, same row count, same icon/text/bar positions. A user glancing at the skeleton should see the same silhouette as the loaded page, just without content. Generic full-width boxes are not acceptable.
+
+---
+
+## Verification protocol
+
+After every task's build passes, before commit, dispatch **two subagents in parallel** and wait for both. Only commit if both report PASS.
+
+**Subagent A — Code Review (`Explore` agent type, no edits):**
+
+Prompt template:
+
+> Review the diff for `<task name>` against `docs/superpowers/specs/2026-06-13-client-side-data-fetching-design.md` and the prior implementation. The migration moved data fetching from server components + server actions to TanStack Query hooks calling Supabase directly from the browser.
+>
+> Check, with file:line citations:
+> 1. Every query function in `client/src/features/<domain>/api/` matches the behavior of the function it replaces from `client/src/lib/data/<domain>.ts` (same filters, same shape, same mapper). Diff against git HEAD~N if needed.
+> 2. Every mutation hook invalidates the correct query keys on success (matches the `revalidatePath` calls in the deleted `_actions.ts`).
+> 3. Every mutation that previously logged activity still logs the same `action` / `entityType` / `entityLabel` shape.
+> 4. The page component renders the same JSX it did before (only data source changed; no styling/layout edits).
+> 5. The new PageSkeleton structurally mirrors the page — same grid, same row count, same component dimensions. Not generic boxes.
+> 6. No `"server-only"` import leaks into a page or feature file.
+> 7. No dead imports remain in the touched files.
+>
+> Report: PASS or FAIL with a numbered list of issues. Under 400 words.
+
+**Subagent B — Playwright UI verification (`general-purpose` agent type, can write to local DB):**
+
+Prompt template:
+
+> Use the Playwright MCP tools to verify `<page path>` after the `<task name>` migration. The local dev server should already be running at http://localhost:3000 — if not, start it with `pnpm --filter client dev` in the background.
+>
+> If the local DB is empty for the records this page reads, seed it via the Supabase JS client or by running SQL through `supabase db execute` against the LOCAL instance only. Do not touch any remote env.
+>
+> Sequence:
+> 1. Sign in if necessary (test account: see `.env.local` for credentials).
+> 2. Navigate to `<page path>`. Take a screenshot named `<task>-initial.png`.
+> 3. Confirm the loading skeleton is structurally similar to the loaded page (same number of rows/cards, same column positions). Screenshot it if you can catch it before the data resolves.
+> 4. Wait for content to render. Take `<task>-loaded.png`.
+> 5. Compare to the prior server-rendered version: read the page file at the commit before this task (`git show HEAD~1:<file>`) and verify the loaded JSX renders the same components in the same positions.
+> 6. Exercise one full CRUD round-trip from the task's checklist below. Confirm the list updates without a full nav.
+> 7. Reload the page. Confirm state persists (the mutation reached the DB).
+>
+> Task-specific checklist: `<inline per-task list of actions to try>`
+>
+> Report: PASS or FAIL with screenshots referenced by filename and a one-sentence note per failed item. Under 300 words.
+
+**If either agent reports FAIL:**
+- Fix the issues inline.
+- Re-run the two agents on the fixed state.
+- Only commit once both PASS.
+
+**If you have no Playwright or no local Supabase running:**
+- Skip subagent B and note it explicitly in the commit message footer: `Skipped Playwright verification (no local env).`
+- Subagent A is non-optional.
 
 ---
 
@@ -569,26 +624,56 @@ export function useDeleteGroup() {
 `client/src/app/(app)/groups/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 export function GroupsPageSkeleton() {
+  const t = useTranslations("groups");
   return (
     <CatalogPageShell
-      title=""
-      subtitle=""
+      title={t("title")}
+      subtitle={t("subtitle")}
       metaLine=""
-      addLabel=""
+      addLabel={t("addAction")}
       onAdd={() => {}}
       search=""
       onSearchChange={() => {}}
     >
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="p-4 space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableName")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableCycle")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground w-[200px]">{t("tableDevices")}</TableHead>
+              <TableHead className="w-20" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TableRow key={i} className="h-14">
+                <TableCell className="px-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </TableCell>
+                <TableCell className="px-4"><Skeleton className="h-4 w-16" /></TableCell>
+                <TableCell className="px-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-6" />
+                    <Skeleton className="h-1.5 w-32 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell className="px-4" />
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </CatalogPageShell>
   );
@@ -681,27 +766,32 @@ Delete the now-unused `useTransition` import and the `startTransition` block. Fi
 rm client/src/app/\(app\)/groups/_actions.ts
 ```
 
-- [ ] **Step 8: Build + smoke test**
+- [ ] **Step 8: Build**
 
 ```bash
 pnpm --filter client build
 ```
 
-Then run dev and check:
+- [ ] **Step 9: Verify via subagents**
 
-```bash
-pnpm --filter client dev
-```
+Dispatch **Code Review** and **Playwright UI** subagents in parallel per the Verification protocol.
 
-Open http://localhost:3000/groups:
-- [ ] Skeleton flashes briefly on first load
-- [ ] Group list populates and looks identical to before
-- [ ] Add a test group → toast "added" → list updates without nav
-- [ ] Edit it → toast "updated" → row reflects change
-- [ ] Delete an empty group → row disappears
-- [ ] Reload — verify nothing was lost
+**Code Review prompt addendum:** focus on `client/src/features/groups/` against deleted `client/src/lib/data/groups.ts` and `client/src/app/(app)/groups/_actions.ts` (use `git show HEAD~1:<path>` to read the deleted versions).
 
-- [ ] **Step 9: Commit**
+**Playwright UI checklist for `/groups`:**
+- Skeleton renders first; visually similar to loaded state (same column count + 6 rows + 30px icon column)
+- Header (title, subtitle, search, add button) renders during skeleton state — verify via screenshot
+- After load: group rows render identically to prior server-rendered version
+- Add a test group named "QA Group" → toast `groups.added` → row appears without page nav
+- Edit it: change name to "QA Group Updated" → toast `groups.updated` → row reflects change
+- Delete the test group (must have 0 devices) → row disappears without nav
+- Reload — list still shows the latest state (proves DB persistence)
+
+Local DB note: a `device_group` row is fine to insert/delete; this table has no external dependencies.
+
+Both agents must report PASS before commit.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add client/src/features/groups client/src/app/\(app\)/groups
@@ -949,26 +1039,53 @@ export function useDeleteDepartment() {
 `client/src/app/(app)/departments/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 export function DepartmentsPageSkeleton() {
+  const t = useTranslations("departments");
   return (
     <CatalogPageShell
-      title=""
-      subtitle=""
+      title={t("title")}
+      subtitle={t("subtitle")}
       metaLine=""
-      addLabel=""
+      addLabel={t("addAction")}
       onAdd={() => {}}
       search=""
       onSearchChange={() => {}}
     >
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="p-4 space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableName")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableManager")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableLocation")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground w-[200px]">{t("tableDevices")}</TableHead>
+              <TableHead className="h-11 w-20" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TableRow key={i} className="h-14">
+                <TableCell className="px-4"><Skeleton className="h-4 w-36" /></TableCell>
+                <TableCell className="px-4"><Skeleton className="h-4 w-28" /></TableCell>
+                <TableCell className="px-4"><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell className="px-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-6" />
+                    <Skeleton className="h-1.5 w-32 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell className="px-4" />
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </CatalogPageShell>
   );
@@ -1045,19 +1162,27 @@ Remove `useTransition` if it becomes unused.
 rm client/src/app/\(app\)/departments/_actions.ts
 ```
 
-- [ ] **Step 8: Build + smoke test**
+- [ ] **Step 8: Build**
 
 ```bash
-pnpm --filter client build && pnpm --filter client dev
+pnpm --filter client build
 ```
 
-Open http://localhost:3000/departments and verify:
-- [ ] Skeleton on first load
-- [ ] Department rows render identically
-- [ ] Add / edit / delete each update the list without nav
-- [ ] Reload survives
+- [ ] **Step 9: Verify via subagents**
 
-- [ ] **Step 9: Commit**
+Dispatch both subagents per the Verification protocol.
+
+**Playwright UI checklist for `/departments`:**
+- Skeleton matches the loaded silhouette (4 text columns + count-bar column + 6 rows)
+- Header renders during skeleton
+- Add "QA Dept" → toast → row appears
+- Edit "QA Dept" → row updates
+- Delete "QA Dept" (0 devices) → row disappears
+- Reload — state persists
+
+Both agents must report PASS before commit.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add client/src/features/departments client/src/app/\(app\)/departments
@@ -1305,26 +1430,51 @@ export function useDeleteManufacturer() {
 `client/src/app/(app)/manufacturers/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 export function ManufacturersPageSkeleton() {
+  const t = useTranslations("manufacturers");
   return (
     <CatalogPageShell
-      title=""
-      subtitle=""
+      title={t("title")}
+      subtitle={t("subtitle")}
       metaLine=""
-      addLabel=""
+      addLabel={t("addAction")}
       onAdd={() => {}}
       search=""
       onSearchChange={() => {}}
     >
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="p-4 space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableName")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("tableSupport")}</TableHead>
+              <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground w-[200px]">{t("tableDevices")}</TableHead>
+              <TableHead className="h-11 w-20" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TableRow key={i} className="h-14">
+                <TableCell className="px-4"><Skeleton className="h-4 w-36" /></TableCell>
+                <TableCell className="px-4"><Skeleton className="h-4 w-40" /></TableCell>
+                <TableCell className="px-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-6" />
+                    <Skeleton className="h-1.5 w-32 rounded-full" />
+                  </div>
+                </TableCell>
+                <TableCell className="px-4" />
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </CatalogPageShell>
   );
@@ -1383,17 +1533,27 @@ Remove `useTransition` if unused.
 rm client/src/app/\(app\)/manufacturers/_actions.ts
 ```
 
-- [ ] **Step 8: Build + smoke test**
+- [ ] **Step 8: Build**
 
 ```bash
-pnpm --filter client build && pnpm --filter client dev
+pnpm --filter client build
 ```
 
-Verify `/manufacturers`:
-- [ ] Skeleton on first load
-- [ ] Add / edit / delete work and update without nav
+- [ ] **Step 9: Verify via subagents**
 
-- [ ] **Step 9: Commit**
+Dispatch both subagents per the Verification protocol.
+
+**Playwright UI checklist for `/manufacturers`:**
+- Skeleton matches loaded silhouette (name + support + count-bar columns, 6 rows)
+- Header renders during skeleton
+- Add "QA Mfr" → toast → row appears
+- Edit "QA Mfr" → row updates
+- Delete "QA Mfr" (0 devices) → row disappears
+- Reload — state persists
+
+Both agents must report PASS before commit.
+
+- [ ] **Step 10: Commit**
 
 ```bash
 git add client/src/features/manufacturers client/src/app/\(app\)/manufacturers
@@ -1710,25 +1870,77 @@ export function useRemoveMember() {
 `client/src/app/(app)/members/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/app/page-shell";
+import { Card } from "@/components/ui/card";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 export function MembersPageSkeleton() {
+  const t = useTranslations("members");
   return (
-    <PageShell title="" crumb="">
+    <PageShell title={t("title")} crumb={t("subtitle")}>
       <div className="space-y-5">
+        {/* Role summary row — three cards: admins / managers / viewers */}
         <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
+            <Card key={i} className="p-5">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-10 w-10 rounded-lg" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-32" />
+                </div>
+                <Skeleton className="h-7 w-8" />
+              </div>
+            </Card>
           ))}
         </div>
-        <Skeleton className="h-10 w-72" />
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="p-4 space-y-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+        {/* Controls row: search + filters + invite/export */}
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-9 w-72" />
+          <div className="flex gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-24 rounded-md" />
             ))}
           </div>
+        </div>
+        {/* Members table */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colMember")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colRole")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colDepartment")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colDevicesManaged")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colLastActive")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colStatus")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <TableRow key={i} className="h-14">
+                  <TableCell className="px-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-9 rounded-full" />
+                      <div className="space-y-1.5">
+                        <Skeleton className="h-3.5 w-32" />
+                        <Skeleton className="h-3 w-40" />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-8" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-20" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </PageShell>
@@ -1904,21 +2116,96 @@ const removeMember = useRemoveMember();
 ```tsx
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/app/page-shell";
+import { Card } from "@/components/ui/card";
 
 export function MemberProfileSkeleton() {
   return (
     <PageShell title="" crumb="">
       <div className="space-y-6">
-        <Skeleton className="h-32 rounded-xl" />
+        {/* Profile header: avatar + name + role/dept pills + actions */}
+        <Card className="p-5">
+          <div className="flex items-start gap-4">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-64" />
+              <div className="flex gap-2">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-5 w-28 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </Card>
         <div className="grid lg:grid-cols-[1fr_320px] gap-6 items-start">
           <div className="space-y-6">
-            <Skeleton className="h-48 rounded-xl" />
-            <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-32 rounded-xl" />
+            {/* DetailsCard */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-24" />
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4 mt-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* DevicesManaged */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-32" />
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-md border border-border">
+                    <Skeleton className="h-9 w-9 rounded-md" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-3.5 w-28" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* PermissionsCard */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-28" />
+              <div className="space-y-2 mt-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-48" />
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
           <div className="space-y-6">
-            <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-56 rounded-xl" />
+            {/* ProfileStatsCard */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-24" />
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* RecentActivityList */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-32" />
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Skeleton className="h-7 w-7 rounded-full" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-40" />
+                      <Skeleton className="h-2.5 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -2016,10 +2303,16 @@ pnpm --filter client build 2>&1 | grep -E "error|features/devices"
 
 Expected: only "Cannot find module '@/features/devices/hooks/use-devices'" type errors.
 
-- [ ] **Step 10: Commit anyway with a note**
+- [ ] **Step 10: Verify (code review only)**
+
+Build is broken, so skip Playwright. Dispatch only the **Code Review subagent** with this addendum:
+
+> Confirm the only outstanding compile error in this commit is the forward reference to `@/features/devices/hooks/use-devices` from `client/src/app/(app)/members/[id]/page.tsx`. Confirm every member feature file matches the behavior of the deleted `client/src/lib/data/members.ts` and `client/src/app/(app)/members/_actions.ts`. Confirm the MembersPageSkeleton and MemberProfileSkeleton mirror the loaded layouts (role cards, controls row, member table; profile header + 3-card grid + 2-card rail).
+
+If PASS, commit:
 
 ```bash
-git add client/src/features/members client/src/app/\(app\)/members
+git add client/src/features/members client/src/features/auth client/src/app/\(app\)/members
 git commit -m "feat(members): migrate to client-side queries and mutations (devices hook pending Task 8)"
 ```
 
@@ -2286,15 +2579,34 @@ export function usePurgeRetired() {
 `client/src/app/(app)/settings/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/app/page-shell";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function SettingsPageSkeleton() {
+  const t = useTranslations("settings");
   return (
-    <PageShell title="">
+    <PageShell title={t("title")}>
       <div className="space-y-5">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-48 rounded-xl" />
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="px-[22px] py-5 border-b">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-3.5 w-72 mt-2" />
+            </CardHeader>
+            <CardContent className="p-[22px] space-y-5">
+              {Array.from({ length: 4 }).map((_, j) => (
+                <div key={j} className="flex items-center justify-between gap-6">
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-4 w-48" />
+                    <Skeleton className="h-3 w-72" />
+                  </div>
+                  <Skeleton className="h-9 w-[200px] rounded-md" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         ))}
       </div>
     </PageShell>
@@ -2401,21 +2713,21 @@ try {
 rm client/src/app/\(app\)/settings/_actions.ts
 ```
 
-- [ ] **Step 8: Build + smoke test**
-
-```bash
-pnpm --filter client build
-```
-
-The build will still fail due to Task 6's pending `useDevices` import. Verify the failures are limited to that:
+- [ ] **Step 8: Build will still fail (pending Task 8)**
 
 ```bash
 pnpm --filter client build 2>&1 | grep -E "error|use-devices"
 ```
 
-If only members/[id]/page.tsx complains, proceed.
+Confirm failures are limited to the forward reference from Task 6. If anything else fails, fix it before continuing.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 9: Verify (code review only)**
+
+Dispatch only the **Code Review subagent** with this addendum:
+
+> Confirm every settings feature file matches the behavior of the deleted `client/src/lib/data/settings.ts` and `client/src/app/(app)/settings/_actions.ts`. The skeleton must mirror the real settings layout: 5 cards stacked, each with a header (title + description) and a content area containing 4 label/control rows. Flag if `purgeRetiredDevices` could fail under RLS from the browser.
+
+If PASS, commit:
 
 ```bash
 git add client/src/features/settings client/src/app/\(app\)/settings
@@ -2626,26 +2938,98 @@ export function useDeviceDocuments(deviceId: string) {
 `client/src/app/(app)/overview/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/app/page-shell";
+import { Card } from "@/components/ui/card";
 
 export function OverviewPageSkeleton() {
+  const t = useTranslations("overview");
   return (
-    <PageShell title="" crumb="">
+    <PageShell title={t("title")} crumb={t("subtitle")}>
       <div className="space-y-5">
+        {/* 4 KPI cards: icon + label + big value + subtitle */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
+            <Card key={i} className="p-5">
+              <div className="flex items-start justify-between">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
+              <Skeleton className="h-8 w-16 mt-3" />
+              <Skeleton className="h-3 w-32 mt-2" />
+            </Card>
           ))}
         </div>
         <div className="grid lg:grid-cols-[1fr_340px] gap-5">
           <div className="space-y-5">
-            <Skeleton className="h-48 rounded-xl" />
-            <Skeleton className="h-72 rounded-xl" />
+            {/* LifecycleBar */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-56 mt-1.5" />
+              <Skeleton className="h-3 w-full mt-5 rounded-full" />
+              <div className="flex gap-4 mt-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <Skeleton className="h-2 w-2 rounded-full" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* GroupShareBars */}
+            <Card className="p-5">
+              <div className="flex items-start justify-between">
+                <div>
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-40 mt-1.5" />
+                </div>
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-7 w-7 rounded-md" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-2 flex-1 rounded-full" />
+                    <Skeleton className="h-3 w-6" />
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
           <div className="space-y-5">
-            <Skeleton className="h-56 rounded-xl" />
-            <Skeleton className="h-64 rounded-xl" />
+            {/* AttentionRail */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-48 mt-1.5" />
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-md" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            {/* RecentActivityList */}
+            <Card className="p-5">
+              <Skeleton className="h-4 w-32" />
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Skeleton className="h-7 w-7 rounded-full" />
+                    <div className="flex-1 space-y-1.5">
+                      <Skeleton className="h-3 w-40" />
+                      <Skeleton className="h-2.5 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </div>
@@ -2815,18 +3199,20 @@ pnpm --filter client build
 
 Expected: success. Tasks 6 and 7's pending imports now resolve.
 
-- [ ] **Step 6: Smoke test**
+- [ ] **Step 6: Verify via subagents (full sweep)**
 
-```bash
-pnpm --filter client dev
-```
+This is the first task after which the whole app builds again. Dispatch both subagents per the Verification protocol — but the **Playwright agent runs against every migrated page so far**, not just `/overview`.
 
-Verify each page touched so far:
-- [ ] `/overview` — skeleton then identical layout, all KPIs, lifecycle bar, group shares, attention rail, recent activity
-- [ ] `/groups`, `/departments`, `/manufacturers` — still working
-- [ ] `/settings` — loads, save works, purge works
-- [ ] `/members` — list, summary cards, filters via URL still work
-- [ ] `/members/<id>` — profile loads, managed devices appear, activity feed appears
+**Playwright UI checklist (full sweep):**
+- `/overview` — skeleton matches (4 KPI cards, lifecycle bar + group share bars on left, attention rail + activity list on right); content loads identically to previous version
+- `/groups`, `/departments`, `/manufacturers` — re-verify each (header during skeleton, CRUD works)
+- `/settings` — skeleton (5 cards) → loads → save general → toast → reload persists; save user preference; click Purge retired devices (only if there are any with status=retired older than retention) → confirm count
+- `/members` — skeleton (3 role cards + controls row + 6-col table); URL filter `?role=manager` works; invite a member → row appears; change a member's role → reflected; remove the invited member → gone
+- `/members/<id>` — skeleton (profile header + 3-card grid + 2-card rail); profile loads; managed devices populated for a member with department + non-viewer role; recent activity populated
+
+**Code Review prompt addendum:** verify that `useDevices` correctly forwards filters as a query key, that `select` is not yet used for derivations (overview still computes inline — that's fine, was in the spec as optional). Verify the overview KPI numbers, lifecycle segments, and group-share rollup match the prior server-component code line-for-line in math.
+
+Both agents must report PASS before commit.
 
 - [ ] **Step 7: Commit**
 
@@ -3095,31 +3481,70 @@ export function useBulkDelete() {
 `client/src/app/(app)/devices/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageShell } from "@/components/app/page-shell";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 
 export function DevicesPageSkeleton() {
+  const t = useTranslations("devices.list");
   return (
-    <PageShell title="" crumb="">
+    <PageShell title={t("title")} crumb={t("subtitle")}>
       <div className="space-y-4">
-        <div className="flex gap-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-28 rounded-md" />
-          ))}
-        </div>
-        <Skeleton className="h-10 w-72" />
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="p-4 space-y-3">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+        {/* Search + filter chips row */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-72" />
+          <div className="flex gap-2 ml-auto">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-28 rounded-md" />
             ))}
           </div>
+        </div>
+        {/* Device table — mirrors the table column shape (checkbox, code, name, group, dept, status, condition, flags, actions) */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="h-11 w-10 px-4"><Skeleton className="h-4 w-4 rounded" /></TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colCode")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colName")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colGroup")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colDepartment")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colStatus")}</TableHead>
+                <TableHead className="h-11 px-4 text-xs font-medium text-muted-foreground">{t("colCondition")}</TableHead>
+                <TableHead className="h-11 w-20" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 10 }).map((_, i) => (
+                <TableRow key={i} className="h-14">
+                  <TableCell className="px-4"><Skeleton className="h-4 w-4 rounded" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell className="px-4">
+                    <div className="flex items-center gap-2.5">
+                      <Skeleton className="h-7 w-7 rounded-md" />
+                      <Skeleton className="h-4 w-40" />
+                    </div>
+                  </TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                  <TableCell className="px-4"><Skeleton className="h-4 w-10" /></TableCell>
+                  <TableCell className="px-4" />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </PageShell>
   );
 }
 ```
+
+> If the `colCode/colName/colGroup/colDepartment/colStatus/colCondition` translation keys don't exist exactly as written, look up the actual keys used in `device-list-client.tsx`'s `<TableHead>` cells and update the skeleton to use them. The skeleton must reuse the live header labels — only the data rows are placeholdered.
 
 - [ ] **Step 4: Rewrite the page**
 
@@ -3242,20 +3667,28 @@ grep -n "Action" client/src/app/\(app\)/devices/_components/device-list-client.t
 
 If any (e.g. inline delete in a row menu), apply the same hook-replacement pattern as above.
 
-- [ ] **Step 7: Build + smoke test**
+- [ ] **Step 7: Build**
 
 ```bash
-pnpm --filter client build && pnpm --filter client dev
+pnpm --filter client build
 ```
 
-Verify `/devices`:
-- [ ] Skeleton on first load
-- [ ] Filters via URL (`/devices?status=in-use`, `/devices?group=<id>`) populate correctly
-- [ ] Search input updates the list
-- [ ] Bulk update status works → toast → list refreshes
-- [ ] Bulk delete works → row(s) gone
+- [ ] **Step 8: Verify via subagents**
 
-- [ ] **Step 8: Commit**
+Dispatch both per the Verification protocol.
+
+**Playwright UI checklist for `/devices`:**
+- Skeleton mirrors loaded table (search row + 5 filter chips + 8-col table with 10 rows)
+- Header visible during skeleton
+- Visit `/devices?status=in-use` — only in-use devices listed
+- Visit `/devices?group=<id>` — only that group's devices
+- Search "QA" — debounce, list updates
+- Select 2 rows, change status via bulk action → toast → rows updated in place
+- Select 2 rows, bulk delete → rows gone
+
+Both agents must report PASS before commit.
+
+- [ ] **Step 9: Commit**
 
 ```bash
 git add client/src/features/devices client/src/app/\(app\)/devices/page.tsx client/src/app/\(app\)/devices/_components/page-skeleton.tsx client/src/app/\(app\)/devices/_components/device-list-client.tsx client/src/app/\(app\)/devices/_components/device-bulk-actions.tsx
@@ -3270,7 +3703,7 @@ git commit -m "feat(devices): migrate list page to client-side queries and mutat
 - Create: `client/src/features/devices/api/{insert-photo-rows,update-photo-order,delete-photo-row,insert-document-rows,delete-document-row,set-cover-photo,signed-photo-urls,signed-document-urls,remove-photo-object,remove-document-object}.ts`
 - Create: `client/src/features/devices/hooks/{use-signed-photo-urls,use-signed-document-urls,use-insert-photos,use-reorder-photos,use-remove-photo,use-set-cover-photo,use-insert-documents,use-remove-document}.ts`
 - Create: `client/src/app/(app)/devices/[code]/_components/page-skeleton.tsx`
-- Create: `client/src/app/(app)/devices/new/_components/page-skeleton.tsx`
+- Create: `client/src/app/(app)/devices/_components/device-form-skeleton.tsx` (shared by new + edit)
 - Modify: `client/src/app/(app)/devices/[code]/page.tsx`
 - Modify: `client/src/app/(app)/devices/[code]/edit/page.tsx`
 - Modify: `client/src/app/(app)/devices/new/page.tsx`
@@ -3658,27 +4091,94 @@ export function useRemoveDocument() {
 `client/src/app/(app)/devices/[code]/_components/page-skeleton.tsx`:
 
 ```tsx
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageTopbar } from "@/components/app/page-topbar";
+import { Card } from "@/components/ui/card";
 
 export function DeviceDetailSkeleton() {
+  const t = useTranslations("devices.details");
   return (
     <>
-      <PageTopbar title="" />
-      <div className="px-7 py-7 space-y-5">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-16 rounded-xl" />
-        <div className="grid grid-cols-1 [@media(min-width:1080px)]:grid-cols-[1fr_320px] gap-5">
-          <div className="space-y-5">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-44 rounded-xl" />
+      <PageTopbar title={t("pageTitle")} />
+      <div className="px-7 py-7">
+        <Skeleton className="h-4 w-32 mb-4" />
+        {/* Header: icon + name/code/badges + action buttons */}
+        <div className="flex flex-wrap items-start justify-between gap-[18px] mb-[22px]">
+          <div className="flex items-start gap-[18px] min-w-0">
+            <Skeleton className="h-14 w-14 rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-64" />
+              <div className="flex items-center gap-2.5">
+                <Skeleton className="h-3.5 w-24" />
+                <span className="inline-block h-[14px] w-px bg-border" aria-hidden />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Skeleton className="h-10 w-28 rounded-md" />
+            <Skeleton className="h-10 w-10 rounded-md" />
+            <Skeleton className="h-10 w-28 rounded-md" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 [@media(min-width:1080px)]:grid-cols-[1fr_320px] gap-5 items-start">
+          <div className="space-y-5 min-w-0">
+            {/* 5 detail sections: Identification, Specifications, Allocation, Lifecycle, Warranty, Notes */}
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="p-[22px]">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-4 rounded" />
+                  <Skeleton className="h-3.5 w-32" />
+                </div>
+                <div className="grid grid-cols-2 gap-x-7 gap-y-[18px] mt-[18px]">
+                  {Array.from({ length: 6 }).map((_, j) => (
+                    <div key={j} className="space-y-1.5">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  ))}
+                </div>
+              </Card>
             ))}
           </div>
-          <div className="space-y-5">
-            <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-48 rounded-xl" />
-            <Skeleton className="h-40 rounded-xl" />
-          </div>
+          <aside className="space-y-5">
+            {/* Condition ring card */}
+            <Card className="p-[22px]">
+              <Skeleton className="h-3.5 w-28" />
+              <div className="mt-4 flex items-center gap-4">
+                <Skeleton className="h-20 w-20 rounded-full" />
+              </div>
+            </Card>
+            {/* Rail stats: 4 rows of icon + label + value */}
+            <Card className="px-[22px] py-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 py-[14px] border-b border-border last:border-b-0">
+                  <Skeleton className="h-[34px] w-[34px] rounded-[9px]" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3.5 w-32" />
+                  </div>
+                </div>
+              ))}
+            </Card>
+            {/* Recent activity timeline */}
+            <Card className="p-[22px]">
+              <Skeleton className="h-3.5 w-32" />
+              <div className="mt-[18px] space-y-[18px]">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-20" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </aside>
         </div>
       </div>
     </>
@@ -3839,7 +4339,56 @@ export function useManufacturerById(id: string) {
 }
 ```
 
-- [ ] **Step 8: Rewrite `/devices/new`**
+- [ ] **Step 8a: Shared device-form skeleton**
+
+`client/src/app/(app)/devices/_components/device-form-skeleton.tsx`:
+
+```tsx
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+import { PageTopbar } from "@/components/app/page-topbar";
+
+interface Props {
+  pageTitle: string;
+  pageSubtitle?: string;
+}
+
+export function DeviceFormSkeleton({ pageTitle, pageSubtitle }: Props) {
+  return (
+    <>
+      <PageTopbar title={pageTitle} crumb={pageSubtitle} />
+      <div className="px-7 py-7 grid grid-cols-1 [@media(min-width:1080px)]:grid-cols-[1fr_240px] gap-6 items-start">
+        <div className="space-y-5">
+          {/* 5 form sections: general, classification, lifecycle, warranty, photos/docs */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i} className="p-6">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-3 w-64 mt-2" />
+              <div className="grid grid-cols-2 gap-x-6 gap-y-5 mt-6">
+                {Array.from({ length: 6 }).map((_, j) => (
+                  <div key={j} className="space-y-2">
+                    <Skeleton className="h-3.5 w-24" />
+                    <Skeleton className="h-9 w-full rounded-md" />
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+        {/* Right rail: section nav + save button */}
+        <aside className="space-y-3 sticky top-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-full rounded-md" />
+          ))}
+          <Skeleton className="h-10 w-full rounded-md mt-4" />
+        </aside>
+      </div>
+    </>
+  );
+}
+```
+
+- [ ] **Step 8b: Rewrite `/devices/new`**
 
 Replace `client/src/app/(app)/devices/new/page.tsx`:
 
@@ -3851,7 +4400,7 @@ import { useGroups } from "@/features/groups/hooks/use-groups";
 import { useDepartments } from "@/features/departments/hooks/use-departments";
 import { useManufacturers } from "@/features/manufacturers/hooks/use-manufacturers";
 import { DeviceForm } from "@/app/(app)/devices/_components/device-form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DeviceFormSkeleton } from "@/app/(app)/devices/_components/device-form-skeleton";
 import type { DeviceFormValues } from "@/lib/domain/devices";
 
 const defaults: DeviceFormValues = {
@@ -3869,12 +4418,7 @@ export default function NewDevicePage() {
   const mfrs = useManufacturers();
 
   if (groups.isPending || depts.isPending || mfrs.isPending) {
-    return (
-      <div className="px-7 py-7 space-y-4">
-        <Skeleton className="h-8 w-72" />
-        <Skeleton className="h-[600px] rounded-xl" />
-      </div>
-    );
+    return <DeviceFormSkeleton pageTitle={t("pageTitle")} pageSubtitle={t("pageSubtitle")} />;
   }
 
   return (
@@ -3912,7 +4456,7 @@ import { useGroups } from "@/features/groups/hooks/use-groups";
 import { useDepartments } from "@/features/departments/hooks/use-departments";
 import { useManufacturers } from "@/features/manufacturers/hooks/use-manufacturers";
 import { DeviceForm } from "@/app/(app)/devices/_components/device-form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { DeviceFormSkeleton } from "@/app/(app)/devices/_components/device-form-skeleton";
 import type { DeviceFormValues } from "@/lib/domain/devices";
 import type { PhotoItem } from "@/app/(app)/devices/_components/photo-gallery";
 import type { DocumentItem } from "@/app/(app)/devices/_components/document-list";
@@ -3942,12 +4486,7 @@ export default function EditDevicePage({ params }: PageProps) {
     deviceQ.isPending || groups.isPending || depts.isPending || mfrs.isPending ||
     photosQ.isPending || docsQ.isPending
   ) {
-    return (
-      <div className="px-7 py-7 space-y-4">
-        <Skeleton className="h-8 w-72" />
-        <Skeleton className="h-[600px] rounded-xl" />
-      </div>
-    );
+    return <DeviceFormSkeleton pageTitle={tForm("editPageTitle", { name: "" })} />;
   }
   if (!deviceQ.data) notFound();
 
@@ -4108,19 +4647,27 @@ The shape of `ActionResult` (`{ ok, deviceId, code, fieldErrors }`) used to be i
 rm client/src/app/\(app\)/devices/_actions.ts
 ```
 
-- [ ] **Step 12: Build + smoke test**
+- [ ] **Step 12: Build**
 
 ```bash
-pnpm --filter client build && pnpm --filter client dev
+pnpm --filter client build
 ```
 
-Verify:
-- [ ] `/devices/<code>` — skeleton, then identical detail page; photos render via signed URLs; documents open via signed URLs
-- [ ] `/devices/new` — submit creates device, photos and docs uploaded, redirected to `/devices/<code>`
-- [ ] `/devices/<code>/edit` — open, change a field, save → redirected; reorder/remove photo and document work
-- [ ] Delete device from edit page → redirected to `/devices`, gone from list
+- [ ] **Step 13: Verify via subagents**
 
-- [ ] **Step 13: Commit**
+Dispatch both per the Verification protocol.
+
+**Playwright UI checklist for `/devices/<code>`, `/devices/new`, `/devices/<code>/edit`:**
+- `/devices/<code>` — skeleton (icon + name/code + 6 detail cards + 3-card rail) → identical detail page; signed photo URLs render images; click document open link opens in new tab
+- `/devices/new` — skeleton (5 form cards + sticky rail) → form renders; fill required fields; submit → toast → redirected to `/devices/<new-code>`
+- `/devices/<code>/edit` — skeleton → form prefilled; change a field; save → redirected; reorder one photo → order persists on reload; remove one photo → gone after reload; upload a doc and remove it
+- Delete device from edit page → routed to `/devices`, no longer in list
+
+**Code Review prompt addendum:** verify the JSX body of `/devices/<code>` is verbatim from the prior server-component version (lines 82–331 of HEAD~1). Verify the `device-form.tsx` action-to-hook replacements preserved the field-error / fallback-toast behavior; flag any path where `ActionResult.fieldErrors` was previously inspected but is now lost.
+
+Both agents must report PASS before commit.
+
+- [ ] **Step 14: Commit**
 
 ```bash
 git add client/src/features/devices client/src/features/groups/hooks/use-group.ts client/src/features/departments/hooks/use-department.ts client/src/features/manufacturers/hooks/use-manufacturer.ts client/src/app/\(app\)/devices
@@ -4189,30 +4736,27 @@ grep -rE "\"server-only\"|'server-only'" client/src --include="*.ts" --include="
 
 Expected: matches only in `client/src/lib/data/auth.ts` and `client/src/lib/supabase/server.ts` (if it uses it) — and **nowhere** in pages or feature folders. Anywhere else is a leak.
 
-- [ ] **Step 6: Final build + smoke test**
+- [ ] **Step 6: Final build**
 
 ```bash
-pnpm --filter client build && pnpm --filter client dev
+pnpm --filter client build
 ```
 
-Walk through every page:
-- [ ] `/overview`
-- [ ] `/devices` (with filters in URL)
-- [ ] `/devices/<code>`
-- [ ] `/devices/new`
-- [ ] `/devices/<code>/edit`
-- [ ] `/groups`
-- [ ] `/departments`
-- [ ] `/manufacturers`
-- [ ] `/members`
-- [ ] `/members/<id>`
-- [ ] `/settings`
+- [ ] **Step 7: Verify via subagents (final full sweep)**
 
-For each: skeleton flashes → identical layout → at least one CRUD action works → reload survives → back-nav shows cached data.
+Dispatch both subagents per the Verification protocol — this is the final verification before the cleanup commit.
 
-- [ ] **Step 7: Confirm logout-then-visit-any-app-page still redirects via server**
+**Playwright UI checklist (every page):**
+- `/overview`, `/devices`, `/devices/<code>`, `/devices/new`, `/devices/<code>/edit`, `/groups`, `/departments`, `/manufacturers`, `/members`, `/members/<id>`, `/settings`
+- For each: skeleton appears on cold load → identical layout once data resolves → at least one CRUD round-trip works → reload survives → back-nav shows cached data instantly (no skeleton flash on cache hit)
+- **Logout test:** sign out, then navigate directly to `http://localhost:3000/overview`. Server must redirect to `/login` BEFORE any client JS runs — no skeleton should flash. This verifies the auth gate still works server-side.
 
-Open an incognito window, navigate to `http://localhost:3000/overview`. Expected: server-side redirect to `/login` before any client JS runs (no skeleton appears).
+**Code Review prompt addendum:**
+- Verify no `"server-only"` import remains outside `client/src/lib/data/auth.ts` and `client/src/lib/supabase/server.ts`.
+- Verify the final three audit commands at the bottom of this plan all pass (no async (app) page components, no `_actions.ts` files, every (app)/page.tsx is `"use client"`).
+- Spot-check 3 random feature/api files against the spec for fidelity.
+
+Both agents must report PASS before commit.
 
 - [ ] **Step 8: Commit**
 
@@ -4261,4 +4805,6 @@ If all three checks pass, the migration is complete.
 - No placeholders, no "TODO", no "similar to Task N" — every replacement step shows the actual code.
 - Function/hook names are consistent across tasks: `useDevices`, `useDeviceByCode`, `useGroupsWithCounts`, `useSaveGroup`, `useDeleteGroup`, `useBulkUpdateStatus`, `useBulkDelete`, etc.
 - Type imports for `keys.ts` (Task 1 Step 1) are forward-referenced; the file is only consumed once the referenced features exist (starting Task 3). Build-safe because nothing imports `keys.ts` until then.
-- Tasks 6 and 7 intentionally leave the tree non-building until Task 8 lands `useDevices`. This is called out at the end of each affected task.
+- Tasks 6 and 7 intentionally leave the tree non-building until Task 8 lands `useDevices`. This is called out at the end of each affected task; both run a code-review-only verification (Playwright skipped because the build is broken).
+- Every PageSkeleton mirrors the loaded page's silhouette — same grid, same row count, same column widths. The headers/labels are pulled from `useTranslations` so they render solid during the loading state; only the data cells are placeholdered.
+- Every task with a passing build runs **both** subagents (Code Review + Playwright UI) in parallel per the Verification protocol before commit.
