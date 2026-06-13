@@ -14,7 +14,8 @@ import {
 import { BulkActionBar } from "@/components/app/bulk-action-bar";
 import { useConfirm } from "@/hooks/use-confirm";
 import { DEVICE_STATUSES, type DeviceStatus } from "@/lib/domain/devices";
-import { bulkUpdateStatusAction, bulkDeleteAction } from "../_actions";
+import { useBulkUpdateStatus } from "@/features/devices/hooks/use-bulk-update-status";
+import { useBulkDelete } from "@/features/devices/hooks/use-bulk-delete";
 
 interface DeviceBulkActionsProps {
   selected: Set<string>;
@@ -26,6 +27,9 @@ export function DeviceBulkActions({ selected, onClear }: DeviceBulkActionsProps)
   const confirm = useConfirm();
   const t = useTranslations("devices.list");
   const tStatus = useTranslations("devices.status");
+  const tCommon = useTranslations("common");
+  const bulkUpdateStatus = useBulkUpdateStatus();
+  const bulkDelete = useBulkDelete();
   const [statusOpen, setStatusOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -36,16 +40,17 @@ export function DeviceBulkActions({ selected, onClear }: DeviceBulkActionsProps)
     setLoading(true);
     try {
       const ids = Array.from(selected);
-      const res = await bulkUpdateStatusAction(ids, status);
-      if (!res.ok) {
-        toast.error(t("bulk.toastFailed"));
-      } else {
-        toast.success(t("bulk.toastStatusUpdated"), {
-          description: t("bulk.toastStatusUpdatedDesc", { count }),
-        });
-        onClear();
-        router.refresh();
+      try {
+        await bulkUpdateStatus.mutateAsync({ ids, status });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
+        return;
       }
+      toast.success(t("bulk.toastStatusUpdated"), {
+        description: t("bulk.toastStatusUpdatedDesc", { count }),
+      });
+      onClear();
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -70,16 +75,17 @@ export function DeviceBulkActions({ selected, onClear }: DeviceBulkActionsProps)
     setLoading(true);
     try {
       const ids = Array.from(selected);
-      const res = await bulkDeleteAction(ids);
-      if (!res.ok) {
-        toast.error(t("bulk.toastFailed"));
-      } else {
-        toast.success(t("bulk.toastDeleted"), {
-          description: t("bulk.toastDeletedDesc", { count }),
-        });
-        onClear();
-        router.refresh();
+      try {
+        await bulkDelete.mutateAsync(ids);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : tCommon("deleteFailed"));
+        return;
       }
+      toast.success(t("bulk.toastDeleted"), {
+        description: t("bulk.toastDeletedDesc", { count }),
+      });
+      onClear();
+      router.refresh();
     } finally {
       setLoading(false);
     }

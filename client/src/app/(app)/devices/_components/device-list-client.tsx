@@ -63,7 +63,7 @@ import {
   type Manufacturer,
 } from "@/lib/domain/devices";
 import { cn } from "@/lib/utils";
-import type { DeviceListFilters } from "@/lib/data/devices";
+import type { DeviceListFilters } from "@/features/devices/api/get-devices";
 
 const COLUMNS_LS_KEY = "dh-cols";
 

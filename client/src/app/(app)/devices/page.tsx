@@ -1,47 +1,40 @@
-import { listDevices, type DeviceListFilters } from "@/lib/data/devices";
-import { listDepartments } from "@/lib/data/departments";
-import { listGroups } from "@/lib/data/groups";
-import { listManufacturers } from "@/lib/data/manufacturers";
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { Download, Plus } from "lucide-react";
+import { useDevices } from "@/features/devices/hooks/use-devices";
+import type { DeviceListFilters } from "@/features/devices/api/get-devices";
+import { useGroups } from "@/features/groups/hooks/use-groups";
+import { useDepartments } from "@/features/departments/hooks/use-departments";
+import { useManufacturers } from "@/features/manufacturers/hooks/use-manufacturers";
 import { PageShell } from "@/components/app/page-shell";
 import { Button } from "@/components/ui/button";
-import { Download, Plus } from "lucide-react";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
 import { DeviceListClient } from "./_components/device-list-client";
+import { DevicesPageSkeleton } from "./_components/page-skeleton";
 
-export const dynamic = "force-dynamic";
-
-interface PageProps {
-  searchParams: Promise<{
-    q?: string;
-    group?: string;
-    dept?: string;
-    status?: string;
-    mfr?: string;
-    flag?: string;
-    view?: string;
-  }>;
-}
-
-export default async function DevicesPage({ searchParams }: PageProps) {
-  const t = await getTranslations("devices.list");
-  const params = await searchParams;
+export default function DevicesPage() {
+  const t = useTranslations("devices.list");
+  const params = useSearchParams();
   const filters: DeviceListFilters = {
-    q: params.q,
-    group: params.group,
-    dept: params.dept,
-    status: params.status,
-    mfr: params.mfr,
-    flag: params.flag,
+    q: params.get("q") ?? undefined,
+    group: params.get("group") ?? undefined,
+    dept: params.get("dept") ?? undefined,
+    status: params.get("status") ?? undefined,
+    mfr: params.get("mfr") ?? undefined,
+    flag: params.get("flag") ?? undefined,
   };
-  const view = params.view === "cards" ? "cards" : "table";
+  const view = params.get("view") === "cards" ? "cards" : "table";
 
-  const [devices, groups, departments, manufacturers] = await Promise.all([
-    listDevices(filters),
-    listGroups(),
-    listDepartments(),
-    listManufacturers(),
-  ]);
+  const devicesQ = useDevices(filters);
+  const groupsQ = useGroups();
+  const deptsQ = useDepartments();
+  const mfrsQ = useManufacturers();
+
+  if (devicesQ.isPending || groupsQ.isPending || deptsQ.isPending || mfrsQ.isPending) {
+    return <DevicesPageSkeleton />;
+  }
 
   return (
     <PageShell
@@ -61,10 +54,10 @@ export default async function DevicesPage({ searchParams }: PageProps) {
       }
     >
       <DeviceListClient
-        devices={devices}
-        groups={groups}
-        departments={departments}
-        manufacturers={manufacturers}
+        devices={devicesQ.data ?? []}
+        groups={groupsQ.data ?? []}
+        departments={deptsQ.data ?? []}
+        manufacturers={mfrsQ.data ?? []}
         initialFilters={filters}
         initialView={view}
       />
