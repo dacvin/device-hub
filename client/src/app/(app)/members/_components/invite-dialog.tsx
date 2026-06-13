@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Department } from "@/lib/domain/devices";
-import { inviteMemberAction } from "../_actions";
+import { useInviteMember } from "@/features/members/hooks/use-invite-member";
 
 interface InviteDialogProps {
   open: boolean;
@@ -61,6 +61,7 @@ export function InviteDialog({
   roleLabels,
 }: InviteDialogProps) {
   const router = useRouter();
+  const inviteMember = useInviteMember();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<string>("viewer");
@@ -78,20 +79,18 @@ export function InviteDialog({
     e.preventDefault();
     setLoading(true);
     try {
-      const result = await inviteMemberAction({
+      await inviteMember.mutateAsync({
         name,
         email,
         role: role as "it_admin" | "manager" | "viewer",
         departmentId: departmentId === "none" ? null : departmentId,
       });
-      if (result.ok) {
-        toast.success(toastLabels.invitationSent);
-        onOpenChange(false);
-        reset();
-        router.refresh();
-      } else {
-        toast.error(result.error);
-      }
+      toast.success(toastLabels.invitationSent);
+      onOpenChange(false);
+      reset();
+      router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : toastLabels.actionFailed);
     } finally {
       setLoading(false);
     }

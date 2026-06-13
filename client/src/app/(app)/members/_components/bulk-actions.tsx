@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/popover";
 import { BulkActionBar } from "@/components/app/bulk-action-bar";
 import { useConfirm } from "@/hooks/use-confirm";
-import { updateMemberRoleAction, removeMemberAction } from "../_actions";
+import { useUpdateMemberRole } from "@/features/members/hooks/use-update-member-role";
+import { useRemoveMember } from "@/features/members/hooks/use-remove-member";
 import type { MemberRole } from "@/lib/domain/members";
 import { ROLE_LABEL } from "@/lib/domain/members";
 
@@ -32,6 +33,8 @@ export function BulkActions({ selected, onClear }: BulkActionsProps) {
   const router = useRouter();
   const confirm = useConfirm();
   const t = useTranslations("members");
+  const updateRole = useUpdateMemberRole();
+  const removeMember = useRemoveMember();
   const [rolePopoverOpen, setRolePopoverOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -42,15 +45,12 @@ export function BulkActions({ selected, onClear }: BulkActionsProps) {
     setLoading(true);
     try {
       const ids = Array.from(selected);
-      const results = await Promise.all(ids.map((id) => updateMemberRoleAction(id, role)));
-      const failed = results.filter((r) => !r.ok).length;
-      if (failed > 0) {
-        toast.error(t("toast.actionFailed"));
-      } else {
-        toast.success(t("toast.roleUpdated"));
-      }
+      await Promise.all(ids.map((id) => updateRole.mutateAsync({ memberId: id, role })));
+      toast.success(t("toast.roleUpdated"));
       onClear();
       router.refresh();
+    } catch {
+      toast.error(t("toast.actionFailed"));
     } finally {
       setLoading(false);
     }
@@ -73,15 +73,12 @@ export function BulkActions({ selected, onClear }: BulkActionsProps) {
     setLoading(true);
     try {
       const ids = Array.from(selected);
-      const results = await Promise.all(ids.map((id) => removeMemberAction(id)));
-      const failed = results.filter((r) => !r.ok).length;
-      if (failed > 0) {
-        toast.error(t("toast.actionFailed"));
-      } else {
-        toast.success(t("toast.memberRemoved"));
-      }
+      await Promise.all(ids.map((id) => removeMember.mutateAsync(id)));
+      toast.success(t("toast.memberRemoved"));
       onClear();
       router.refresh();
+    } catch {
+      toast.error(t("toast.actionFailed"));
     } finally {
       setLoading(false);
     }
