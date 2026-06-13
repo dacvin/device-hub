@@ -34,82 +34,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity: {
+      activities: {
         Row: {
           action: Database["public"]["Enums"]["activity_action"]
           actor_id: string | null
+          after: Json
+          before: Json
           created_at: string
           entity_id: string | null
           entity_label: string | null
           entity_type: string
           id: string
-          metadata: Json
         }
         Insert: {
           action: Database["public"]["Enums"]["activity_action"]
           actor_id?: string | null
+          after?: Json
+          before?: Json
           created_at?: string
           entity_id?: string | null
           entity_label?: string | null
           entity_type: string
           id?: string
-          metadata?: Json
         }
         Update: {
           action?: Database["public"]["Enums"]["activity_action"]
           actor_id?: string | null
+          after?: Json
+          before?: Json
           created_at?: string
           entity_id?: string | null
           entity_label?: string | null
           entity_type?: string
           id?: string
-          metadata?: Json
         }
         Relationships: [
           {
-            foreignKeyName: "activity_actor_id_fkey"
+            foreignKeyName: "activities_actor_id_fkey"
             columns: ["actor_id"]
             isOneToOne: false
-            referencedRelation: "member"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
       }
-      department: {
-        Row: {
-          created_at: string
-          id: string
-          manager: string | null
-          name: string
-          primary_location: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          manager?: string | null
-          name: string
-          primary_location?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          manager?: string | null
-          name?: string
-          primary_location?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      device: {
+      devices: {
         Row: {
           code: string
           condition: number
-          cover_photo_id: string | null
           created_at: string
           deleted_at: string | null
-          department_id: string
+          documents: Json
           group_id: string
           id: string
           import_date: string | null
@@ -120,12 +95,13 @@ export type Database = {
           model: string | null
           name: string
           notes: string | null
+          photos: Json
           quantity: number
           serial_number: string | null
           source: Database["public"]["Enums"]["device_source"] | null
           specifications: string | null
           status: Database["public"]["Enums"]["device_status"]
-          unit: Database["public"]["Enums"]["unit"]
+          unit_id: string
           updated_at: string
           warranty_end: string | null
           warranty_start: string | null
@@ -133,10 +109,9 @@ export type Database = {
         Insert: {
           code: string
           condition?: number
-          cover_photo_id?: string | null
           created_at?: string
           deleted_at?: string | null
-          department_id: string
+          documents?: Json
           group_id: string
           id?: string
           import_date?: string | null
@@ -147,12 +122,13 @@ export type Database = {
           model?: string | null
           name: string
           notes?: string | null
+          photos?: Json
           quantity?: number
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
           status?: Database["public"]["Enums"]["device_status"]
-          unit?: Database["public"]["Enums"]["unit"]
+          unit_id: string
           updated_at?: string
           warranty_end?: string | null
           warranty_start?: string | null
@@ -160,10 +136,9 @@ export type Database = {
         Update: {
           code?: string
           condition?: number
-          cover_photo_id?: string | null
           created_at?: string
           deleted_at?: string | null
-          department_id?: string
+          documents?: Json
           group_id?: string
           id?: string
           import_date?: string | null
@@ -174,89 +149,46 @@ export type Database = {
           model?: string | null
           name?: string
           notes?: string | null
+          photos?: Json
           quantity?: number
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
           status?: Database["public"]["Enums"]["device_status"]
-          unit?: Database["public"]["Enums"]["unit"]
+          unit_id?: string
           updated_at?: string
           warranty_end?: string | null
           warranty_start?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "device_cover_photo_fk"
-            columns: ["cover_photo_id"]
-            isOneToOne: false
-            referencedRelation: "device_photo"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "device_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "department"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "device_group_id_fkey"
+            foreignKeyName: "devices_group_id_fkey"
             columns: ["group_id"]
             isOneToOne: false
-            referencedRelation: "device_group"
+            referencedRelation: "groups"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "device_manufacturer_id_fkey"
+            foreignKeyName: "devices_manufacturer_id_fkey"
             columns: ["manufacturer_id"]
             isOneToOne: false
-            referencedRelation: "manufacturer"
+            referencedRelation: "manufacturers"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      device_document: {
-        Row: {
-          created_at: string
-          device_id: string
-          file_name: string
-          id: string
-          mime_type: string | null
-          size_bytes: number | null
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          device_id: string
-          file_name: string
-          id?: string
-          mime_type?: string | null
-          size_bytes?: number | null
-          url: string
-        }
-        Update: {
-          created_at?: string
-          device_id?: string
-          file_name?: string
-          id?: string
-          mime_type?: string | null
-          size_bytes?: number | null
-          url?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "device_document_device_id_fkey"
-            columns: ["device_id"]
+            foreignKeyName: "devices_unit_id_fkey"
+            columns: ["unit_id"]
             isOneToOne: false
-            referencedRelation: "device"
+            referencedRelation: "units"
             referencedColumns: ["id"]
           },
         ]
       }
-      device_group: {
+      groups: {
         Row: {
           created_at: string
           default_inventory_cycle_months: number
+          deleted_at: string | null
           icon: string | null
           id: string
           name: string
@@ -265,6 +197,7 @@ export type Database = {
         Insert: {
           created_at?: string
           default_inventory_cycle_months?: number
+          deleted_at?: string | null
           icon?: string | null
           id?: string
           name: string
@@ -273,6 +206,7 @@ export type Database = {
         Update: {
           created_at?: string
           default_inventory_cycle_months?: number
+          deleted_at?: string | null
           icon?: string | null
           id?: string
           name?: string
@@ -280,47 +214,10 @@ export type Database = {
         }
         Relationships: []
       }
-      device_photo: {
+      manufacturers: {
         Row: {
           created_at: string
-          device_id: string
-          file_name: string | null
-          id: string
-          size_bytes: number | null
-          sort_order: number
-          url: string
-        }
-        Insert: {
-          created_at?: string
-          device_id: string
-          file_name?: string | null
-          id?: string
-          size_bytes?: number | null
-          sort_order?: number
-          url: string
-        }
-        Update: {
-          created_at?: string
-          device_id?: string
-          file_name?: string | null
-          id?: string
-          size_bytes?: number | null
-          sort_order?: number
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "device_photo_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "device"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      manufacturer: {
-        Row: {
-          created_at: string
+          deleted_at: string | null
           id: string
           name: string
           support_contact: string | null
@@ -328,6 +225,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           name: string
           support_contact?: string | null
@@ -335,6 +233,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           name?: string
           support_contact?: string | null
@@ -342,10 +241,38 @@ export type Database = {
         }
         Relationships: []
       }
-      member: {
+      units: {
         Row: {
+          abbreviation: string | null
           created_at: string
-          department_id: string | null
+          deleted_at: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          abbreviation?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          abbreviation?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          auth_user_id: string | null
+          created_at: string
+          deleted_at: string | null
           email: string
           id: string
           invited_by: string | null
@@ -353,31 +280,29 @@ export type Database = {
           last_active_at: string | null
           name: string
           phone: string | null
-          reports_to: string | null
-          role: Database["public"]["Enums"]["member_role"]
-          site: string | null
-          status: Database["public"]["Enums"]["member_status"]
+          role: Database["public"]["Enums"]["user_role"]
+          status: Database["public"]["Enums"]["user_status"]
           updated_at: string
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
-          department_id?: string | null
+          deleted_at?: string | null
           email: string
-          id: string
+          id?: string
           invited_by?: string | null
           joined_at?: string | null
           last_active_at?: string | null
           name: string
           phone?: string | null
-          reports_to?: string | null
-          role?: Database["public"]["Enums"]["member_role"]
-          site?: string | null
-          status?: Database["public"]["Enums"]["member_status"]
+          role?: Database["public"]["Enums"]["user_role"]
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
-          department_id?: string | null
+          deleted_at?: string | null
           email?: string
           id?: string
           invited_by?: string | null
@@ -385,135 +310,16 @@ export type Database = {
           last_active_at?: string | null
           name?: string
           phone?: string | null
-          reports_to?: string | null
-          role?: Database["public"]["Enums"]["member_role"]
-          site?: string | null
-          status?: Database["public"]["Enums"]["member_status"]
+          role?: Database["public"]["Enums"]["user_role"]
+          status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "member_department_id_fkey"
-            columns: ["department_id"]
-            isOneToOne: false
-            referencedRelation: "department"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "member_invited_by_fkey"
+            foreignKeyName: "users_invited_by_fkey"
             columns: ["invited_by"]
             isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "member_reports_to_fkey"
-            columns: ["reports_to"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_settings: {
-        Row: {
-          code_autogenerate: boolean
-          code_prefix: string
-          condition_fair_pct: number
-          condition_good_pct: number
-          date_format: string
-          default_inventory_cycle_months: number
-          deleted_retention_days: number
-          export_format: string
-          id: boolean
-          notify_inventory_overdue: boolean
-          notify_new_device: boolean
-          notify_warranty: boolean
-          notify_weekly_summary: boolean
-          org_name: string
-          primary_site: string | null
-          updated_at: string
-          updated_by: string | null
-          warranty_expiring_days: number
-        }
-        Insert: {
-          code_autogenerate?: boolean
-          code_prefix?: string
-          condition_fair_pct?: number
-          condition_good_pct?: number
-          date_format?: string
-          default_inventory_cycle_months?: number
-          deleted_retention_days?: number
-          export_format?: string
-          id?: boolean
-          notify_inventory_overdue?: boolean
-          notify_new_device?: boolean
-          notify_warranty?: boolean
-          notify_weekly_summary?: boolean
-          org_name?: string
-          primary_site?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          warranty_expiring_days?: number
-        }
-        Update: {
-          code_autogenerate?: boolean
-          code_prefix?: string
-          condition_fair_pct?: number
-          condition_good_pct?: number
-          date_format?: string
-          default_inventory_cycle_months?: number
-          deleted_retention_days?: number
-          export_format?: string
-          id?: boolean
-          notify_inventory_overdue?: boolean
-          notify_new_device?: boolean
-          notify_warranty?: boolean
-          notify_weekly_summary?: boolean
-          org_name?: string
-          primary_site?: string | null
-          updated_at?: string
-          updated_by?: string | null
-          warranty_expiring_days?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_settings_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "member"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_preference: {
-        Row: {
-          default_device_view: string
-          mono_codes: boolean
-          theme: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          default_device_view?: string
-          mono_codes?: boolean
-          theme?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          default_device_view?: string
-          mono_codes?: boolean
-          theme?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_preference_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "member"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -523,69 +329,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      app_dept: { Args: never; Returns: string }
-      app_role: {
-        Args: never
-        Returns: Database["public"]["Enums"]["member_role"]
-      }
-      devices_with_flags: {
-        Args: { p_warranty_days?: number }
-        Returns: {
-          code: string
-          condition: number
-          cover_photo_id: string
-          created_at: string
-          deleted_at: string
-          department_id: string
-          flag_inventory_overdue: boolean
-          flag_warranty_expiring: boolean
-          group_id: string
-          id: string
-          import_date: string
-          inventory_cycle_months: number
-          last_check_date: string
-          location: string
-          manufacturer_id: string
-          model: string
-          name: string
-          notes: string
-          quantity: number
-          serial_number: string
-          source: Database["public"]["Enums"]["device_source"]
-          specifications: string
-          status: Database["public"]["Enums"]["device_status"]
-          unit: Database["public"]["Enums"]["unit"]
-          updated_at: string
-          warranty_end: string
-          warranty_start: string
-        }[]
-      }
-      member_role_label: {
-        Args: { r: Database["public"]["Enums"]["member_role"] }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
-      activity_action:
-        | "device.created"
-        | "device.updated"
-        | "device.status_changed"
-        | "device.deleted"
-        | "device.restored"
-        | "device.inventory_checked"
-        | "device.allocated"
-        | "member.invited"
-        | "member.role_changed"
-        | "member.removed"
-        | "catalog.created"
-        | "catalog.updated"
-        | "catalog.deleted"
-        | "settings.updated"
+      activity_action: "insert" | "update" | "delete" | "restore"
       device_source: "Purchased" | "Leased" | "Donated" | "Transferred"
       device_status: "in-use" | "in-storage" | "in-repair" | "retired"
-      member_role: "it_admin" | "manager" | "viewer"
-      member_status: "active" | "invited" | "disabled"
-      unit: "piece" | "set" | "box"
+      user_role: "admin" | "member"
+      user_status: "active" | "invited" | "disabled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -716,27 +467,11 @@ export const Constants = {
   },
   public: {
     Enums: {
-      activity_action: [
-        "device.created",
-        "device.updated",
-        "device.status_changed",
-        "device.deleted",
-        "device.restored",
-        "device.inventory_checked",
-        "device.allocated",
-        "member.invited",
-        "member.role_changed",
-        "member.removed",
-        "catalog.created",
-        "catalog.updated",
-        "catalog.deleted",
-        "settings.updated",
-      ],
+      activity_action: ["insert", "update", "delete", "restore"],
       device_source: ["Purchased", "Leased", "Donated", "Transferred"],
       device_status: ["in-use", "in-storage", "in-repair", "retired"],
-      member_role: ["it_admin", "manager", "viewer"],
-      member_status: ["active", "invited", "disabled"],
-      unit: ["piece", "set", "box"],
+      user_role: ["admin", "member"],
+      user_status: ["active", "invited", "disabled"],
     },
   },
 } as const

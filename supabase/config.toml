@@ -55,7 +55,24 @@ max_client_conn = 100
 enabled = true
 # Specifies an ordered list of schema files that describe your database.
 # Supports glob patterns relative to supabase directory: "./schemas/*.sql"
-schema_paths = ["./schemas/*.sql"]
+schema_paths = [
+  # Extensions, shared trigger functions, storage buckets.
+  "./schemas/_core.sql",
+  # Independent lookup tables.
+  "./schemas/groups.sql",
+  "./schemas/manufacturers.sql",
+  "./schemas/units.sql",
+  # users-functions.sql defines is_admin() / app_user_id() used by users.sql's RLS.
+  # plpgsql, so the body's reference to public.users resolves lazily at first call.
+  "./schemas/users-functions.sql",
+  "./schemas/users.sql",
+  # Tables that depend on the lookups + users.
+  "./schemas/devices.sql",
+  # activities last: its log_activity() trigger is attached by every earlier
+  # table, but the public.activities table only needs to exist before the
+  # first INSERT (i.e. before seed.sql runs).
+  "./schemas/activities.sql",
+]
 
 [db.seed]
 # If enabled, seeds the database after migrations during a db reset.
