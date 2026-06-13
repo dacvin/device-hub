@@ -106,3 +106,67 @@ WHERE ph.device_id = d.id AND ph.sort_order = 0 AND d.cover_photo_id IS NULL;
 -- not when applied via a migration. Seed it here so first sign-in / Overview
 -- / Settings can always read the singleton.
 INSERT INTO org_settings (id) VALUES (true) ON CONFLICT (id) DO NOTHING;
+
+-- ---- Local test admin (LOCAL ONLY) ----
+-- Creates an auth user + matching member row so you can sign in via
+-- email/password on local without going through Google OAuth.
+-- Email: admin@local.test  Password: password123
+-- Uses pgcrypto's crypt() with bcrypt (cost 10) to match Supabase's format.
+DO $$
+DECLARE
+  test_user_id uuid;
+BEGIN
+  SELECT id INTO test_user_id FROM auth.users WHERE email = 'admin@local.test';
+
+  IF test_user_id IS NULL THEN
+    test_user_id := gen_random_uuid();
+    INSERT INTO auth.users (
+      instance_id, id, aud, role, email,
+      encrypted_password, email_confirmed_at,
+      raw_app_meta_data, raw_user_meta_data,
+      created_at, updated_at
+    )
+    VALUES (
+      '00000000-0000-0000-0000-000000000000',
+      test_user_id,
+      'authenticated', 'authenticated',
+      'admin@local.test',
+      crypt('password123', gen_salt('bf')),
+      now(),
+      '{"provider":"email","providers":["email"]}'::jsonb,
+      '{"full_name":"Test Admin"}'::jsonb,
+      now(), now()
+    );
+    -- GoTrue requires empty strings (not NULL) for token fields.
+    UPDATE auth.users SET
+      confirmation_token = '',
+      recovery_token = '',
+      email_change_token_new = '',
+      email_change = '',
+      email_change_token_current = '',
+      reauthentication_token = ''
+    WHERE id = test_user_id;
+  END IF;
+
+  -- Supabase requires an auth.identities row for email/password sign-in.
+  INSERT INTO auth.identities (
+    id, user_id, provider_id, provider, identity_data,
+    last_sign_in_at, created_at, updated_at
+  )
+  VALUES (
+    gen_random_uuid(),
+    test_user_id,
+    'admin@local.test',
+    'email',
+    jsonb_build_object('sub', test_user_id::text, 'email', 'admin@local.test'),
+    now(), now(), now()
+  )
+  ON CONFLICT (provider, provider_id) DO NOTHING;
+
+  INSERT INTO member (id, name, email, role, status, department_id)
+  VALUES (
+    test_user_id, 'Test Admin', 'admin@local.test', 'it_admin', 'active',
+    (SELECT id FROM department WHERE name = 'IT' LIMIT 1)
+  )
+  ON CONFLICT (id) DO NOTHING;
+END $$;
