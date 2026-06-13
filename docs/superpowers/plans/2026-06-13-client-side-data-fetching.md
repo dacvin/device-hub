@@ -84,16 +84,13 @@ Prompt template:
 
 - [ ] **Step 1: Create the query-key factory**
 
-Write `client/src/lib/queries/keys.ts`:
+Write `client/src/lib/queries/keys.ts`. To avoid forward type dependencies that would fail the build before later tasks land, filter parameters are typed as `unknown` here. Hook callers in later tasks pass their domain-specific filter objects directly — the key factory only needs them as opaque values for cache identity.
 
 ```ts
-import type { DeviceListFilters } from "@/features/devices/api/get-devices";
-import type { MemberListFilters } from "@/features/members/api/get-members";
-
 export const queryKeys = {
   devices: {
     all: ["devices"] as const,
-    list: (filters: DeviceListFilters) => ["devices", "list", filters] as const,
+    list: (filters: unknown) => ["devices", "list", filters] as const,
     byCode: (code: string) => ["devices", "by-code", code] as const,
     byId: (id: string) => ["devices", "by-id", id] as const,
     photos: (deviceId: string) => ["devices", deviceId, "photos"] as const,
@@ -116,7 +113,7 @@ export const queryKeys = {
   },
   members: {
     all: ["members"] as const,
-    list: (filters: MemberListFilters) => ["members", "list", filters] as const,
+    list: (filters: unknown) => ["members", "list", filters] as const,
     byId: (id: string) => ["members", "by-id", id] as const,
     deviceCount: (departmentId: string | null) => ["members", "device-count", departmentId] as const,
   },
@@ -134,8 +131,6 @@ export const queryKeys = {
   },
 } as const;
 ```
-
-The two type imports from `@/features/.../api/...` won't resolve yet — those files arrive in later tasks. Leaving them here keeps the keys file colocated and avoids edits when the imports become valid.
 
 - [ ] **Step 2: Move the PostgREST filter helper**
 
