@@ -1,9 +1,11 @@
-import { listDepartmentsWithCounts } from "@/lib/data/departments";
+"use client";
+
+import { useDepartmentsWithCounts } from "@/features/departments/hooks/use-departments-with-counts";
 import { DepartmentsClient } from "./_components/departments-client";
+import { DepartmentsPageSkeleton } from "./_components/page-skeleton";
 
-export const dynamic = "force-dynamic";
-
-export default async function DepartmentsPage() {
-  const rows = await listDepartmentsWithCounts();
+export default function DepartmentsPage() {
+  const { data: rows, isPending } = useDepartmentsWithCounts();
+  if (isPending || !rows) return <DepartmentsPageSkeleton />;
   return <DepartmentsClient rows={rows} />;
 }

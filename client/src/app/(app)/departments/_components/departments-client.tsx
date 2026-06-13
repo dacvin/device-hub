@@ -2,7 +2,7 @@
 
 /* eslint-disable react/no-children-prop */
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,11 +31,9 @@ import { CatalogPageShell } from "@/app/(app)/_components/catalog-page-shell";
 import { CountLink } from "@/app/(app)/_components/catalog-link";
 import { Required } from "@/components/app/required";
 import { departmentFormSchema, type DepartmentFormValues } from "@/lib/domain/devices";
-import {
-  deleteDepartmentAction,
-  saveDepartmentAction,
-} from "@/app/(app)/departments/_actions";
-import type { DepartmentWithCount } from "@/lib/data/departments";
+import { useSaveDepartment } from "@/features/departments/hooks/use-save-department";
+import { useDeleteDepartment } from "@/features/departments/hooks/use-delete-department";
+import type { DepartmentWithCount } from "@/features/departments/api/list-departments-with-counts";
 
 const empty: DepartmentFormValues = { name: "", manager: "", primaryLocation: "" };
 
@@ -44,7 +42,8 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
   const tCommon = useTranslations("common");
   const [search, setSearch] = useState("");
   const [openId, setOpenId] = useState<string | "new" | null>(null);
-  const [, startTransition] = useTransition();
+  const saveDepartment = useSaveDepartment();
+  const deleteDepartment = useDeleteDepartment();
 
   const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
@@ -104,9 +103,8 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
                         disabled={r.deviceCount > 0}
                         title={r.deviceCount > 0 ? t("reassignFirst") : tCommon("delete")}
                         onClick={() => {
-                          startTransition(async () => {
-                            const res = await deleteDepartmentAction(r.id);
-                            if (!res.ok) toast.error(res.error ?? tCommon("deleteFailed"));
+                          deleteDepartment.mutate(r.id, {
+                            onError: (e) => toast.error(e instanceof Error ? e.message : tCommon("deleteFailed")),
                           });
                         }}
                       >
@@ -134,12 +132,12 @@ export function DepartmentsClient({ rows }: { rows: DepartmentWithCount[] }) {
               primaryLocation: editing.primaryLocation ?? "",
             } : empty}
             onSubmit={async (values) => {
-              const res = await saveDepartmentAction(editing?.id ?? null, values);
-              if (res.ok) {
+              try {
+                await saveDepartment.mutateAsync({ id: editing?.id ?? null, values });
                 setOpenId(null);
                 toast.success(editing ? t("updated") : t("added"));
-              } else {
-                toast.error(res.error ?? tCommon("saveFailed"));
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
               }
             }}
             onCancel={() => setOpenId(null)}
