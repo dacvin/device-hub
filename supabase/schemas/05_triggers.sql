@@ -48,3 +48,24 @@ create trigger device_photo_set_created_at
 create trigger device_document_set_created_at
   before insert on device_document
   for each row execute function set_created_at_only();
+
+-- ---- org_settings (server-side audit fields) ----
+-- Set updated_by = auth.uid() and updated_at = now() on every update,
+-- so client-supplied values cannot spoof the audit trail. RLS still
+-- enforces who may update; this hardens what they may attribute.
+create or replace function set_org_settings_updated_meta()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  new.updated_by := auth.uid();
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+create trigger org_settings_set_updated_meta
+  before update on org_settings
+  for each row execute function set_org_settings_updated_meta();

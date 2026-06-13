@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/client";
 import type { OrgSettingsInput } from "@/lib/domain/settings";
 
-export async function updateOrgSettings(patch: OrgSettingsInput, updatedBy: string): Promise<void> {
+// `updated_by` and `updated_at` are set server-side by a Postgres trigger
+// using auth.uid() and now() — never trust a client-supplied identity field.
+export async function updateOrgSettings(patch: OrgSettingsInput): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase
     .from("org_settings")
@@ -21,8 +23,6 @@ export async function updateOrgSettings(patch: OrgSettingsInput, updatedBy: stri
       notify_new_device: patch.notifyNewDevice,
       export_format: patch.exportFormat,
       deleted_retention_days: patch.deletedRetentionDays,
-      updated_by: updatedBy,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", true);
   if (error) throw error;

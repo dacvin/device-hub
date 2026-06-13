@@ -10,10 +10,12 @@ export function useSaveOrgSettings() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: OrgSettingsInput) => {
+      // Client-side `can()` check is UX-only — RLS policy `org_settings_write`
+      // is the authoritative gate (requires app_role() = 'it_admin').
       const me = await getCurrentMember();
       if (!me || !can(me.role, "changeSettings")) throw new Error("not-allowed");
       const parsed = orgSettingsSchema.parse(input);
-      await updateOrgSettings(parsed, me.id);
+      await updateOrgSettings(parsed);
       await logActivity({
         actorId: me.id,
         action: "settings.updated",
