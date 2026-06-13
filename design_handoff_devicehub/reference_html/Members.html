@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Members</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .cat-meta { font-size: 13px; color: var(--muted-foreground); margin-bottom: 12px; }
+
+  .table-scroll { overflow-x: auto; }
+  .table-scroll .table { min-width: 940px; }
+  #tbl .actcol { width: 158px; }
+
+  .member { display: flex; align-items: center; gap: 12px; }
+  .member .avatar { width: 36px; height: 36px; font-size: 13px; }
+  .member .mname { font-size: 14px; font-weight: 500; line-height: 1.25; display: inline-flex; align-items: center; gap: 8px; }
+  .member .memail { font-size: 12.5px; color: var(--muted-foreground); }
+
+  .role { display: inline-flex; align-items: center; gap: 6px; }
+  .role svg { width: 14px; height: 14px; }
+  .you { display:inline-block; font-size: 10.5px; line-height:1; color: var(--primary); background: var(--secondary); font-weight: 600; letter-spacing:.02em; padding: 3px 7px; border-radius: 9999px; }
+
+  .last { font-size: 13px; color: var(--muted-foreground); }
+  .devct { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; }
+
+  .actcol { width: 78px; }
+  .actcol .rowact { opacity: 0; transition: opacity .12s; justify-content: flex-end; display: flex; gap: 4px; }
+  tr:hover .actcol .rowact { opacity: 1; }
+
+  /* role summary cards */
+  .rolecards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+  .rolecard { padding: 16px 18px; display: flex; align-items: flex-start; gap: 14px; }
+  .rolecard .ric { width: 40px; height: 40px; border-radius: 11px; background: var(--secondary); color: var(--secondary-foreground); display: grid; place-items: center; flex: none; }
+  .rolecard .ric svg { width: 19px; height: 19px; }
+  .rolecard .rval { font-size: 22px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+  .rolecard .rlabel { font-size: 13px; font-weight: 500; margin-top: 4px; }
+  .rolecard .rdesc { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+  @media (max-width: 880px){ .rolecards { grid-template-columns: 1fr; } }
+
+  .seg { display: inline-flex; gap: 2px; padding: 3px; background: var(--muted); border-radius: var(--radius-md); }
+  .seg button { padding: 6px 12px; border-radius: calc(var(--radius-md) - 2px); font-size: 13px; font-weight: 500; color: var(--muted-foreground); cursor: pointer; border: none; background: transparent; font-family: inherit; }
+  .seg button.active { background: var(--card); color: var(--foreground); box-shadow: 0 1px 2px rgba(16,24,40,.06); }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Members" data-crumb="People with access to DeviceHub" data-active="members">
+    <template id="topbar-actions">
+      <div class="searchbox"><i data-lucide="search"></i><input id="search" placeholder="Search members…" /></div>
+      <button class="btn btn-outline"><i data-lucide="download"></i> Export</button>
+      <button class="btn btn-primary" id="inviteBtn"><i data-lucide="user-plus"></i> Invite member</button>
+    </template>
+
+    <div class="rolecards" id="rolecards"></div>
+
+    <div class="toolbar">
+      <div class="seg" id="roleseg">
+        <button class="active" data-role="">All</button>
+        <button data-role="Admin">Admins</button>
+        <button data-role="Member">Members</button>
+      </div>
+      <div class="grow" style="flex:1"></div>
+    </div>
+
+    <div class="cat-meta" id="meta"></div>
+
+    <div class="card empty-state" id="emptyState" style="display:none"></div>
+
+    <div class="card table-wrap" id="tableView">
+      <div class="table-scroll">
+        <table class="table" id="tbl"><thead>
+          <tr>
+            <th class="checkcol" style="width:40px;padding-right:0"><span class="checkbox"></span></th>
+            <th>Member</th>
+            <th>Role</th>
+            <th>Last active</th>
+            <th>Status</th>
+            <th class="actcol"></th>
+          </tr>
+        </thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <!-- Invite dialog -->
+    <div class="dialog-overlay" id="inviteDlg">
+    <div class="dialog" role="dialog" aria-modal="true">
+      <div class="dialog-head">
+        <div>
+          <div class="dialog-title" id="dlgTitle">Invite member</div>
+          <div class="dialog-desc" id="dlgDesc">They'll get an email to join with the role you pick. Only admins can invite.</div>
+        </div>
+        <button class="icon-btn" data-close><i data-lucide="x"></i></button>
+      </div>
+      <div class="dialog-body">
+        <div class="field">
+          <label class="label">Work email</label>
+          <input class="input" id="dlgEmail" type="email" placeholder="name@sioux.asia" />
+          <span class="field-hint" id="dlgEmailHint">Must be an IT-managed @sioux.asia account.</span>
+        </div>
+        <div class="field">
+          <label class="label">Role</label>
+          <select class="select" id="dlgRole">
+            <option>Member</option>
+            <option>Admin</option>
+          </select>
+        </div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn-outline" data-close>Cancel</button>
+        <button class="btn btn-primary" id="dlgSubmit">Send invite</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    const ROLE_META = {
+      "Admin":  { icon:"shield-check", badge:"badge-primary", desc:"Full access — manage every device, catalog & member." },
+      "Member": { icon:"user",         badge:"badge-secondary", desc:"Manage and view devices in the inventory." },
+    };
+
+    const MEMBERS = [
+      { name:"Anh Tran",     email:"anh.tran@sioux.asia",     role:"Admin",  last:"Active now",   status:"active", you:true },
+      { name:"Quan Bui",     email:"quan.bui@sioux.asia",     role:"Admin",  last:"2 hours ago",  status:"active" },
+      { name:"Mai Pham",     email:"mai.pham@sioux.asia",     role:"Member", last:"Yesterday",    status:"active" },
+      { name:"Khoa Le",      email:"khoa.le@sioux.asia",      role:"Member", last:"3 days ago",   status:"active" },
+      { name:"Hoa Nguyen",   email:"hoa.nguyen@sioux.asia",   role:"Member", last:"1 week ago",   status:"active" },
+      { name:"Phuong Ho",    email:"phuong.ho@sioux.asia",    role:"Member", last:"4 days ago",   status:"active" },
+      { name:"Tuan Vo",      email:"tuan.vo@sioux.asia",      role:"Member", last:"2 weeks ago",  status:"deactivated" },
+      { name:"Linh Dang",    email:"linh.dang@sioux.asia",    role:"Member", last:"—",            status:"invited" },
+    ];
+
+    let roleFilter = "", q = "";
+
+    function render(){
+      const list = MEMBERS.filter(m =>
+        (!roleFilter || m.role === roleFilter) &&
+        (!q || (m.name + m.email + m.dept).toLowerCase().includes(q.toLowerCase())));
+
+      document.getElementById("meta").textContent =
+        `${list.length} member${list.length!==1?'s':''}` +
+        (roleFilter ? "" : ` · ${MEMBERS.filter(m=>m.role==='Admin').length} admins · ${MEMBERS.filter(m=>m.status==='invited').length} pending invite`);
+
+      const empty = list.length === 0;
+      document.getElementById("tableView").style.display = empty ? "none" : "";
+      const es = document.getElementById("emptyState");
+      es.style.display = empty ? "" : "none";
+      if (empty) {
+        es.innerHTML = `
+          <div class="empty-ic"><i data-lucide="search-x"></i></div>
+          <div class="empty-title">No members match</div>
+          <div class="empty-desc">No one matches “${q || roleFilter}”. Try a different search or role filter.</div>
+          <div class="empty-actions"><button class="btn btn-outline" id="es-reset"><i data-lucide="x"></i> Reset filters</button></div>`;
+        lucide.createIcons();
+        const r = document.getElementById("es-reset");
+        r && r.addEventListener("click", () => {
+          q = ""; roleFilter = "";
+          document.getElementById("search").value = "";
+          document.querySelectorAll("#roleseg button").forEach(x=>x.classList.toggle("active", x.dataset.role===""));
+          render();
+        });
+        updateBulk();
+        return;
+      }
+
+      document.querySelector("#tbl tbody").innerHTML = list.map(m => {
+        const rm = ROLE_META[m.role];
+        const href = `Member Profile.html?email=${encodeURIComponent(m.email)}`;
+        const statusBadge = m.status==='active'
+          ? '<span class="badge badge-success"><span class="dot"></span>Active</span>'
+          : m.status==='invited'
+            ? '<span class="badge badge-warning"><span class="dot"></span>Invited</span>'
+            : '<span class="badge badge-muted"><span class="dot"></span>Deactivated</span>';
+        return `
+        <tr data-email="${m.email}">
+          <td class="checkcol" style="width:40px;padding-right:0"><span class="checkbox" data-email="${m.email}"></span></td>
+          <td>
+            <a class="member" href="${href}" style="color:inherit">
+              <span class="avatar">${DH.initials(m.name)}</span>
+              <div class="col"><span class="mname">${m.name}${m.you?'<span class="you">You</span>':''}</span><span class="memail">${m.email}</span></div>
+            </a>
+          </td>
+          <td><span class="badge ${rm.badge} role"><i data-lucide="${rm.icon}"></i>${m.role}</span></td>
+          <td><span class="last">${m.last}</span></td>
+          <td>${statusBadge}</td>
+          <td class="actcol"><div class="rowact row" style="gap:4px">
+            <button class="icon-btn js-edit" data-email="${m.email}" style="width:30px;height:30px;border:none" title="${m.you ? 'Edit my profile' : 'Edit'}"><i data-lucide="pencil"></i></button>
+            ${m.you ? "" : `<button class="icon-btn js-reset" data-email="${m.email}" style="width:30px;height:30px;border:none" title="Reset password"><i data-lucide="key-round"></i></button><button class="icon-btn js-toggle ${m.status==='deactivated' ? '' : 'js-del'}" data-email="${m.email}" style="width:30px;height:30px;border:none" title="${m.status==='deactivated' ? 'Activate' : 'Deactivate'}"><i data-lucide="${m.status==='deactivated' ? 'user-check' : 'user-x'}"></i></button><button class="icon-btn js-remove js-del" data-email="${m.email}" style="width:30px;height:30px;border:none" title="Remove"><i data-lucide="user-minus"></i></button>`}
+          </div></td>
+        </tr>`;
+      }).join("");
+      lucide.createIcons();
+      syncChecks();
+    }
+
+    /* ---- Bulk selection ---- */
+    const selected = new Set();
+    let bulk;
+    function visibleMembers(){
+      return MEMBERS.filter(m =>
+        (!roleFilter || m.role === roleFilter) &&
+        (!q || (m.name + m.email + m.dept).toLowerCase().includes(q.toLowerCase())));
+    }
+    function syncChecks(){
+      document.querySelectorAll('#tbl tbody .checkbox[data-email]').forEach(box=>{
+        const on = selected.has(box.dataset.email);
+        box.classList.toggle('checked', on);
+        box.innerHTML = on ? '<i data-lucide="check"></i>' : '';
+        const tr = box.closest('tr'); if (tr) tr.classList.toggle('row-selected', on);
+      });
+      const head = document.querySelector('#tbl thead .checkbox');
+      if (head){
+        const vis = visibleMembers();
+        const sel = vis.filter(m=>selected.has(m.email)).length;
+        const allOn = sel>0 && sel===vis.length, part = sel>0 && sel<vis.length;
+        head.classList.toggle('checked', allOn);
+        head.classList.toggle('indeterminate', part);
+        head.innerHTML = allOn ? '<i data-lucide="check"></i>' : part ? '<i data-lucide="minus"></i>' : '';
+      }
+      lucide.createIcons();
+    }
+    function updateBulk(){ if (bulk) bulk.update(selected.size); }
+    function clearSel(){ selected.clear(); syncChecks(); updateBulk(); }
+
+    document.addEventListener("shell:ready", () => {
+      // role summary cards
+      const counts = { "Admin":0, "Member":0 };
+      MEMBERS.forEach(m=>counts[m.role]++);
+      document.getElementById("rolecards").innerHTML = Object.keys(ROLE_META).map(r=>{
+        const rm = ROLE_META[r];
+        return `<div class="card rolecard">
+          <span class="ric"><i data-lucide="${rm.icon}"></i></span>
+          <div>
+            <div class="rval">${counts[r]}</div>
+            <div class="rlabel">${r}${counts[r]!==1?'s':''}</div>
+            <div class="rdesc">${rm.desc}</div>
+          </div>
+        </div>`;
+      }).join("");
+
+      // segmented role filter
+      document.querySelectorAll("#roleseg button").forEach(b => b.addEventListener("click", () => {
+        document.querySelectorAll("#roleseg button").forEach(x=>x.classList.remove("active"));
+        b.classList.add("active");
+        roleFilter = b.dataset.role; render();
+      }));
+      document.getElementById("search").addEventListener("input", e=>{ q=e.target.value; render(); });
+
+      // bulk selection bar
+      bulk = DH.bulkBar();
+      bulk.setActions(
+        `<button class="btn btn-outline btn-sm" id="bulk-role"><i data-lucide="user-cog"></i> Role</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-reset"><i data-lucide="key-round"></i> Reset password</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-deact"><i data-lucide="user-x"></i> Deactivate</button>`
+        + `<button class="btn btn-outline btn-sm" id="bulk-remove" style="color:var(--destructive)"><i data-lucide="user-minus"></i> Remove</button>`);
+      bulk.onClear(clearSel);
+      document.getElementById("tbl").addEventListener("click", e => {
+        const box = e.target.closest(".checkbox"); if (!box) return;
+        if (box.closest("thead")) {
+          const vis = visibleMembers();
+          const allOn = vis.length && vis.every(m=>selected.has(m.email));
+          vis.forEach(m => allOn ? selected.delete(m.email) : selected.add(m.email));
+        } else {
+          const em = box.dataset.email;
+          selected.has(em) ? selected.delete(em) : selected.add(em);
+        }
+        syncChecks(); updateBulk();
+      });
+      // per-row actions: Edit · Reset password · Activate/Deactivate · Remove (self: Edit only)
+      document.getElementById("tbl").addEventListener("click", e => {
+        const editBtn = e.target.closest(".js-edit");
+        if (editBtn) { const m = MEMBERS.find(x => x.email === editBtn.dataset.email); if (!m) return; if (m.you) location.href = "Profile.html"; else openEdit(m); return; }
+        const reset = e.target.closest(".js-reset");
+        if (reset) { const m = MEMBERS.find(x => x.email === reset.dataset.email); if (m) DH.confirm({
+          title: `Reset password for ${m.name}?`, desc: "Are you sure? We'll email them a link to set a new password.",
+          confirmLabel: "Send reset link", icon: "key-round",
+          onConfirm: () => DH.toast("Reset link sent", { desc: `A password-reset email was sent to ${m.email}.` })
+        }); return; }
+        const tog = e.target.closest(".js-toggle");
+        if (tog) {
+          const m = MEMBERS.find(x => x.email === tog.dataset.email); if (!m) return;
+          const deact = m.status === "deactivated";
+          DH.confirm({
+            title: deact ? `Activate ${m.name}?` : `Deactivate ${m.name}?`,
+            desc: deact ? `Are you sure you want to activate ${m.name}? They'll regain access to DeviceHub.`
+                        : `Are you sure you want to deactivate ${m.name}? They'll lose access until reactivated.`,
+            confirmLabel: deact ? "Activate" : "Deactivate", icon: deact ? "user-check" : "user-x",
+            onConfirm: () => { m.status = deact ? "active" : "deactivated"; render(); DH.toast(deact ? "Member activated" : "Member deactivated", { desc: `${m.name} is now ${deact ? "active" : "deactivated"}.` }); }
+          });
+          return;
+        }
+        const rem = e.target.closest(".js-remove");
+        if (rem) {
+          const m = MEMBERS.find(x => x.email === rem.dataset.email); if (!m) return;
+          DH.confirm({
+            title: `Remove ${m.name}?`, desc: `Are you sure you want to remove ${m.name}?`, confirmLabel: "Remove", icon: "user-minus",
+            onConfirm: () => { const i = MEMBERS.indexOf(m); if (i>-1) MEMBERS.splice(i,1); selected.delete(m.email); render(); updateBulk(); DH.toast("Member removed"); }
+          });
+        }
+      });
+      document.getElementById("bulk-role").addEventListener("click", e => {
+        DH.popoverMenu(e.currentTarget, Object.keys(ROLE_META).map(role => ({
+          label: role, icon: ROLE_META[role].icon,
+          onClick: () => { const n = selected.size; MEMBERS.forEach(m => { if (selected.has(m.email)) m.role = role; }); render(); DH.toast(`Role updated`, { desc: `${n} member${n>1?'s':''} set to ${role}.` }); }
+        })), { head: "Set role", above: true });
+      });
+      document.getElementById("bulk-reset").addEventListener("click", () => { const n = selected.size; DH.confirm({
+        title: `Reset password for ${n} member${n>1?'s':''}?`, desc: "Are you sure? We'll email each of them a link to set a new password.",
+        confirmLabel: "Send reset link" + (n>1?"s":""), icon: "key-round",
+        onConfirm: () => { clearSel(); DH.toast("Reset links sent", { type:"info", desc: `A password-reset email was sent to ${n} member${n>1?'s':''}.` }); }
+      }); });
+      document.getElementById("bulk-deact").addEventListener("click", () => {
+        const n = selected.size; MEMBERS.forEach(m => { if (selected.has(m.email) && !m.you) m.status = "deactivated"; }); render(); DH.toast(`${n} member${n>1?'s':''} deactivated`);
+      });
+      document.getElementById("bulk-remove").addEventListener("click", () => {
+        const n = selected.size;
+        DH.confirm({
+          title: `Remove ${n} member${n>1?'s':''}?`,
+          desc: `Are you sure you want to remove the selected member${n>1?'s':''}?`,
+          confirmLabel: "Remove", icon: "user-minus",
+          onConfirm: () => { for (let i = MEMBERS.length - 1; i >= 0; i--) if (selected.has(MEMBERS[i].email)) MEMBERS.splice(i, 1); clearSel(); render(); DH.toast(`${n} member${n>1?'s':''} removed`); }
+        });
+      });
+
+      // invite / edit dialog
+      const dlg = document.getElementById("inviteDlg");
+      const dlgTitle = document.getElementById("dlgTitle");
+      const dlgDesc = document.getElementById("dlgDesc");
+      const dlgEmail = document.getElementById("dlgEmail");
+      const dlgEmailHint = document.getElementById("dlgEmailHint");
+      const dlgRole = document.getElementById("dlgRole");
+      const dlgSubmit = document.getElementById("dlgSubmit");
+      let editing = null;
+      const close = ()=>{ dlg.classList.remove("open"); editing = null; };
+      const openInvite = ()=>{
+        editing = null;
+        dlgTitle.textContent = "Invite member";
+        dlgDesc.textContent = "They'll get an email to join with the role you pick. Only admins can invite.";
+        dlgEmail.value = ""; dlgEmail.removeAttribute("disabled"); dlgEmailHint.style.display = "";
+        dlgRole.value = "Member";
+        dlgSubmit.textContent = "Send invite";
+        dlg.classList.add("open"); dlgEmail.focus();
+      };
+      const openEdit = (m)=>{
+        editing = m;
+        dlgTitle.textContent = `Edit ${m.name}`;
+        dlgDesc.textContent = "Update this member's role. Email is managed by IT and can't be changed.";
+        dlgEmail.value = m.email; dlgEmail.setAttribute("disabled", ""); dlgEmailHint.style.display = "none";
+        dlgRole.value = m.role;
+        dlgSubmit.textContent = "Save";
+        dlg.classList.add("open"); dlgRole.focus();
+      };
+      window.openEdit = openEdit;
+      document.getElementById("inviteBtn").addEventListener("click", openInvite);
+      dlg.querySelectorAll("[data-close]").forEach(el=>el.addEventListener("click", close));
+      dlgSubmit.addEventListener("click", () => {
+        if (editing) {
+          const changed = editing.role !== dlgRole.value;
+          const who = editing.name;
+          editing.role = dlgRole.value;
+          render();
+          close();
+          DH.toast("Member updated", { desc: changed ? `${who}'s role saved.` : "No changes to save." });
+        } else {
+          close();
+          DH.toast("Invitation sent", { desc: "They'll get an email to join DeviceHub." });
+        }
+      });
+      dlg.addEventListener("mousedown", e=>{ if(e.target===dlg) close(); });
+      document.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); });
+
+      render();
+    });
+  </script>
+</body>
+</html>

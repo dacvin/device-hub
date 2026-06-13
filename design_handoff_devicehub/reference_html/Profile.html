@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — My profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .cols { display:flex; flex-direction:column; gap:20px; max-width:820px; }
+  .stack { display:flex; flex-direction:column; gap:20px; }
+
+  .pcard { padding:24px; }
+  .pcard .section-title { font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted-foreground); display:flex; align-items:center; gap:8px; margin-bottom:18px; }
+  .pcard .section-title svg { width:15px; height:15px; color:var(--primary); }
+
+  .photo-row { display:flex; align-items:center; gap:18px; margin-bottom:22px; }
+  .photo-av { width:72px; height:72px; border-radius:9999px; font-size:24px; overflow:hidden; flex:none; }
+  .photo-av img { width:100%; height:100%; object-fit:cover; }
+  .photo-meta .ph-name { font-size:15px; font-weight:600; }
+  .photo-meta .ph-sub { font-size:12.5px; color:var(--muted-foreground); margin-top:2px; }
+  .photo-acts { display:flex; gap:8px; margin-top:10px; }
+
+  .fgrid { display:grid; grid-template-columns: 1fr 1fr; gap:18px; }
+  .fgrid .full { grid-column:1 / -1; }
+  .readonly { display:flex; align-items:center; gap:8px; height:36px; padding:0 12px; border:1px solid var(--border); border-radius:var(--radius-md); background:var(--muted); color:var(--muted-foreground); font-size:14px; }
+  .readonly .badge { margin:0; }
+
+  .actionbar { margin-top:22px; padding-top:18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+
+  .rail-stat { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .rail-stat:last-child { border-bottom:none; }
+  .rail-stat .ic { width:34px; height:34px; border-radius:9px; background:var(--muted); display:grid; place-items:center; flex:none; color:var(--muted-foreground); }
+  .rail-stat .ic svg { width:17px; height:17px; }
+  .rail-stat .k { font-size:12px; color:var(--muted-foreground); }
+  .rail-stat .v { font-size:14px; font-weight:500; margin-top:1px; word-break:break-all; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="My profile" data-crumb="Your account details and password" data-active="">
+    <div class="cols">
+      <div class="stack">
+        <!-- Personal info -->
+        <div class="card pcard">
+          <div class="section-title"><i data-lucide="id-card"></i>Personal information</div>
+          <div class="photo-row">
+            <span class="avatar photo-av" id="pAvatar">AT</span>
+            <div class="photo-meta">
+              <div class="ph-name" id="pPreviewName">Anh Tran</div>
+              <div class="ph-sub">PNG or JPG, up to 2&nbsp;MB.</div>
+              <div class="photo-acts">
+                <button class="btn btn-outline btn-sm" id="pUpload"><i data-lucide="upload"></i> Upload photo</button>
+                <button class="btn btn-ghost btn-sm" id="pRemove">Remove</button>
+              </div>
+            </div>
+            <input type="file" id="pFile" accept="image/*" hidden />
+          </div>
+          <div class="fgrid">
+            <div class="field"><label class="label">Full name</label><input class="input" id="pName" value="Anh Tran" /></div>
+            <div class="field"><label class="label">Work email</label><div class="readonly"><i data-lucide="mail" style="width:15px;height:15px"></i> anh.tran@sioux.asia</div><span class="field-hint">Managed by IT — contact an admin to change.</span></div>
+            <div class="field"><label class="label">Role</label>
+              <select class="select" id="pRole"><option>Admin</option><option>Member</option></select>
+            </div>
+            <div class="field"><label class="label">Phone</label><input class="input" id="pPhone" style="font-family:var(--font-mono)" value="+84 28 7100 1010" /></div>
+          </div>
+          <div class="actionbar">
+            <button class="btn btn-ghost" id="pReset">Discard</button>
+            <button class="btn btn-primary" id="pSave">Save</button>
+          </div>
+        </div>
+
+        <!-- Change password -->
+        <div class="card pcard">
+          <div class="section-title"><i data-lucide="lock"></i>Change password</div>
+          <div class="fgrid">
+            <div class="field full"><label class="label">Current password</label><input class="input" type="password" id="pwCur" placeholder="••••••••" /></div>
+            <div class="field"><label class="label">New password</label><input class="input" type="password" id="pwNew" placeholder="At least 8 characters" /></div>
+            <div class="field"><label class="label">Confirm new password</label><input class="input" type="password" id="pwConf" placeholder="Re-enter new password" /></div>
+          </div>
+          <div class="actionbar">
+            <button class="btn btn-primary" id="pwSave">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      const fileInput = document.getElementById("pFile");
+      const avatar = document.getElementById("pAvatar");
+
+      document.getElementById("pUpload").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = e => { avatar.innerHTML = `<img src="${e.target.result}" alt="Profile photo" />`; DH.toast("Photo updated", { desc: "Don't forget to save your changes." }); };
+        reader.readAsDataURL(f);
+      });
+      document.getElementById("pRemove").addEventListener("click", () => { avatar.innerHTML = "AT"; fileInput.value = ""; });
+
+      // live name preview
+      const nameInput = document.getElementById("pName");
+      nameInput.addEventListener("input", () => {
+        document.getElementById("pPreviewName").textContent = nameInput.value || "—";
+        if (!avatar.querySelector("img")) avatar.textContent = (nameInput.value.trim() ? DH.initials(nameInput.value) : "?");
+      });
+
+      document.getElementById("pSave").addEventListener("click", () => DH.toast("Profile saved", { desc: "Your account details have been updated." }));
+      document.getElementById("pReset").addEventListener("click", () => location.reload());
+
+      document.getElementById("pwSave").addEventListener("click", () => {
+        const cur = document.getElementById("pwCur").value, nw = document.getElementById("pwNew").value, cf = document.getElementById("pwConf").value;
+        if (!cur || !nw || !cf) { DH.toast("Fill in all fields", { type: "error", desc: "Enter your current and new password." }); return; }
+        if (nw.length < 8) { DH.toast("Password too short", { type: "error", desc: "Use at least 8 characters." }); return; }
+        if (nw !== cf) { DH.toast("Passwords don't match", { type: "error", desc: "Re-enter the new password." }); return; }
+        ["pwCur","pwNew","pwConf"].forEach(id => document.getElementById(id).value = "");
+        DH.toast("Password updated", { desc: "Use your new password next time you sign in." });
+      });
+    });
+  </script>
+</body>
+</html>

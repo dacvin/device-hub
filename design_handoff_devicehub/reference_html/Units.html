@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Units</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div id="page" data-title="Units" data-crumb="Units of measure devices are counted in" data-active="units">
+    <template id="topbar-actions">
+      <div class="searchbox"><i data-lucide="search"></i><input id="cat-search" placeholder="Search units…" /></div>
+      <button class="btn btn-outline"><i data-lucide="download"></i> Export</button>
+      <button class="btn btn-primary"><i data-lucide="plus"></i> Create unit</button>
+    </template>
+    <div id="catalog"></div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script src="theme/catalog.js"></script>
+  <script>
+    document.addEventListener("shell:ready", () => {
+      renderCatalog({
+        field: "unit", singular: "Unit",
+        placeholderName: "Piece",
+        form: [
+          { key: "desc", label: "Description", type: "text", ph: "e.g. A single, individually tracked item" },
+        ],
+        cols: [
+          { label: "Description", get: it => it.desc || "—" },
+        ],
+        items: [
+          { name: "Piece", desc: "A single, individually tracked item" },
+          { name: "Set",   desc: "A group counted and moved as one" },
+          { name: "Box",   desc: "A sealed carton of identical items" },
+        ],
+      });
+    });
+  </script>
+</body>
+</html>

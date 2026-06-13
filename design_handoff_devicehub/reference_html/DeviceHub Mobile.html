@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="mobile/mobile.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="gallery" id="gallery">
+    <div class="gallery-top">
+      <h1>DeviceHub — Mobile</h1>
+      <p>Responsive web on phone (no native app). Full parity with desktop, bottom-tab navigation. Section 1 compares two nav patterns — pick one; the rest use the recommended Option B.</p>
+    </div>
+  </div>
+
+  <script src="mobile/mobile-screens.js"></script>
+  <script>
+    const S = window.MOBILE.screens;
+
+    // iOS status bar + island + home indicator overlays around a screen's .mob html
+    function phone(html, dark) {
+      return `<div class="phone${dark ? ' dark' : ''}">
+        <div class="m-island"></div>
+        <div class="m-statusbar">
+          <span>9:41</span>
+          <span class="sb-r">
+            <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx=".6" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx=".6" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx=".6" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx=".6" fill="currentColor"/></svg>
+            <svg width="16" height="11" viewBox="0 0 16 11"><path d="M8 3c2.1 0 4 .8 5.4 2.1l1-1A9 9 0 0 0 8 1.4 9 9 0 0 0 1.6 4l1 1A7.6 7.6 0 0 1 8 3z" fill="currentColor"/><path d="M8 6.4c1.2 0 2.3.5 3.1 1.3l1-1A6 6 0 0 0 8 4.9 6 6 0 0 0 3.9 6.6l1 1A4.4 4.4 0 0 1 8 6.4z" fill="currentColor"/><circle cx="8" cy="9.6" r="1.3" fill="currentColor"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12"><rect x="1" y="1" width="21" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".4"/><rect x="2.5" y="2.5" width="18" height="7" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx=".7" fill="currentColor" fill-opacity=".4"/></svg>
+          </span>
+        </div>
+        ${html}
+        <div class="m-homebar"></div>
+      </div>`;
+    }
+
+    const item = (label, html, dark) => `<div class="g-item"><div class="g-label">${label}</div>${phone(html, dark)}</div>`;
+
+    const SECTIONS = [
+      { title: "Navigation — compare", sub: "Two bottom-bar options. Same screens, different nav. Pick one.", items: [
+        ["Option A · 4-tab — Overview", S.overview("A")],
+        ["Option A · 4-tab — Devices (＋ floating)", S.devices("A")],
+        ["Option B · 5-tab + Add — Overview", S.overview("B")],
+        ["Option B · 5-tab + Add — Devices", S.devices("B")],
+      ]},
+      { title: "Core screens", sub: "Recommended nav (Option B). Full parity with desktop.", items: [
+        ["Overview", S.overview("B")],
+        ["Devices", S.devices("B")],
+        ["Device details", S.deviceDetails("B")],
+        ["Members", S.members("B")],
+        ["Member profile", S.memberProfile("B")],
+        ["More — catalogs + system", S.more("B")],
+      ]},
+      { title: "Forms", sub: "Sticky action bar replaces the tab bar.", items: [
+        ["Add device", S.createDevice()],
+        ["Edit device", S.editDevice()],
+      ]},
+      { title: "Catalog & settings", sub: "Reached from the More tab.", items: [
+        ["Units", S.units("B")],
+        ["Groups", S.groups("B")],
+        ["Manufacturers", S.manufacturers("B")],
+        ["Settings", S.settings("B")],
+      ]},
+      { title: "Auth & dark mode", sub: "Pre-login, plus a dark-mode example.", items: [
+        ["Sign in", S.login()],
+        ["Overview — dark", S.overview("B"), true],
+      ]},
+    ];
+
+    const g = document.getElementById("gallery");
+    g.insertAdjacentHTML("beforeend", SECTIONS.map(sec => `
+      <div class="g-section">
+        <h2>${sec.title}</h2>
+        <div class="gs-sub">${sec.sub}</div>
+        <div class="g-row">${sec.items.map(([l, h, d]) => item(l, h, d)).join("")}</div>
+      </div>`).join(""));
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>

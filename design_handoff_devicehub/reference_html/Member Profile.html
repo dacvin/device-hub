@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Member profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<link rel="stylesheet" href="theme/states.css" />
+<link rel="stylesheet" href="theme/shell.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .back { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted-foreground); margin-bottom:16px; }
+  .back:hover { color: var(--foreground); }
+  .back svg { width:15px; height:15px; }
+
+  .dhead { display:flex; align-items:flex-start; gap:18px; margin-bottom:22px; }
+  .pavatar { width:56px; height:56px; border-radius:9999px; font-size:19px; }
+  .dhead h1 { font-size:24px; font-weight:600; letter-spacing:-0.02em; display:flex; align-items:center; gap:10px; }
+  .dhead .you { font-size:11px; font-weight:600; color:var(--primary); background:var(--secondary); border-radius:9999px; padding:3px 8px; letter-spacing:.02em; }
+  .dhead .sub { display:flex; align-items:center; gap:10px; margin-top:7px; flex-wrap:wrap; }
+  .dhead .email { font-size:13.5px; color:var(--muted-foreground); }
+  .dhead .acts { margin-left:auto; display:flex; gap:8px; }
+  .role { display:inline-flex; align-items:center; gap:6px; }
+  .role svg { width:14px; height:14px; }
+
+  .cols { display:grid; grid-template-columns: 1fr 320px; gap:20px; align-items:start; }
+  .stack { display:flex; flex-direction:column; gap:20px; }
+  @media (max-width: 1080px){ .cols { grid-template-columns: 1fr; } }
+
+  .section-title { font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted-foreground); display:flex; align-items:center; gap:8px; }
+  .section-title svg { width:15px; height:15px; color:var(--primary); }
+  .card-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .view-all { display:inline-flex; align-items:center; gap:5px; font-size:13px; color:var(--primary); font-weight:500; }
+  .view-all svg { width:14px; height:14px; }
+
+  .dl { display:grid; grid-template-columns: 1fr 1fr; gap:18px 28px; margin-top:18px; }
+  .dl .k { font-size:12px; color:var(--muted-foreground); }
+  .dl .v { font-size:14px; font-weight:500; margin-top:3px; }
+  .dl .v.mono { font-family:var(--font-mono); font-weight:400; }
+
+  /* permissions */
+  .perms { margin-top:12px; }
+  .perm { display:flex; align-items:center; gap:11px; padding:11px 0; font-size:14px; border-bottom:1px solid var(--border); }
+  .perm:last-child { border-bottom:none; }
+  .perm .pic { width:22px; height:22px; border-radius:7px; display:grid; place-items:center; flex:none; }
+  .perm.yes .pic { background: color-mix(in oklch, var(--green-200) 55%, var(--card)); color: var(--green-700); }
+  .dark .perm.yes .pic { background: color-mix(in oklch, var(--green-800) 40%, var(--card)); color: var(--green-300); }
+  .perm.no { color: var(--muted-foreground); }
+  .perm.no .pic { background: var(--muted); color: var(--muted-foreground); }
+  .perm .pic svg { width:13px; height:13px; }
+
+  /* devices managed mini-list */
+  .dvlist { margin-top:6px; }
+  .dvrow { display:flex; align-items:center; gap:12px; padding:11px 4px; margin:0 -4px; border-bottom:1px solid var(--border); border-radius:var(--radius-md); transition:background .12s; }
+  .dvrow:last-child { border-bottom:none; }
+  .dvrow:hover { background: var(--muted); }
+  .dvic { width:34px; height:34px; border-radius:9px; background:var(--secondary); color:var(--secondary-foreground); display:grid; place-items:center; flex:none; }
+  .dvic svg { width:17px; height:17px; }
+  .dvmeta { flex:1; min-width:0; }
+  .dvname { font-size:14px; font-weight:500; }
+  .dvcode { font-family:var(--font-mono); font-size:12px; color:var(--muted-foreground); }
+  .dv-empty { padding:22px 0 6px; text-align:center; color:var(--muted-foreground); font-size:13.5px; }
+
+  /* right rail */
+  .rail-stat { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .rail-stat:last-child { border-bottom:none; }
+  .rail-stat .ic { width:34px; height:34px; border-radius:9px; background:var(--muted); display:grid; place-items:center; flex:none; color:var(--muted-foreground); }
+  .rail-stat .ic svg { width:17px; height:17px; }
+  .rail-stat .k { font-size:12px; color:var(--muted-foreground); }
+  .rail-stat .v { font-size:14px; font-weight:500; margin-top:1px; }
+  .rail-big { font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1; font-variant-numeric:tabular-nums; }
+
+  .timeline { margin-top:18px; display:flex; flex-direction:column; }
+  .tl-item { display:flex; gap:12px; padding-bottom:18px; position:relative; }
+  .tl-item > div { flex:1; min-width:0; }
+  .tl-item:not(:last-child)::before { content:""; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:var(--border); }
+  .tl-item:last-child { padding-bottom:0; }
+  .tl-dot { width:24px; height:24px; border-radius:9999px; background:var(--secondary); color:var(--secondary-foreground); display:grid; place-items:center; flex:none; z-index:1; }
+  .tl-dot svg { width:13px; height:13px; }
+  .tl-item .ti { font-size:14px; font-weight:500; }
+  .tl-item .tm { font-size:12px; color:var(--muted-foreground); margin-top:1px; }
+</style>
+</head>
+<body>
+  <div id="page" data-title="Member profile" data-crumb="" data-active="members">
+    <a class="back" href="Members.html"><i data-lucide="arrow-left"></i> Back to members</a>
+    <div id="body"></div>
+  </div>
+
+  <script src="theme/data.js"></script>
+  <script src="theme/shell.js"></script>
+  <script src="theme/states.js"></script>
+  <script>
+    const GROUP_ICON = { Laptop:"laptop", Desktop:"monitor", Monitor:"monitor", Printer:"printer", Network:"network", Server:"server", Mobile:"smartphone", Peripheral:"webcam" };
+
+    const ROLE_META = {
+      "Admin":  { icon:"shield-check", badge:"badge-primary" },
+      "Member": { icon:"user",         badge:"badge-secondary" },
+    };
+    // capability matrix per role — drives the Permissions card
+    const MEMBERS = [
+      { name:"Anh Tran",   email:"anh.tran@sioux.asia",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1010", manager:"—",          joined:"2021-03-08", last:"Active now",  status:"active", you:true },
+      { name:"Quan Bui",   email:"quan.bui@sioux.asia",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1011", manager:"Anh Tran",   joined:"2021-09-14", last:"2 hours ago", status:"active" },
+      { name:"Mai Pham",   email:"mai.pham@sioux.asia",   role:"Member", site:"HCMC",  phone:"+84 28 7100 1042", manager:"Anh Tran",   joined:"2022-05-02", last:"Yesterday",   status:"active" },
+      { name:"Khoa Le",    email:"khoa.le@sioux.asia",    role:"Member", site:"Hanoi", phone:"+84 24 7100 2030", manager:"Anh Tran",   joined:"2022-11-21", last:"3 days ago",  status:"active" },
+      { name:"Hoa Nguyen", email:"hoa.nguyen@sioux.asia", role:"Member", site:"Hanoi", phone:"+84 24 7100 2031", manager:"Anh Tran",   joined:"2023-01-09", last:"1 week ago",  status:"active" },
+      { name:"Phuong Ho",  email:"phuong.ho@sioux.asia",  role:"Member", site:"HCMC",  phone:"+84 28 7100 1050", manager:"Anh Tran",   joined:"2023-04-17", last:"4 days ago",  status:"active" },
+      { name:"Tuan Vo",    email:"tuan.vo@sioux.asia",    role:"Member", site:"HCMC",  phone:"+84 28 7100 1061", manager:"Phuong Ho",  joined:"2024-02-26", last:"2 weeks ago", status:"deactivated" },
+      { name:"Linh Dang",  email:"linh.dang@sioux.asia",  role:"Member", site:"HCMC",  phone:"—",                manager:"Phuong Ho",  joined:"—",          last:"—",           status:"invited" },
+    ];
+
+    function fmt(iso){ if(!iso || iso==="—") return "—"; const dt=new Date(iso); return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
+
+    // Edit role dialog (mirrors the Members list)
+    function openRoleDialog(m){
+      const overlay = document.createElement("div");
+      overlay.className = "dialog-overlay";
+      overlay.innerHTML = `
+        <div class="dialog" role="dialog" aria-modal="true">
+          <div class="dialog-head">
+            <div>
+              <div class="dialog-title">Edit ${m.name}</div>
+              <div class="dialog-desc">Update this member's role. Email is managed by IT and can't be changed.</div>
+            </div>
+            <button class="icon-btn" data-close><i data-lucide="x"></i></button>
+          </div>
+          <div class="dialog-body">
+            <div class="field"><label class="label">Work email</label>
+              <input class="input" type="email" value="${m.email}" disabled /></div>
+            <div class="field"><label class="label">Role</label>
+              <select class="select" id="rd-role"><option>Member</option><option>Admin</option></select></div>
+          </div>
+          <div class="dialog-foot">
+            <button class="btn btn-outline" data-close>Cancel</button>
+            <button class="btn btn-primary" id="rd-save">Save</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector("#rd-role").value = m.role;
+      lucide.createIcons();
+      requestAnimationFrame(() => overlay.classList.add("open"));
+      const close = () => { overlay.classList.remove("open"); setTimeout(() => overlay.remove(), 150); };
+      overlay.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", close));
+      overlay.addEventListener("mousedown", e => { if (e.target === overlay) close(); });
+      overlay.querySelector("#rd-save").addEventListener("click", () => {
+        const v = overlay.querySelector("#rd-role").value;
+        const changed = m.role !== v; m.role = v; close(); render(m);
+        DH.toast("Member updated", { desc: changed ? `${m.name}'s role saved.` : "No changes to save." });
+      });
+    }
+
+    function render(m){
+      const rm = ROLE_META[m.role];
+
+      const statusBadge = m.status === "active"
+        ? '<span class="badge badge-success"><span class="dot"></span>Active</span>'
+        : m.status === "invited"
+          ? '<span class="badge badge-warning"><span class="dot"></span>Invited</span>'
+          : '<span class="badge badge-muted"><span class="dot"></span>Deactivated</span>';
+
+      const details = `<div class="card" style="padding:22px">
+        <div class="section-title"><i data-lucide="id-card"></i>Details</div>
+        <div class="dl">
+          <div><div class="k">Phone</div><div class="v mono">${m.phone}</div></div>
+          <div><div class="k">Member since</div><div class="v">${fmt(m.joined)}</div></div>
+          <div><div class="k">Last active</div><div class="v" style="font-weight:400">${m.last}</div></div>
+        </div>
+      </div>`;
+
+      const rail = `
+        <div class="card" style="padding:22px">
+          <div class="section-title"><i data-lucide="history"></i>Recent activity</div>
+          <div class="timeline">
+            ${m.status === "invited"
+              ? `<div class="tl-item"><span class="tl-dot"><i data-lucide="mail"></i></span><div><div class="ti">Invitation sent</div><div class="tm">by Anh Tran · awaiting acceptance</div></div></div>`
+              : `<div class="tl-item"><span class="tl-dot"><i data-lucide="log-in"></i></span><div><div class="ti">Signed in</div><div class="tm">${m.last}</div></div></div>
+                 <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Updated a device record</div><div class="tm">recently</div></div></div>
+                 <div class="tl-item"><span class="tl-dot"><i data-lucide="user-plus"></i></span><div><div class="ti">Joined the workspace</div><div class="tm">${fmt(m.joined)}</div></div></div>`}
+          </div>
+        </div>`;
+
+      const isSelf = !!m.you;
+      const security = `<div class="card" style="padding:22px">
+          <div class="section-title"><i data-lucide="shield"></i>Security</div>
+          <p style="font-size:13px;color:var(--muted-foreground);line-height:1.55;margin:14px 0 16px">Sign out everywhere if you've used a shared or lost device. You'll need to sign in again.</p>
+          <button class="btn btn-outline" id="act-signout"><i data-lucide="log-out"></i> Sign out all sessions</button>
+        </div>`;
+      const headerActs = isSelf
+        ? `<a class="btn btn-primary" href="Profile.html"><i data-lucide="pencil"></i> Edit my profile</a>`
+        : `<button class="btn btn-outline" id="act-edit"><i data-lucide="pencil"></i> Edit</button>
+           <button class="btn btn-outline" id="act-reset"><i data-lucide="key-round"></i> Reset password</button>
+           <button class="btn btn-outline" id="act-toggle"><i data-lucide="${m.status==='deactivated'?'user-check':'user-x'}"></i> ${m.status==='deactivated'?'Activate':'Deactivate'}</button>
+           <button class="btn btn-destructive" id="act-remove"><i data-lucide="user-minus"></i> Remove</button>`;
+
+      document.getElementById("body").innerHTML = `
+        <div class="dhead">
+          <span class="avatar pavatar">${DH.initials(m.name)}</span>
+          <div>
+            <h1>${m.name}${m.you?'<span class="you">You</span>':''}</h1>
+            <div class="sub">
+              <span class="email">${m.email}</span>
+              <span class="sep-v" style="height:14px"></span>
+              <span class="badge ${rm.badge} role"><i data-lucide="${rm.icon}"></i>${m.role}</span>
+              ${statusBadge}
+            </div>
+          </div>
+          <div class="acts">${headerActs}</div>
+        </div>
+        <div class="cols">
+          <div class="stack">${details}${isSelf ? security : ""}</div>
+          <div class="stack">${rail}</div>
+        </div>`;
+      lucide.createIcons();
+
+      // admin actions (mockup feedback)
+      const reset = document.getElementById("act-reset");
+      reset && reset.addEventListener("click", () => DH.confirm({
+        title: `Reset password for ${m.name}?`, desc: "Are you sure? We'll email them a link to set a new password.",
+        confirmLabel: "Send reset link", icon: "key-round",
+        onConfirm: () => DH.toast("Reset link sent", { desc: `A password-reset email was sent to ${m.email}.` })
+      }));
+      const edit = document.getElementById("act-edit");
+      edit && edit.addEventListener("click", () => openRoleDialog(m));
+      const signout = document.getElementById("act-signout");
+      signout && signout.addEventListener("click", () => DH.confirm({
+        title: "Sign out all sessions?", desc: "Are you sure you want to sign out of all sessions?",
+        confirmLabel: "Sign out everywhere", icon: "log-out", tone: "warn",
+        onConfirm: () => { setTimeout(() => location.href = "Login.html", 500); }
+      }));
+      const toggle = document.getElementById("act-toggle");
+      toggle && toggle.addEventListener("click", () => { const deact = m.status === "deactivated"; DH.confirm({
+        title: deact ? `Activate ${m.name}?` : `Deactivate ${m.name}?`,
+        desc: deact ? `Are you sure you want to activate ${m.name}? They'll regain access to DeviceHub.`
+                    : `Are you sure you want to deactivate ${m.name}? They'll lose access until reactivated.`,
+        confirmLabel: deact ? "Activate" : "Deactivate", icon: deact ? "user-check" : "user-x",
+        onConfirm: () => { m.status = deact ? "active" : "deactivated"; render(m); DH.toast(deact ? "Member activated" : "Member deactivated", { desc: `${m.name} is now ${m.status}.` }); }
+      }); });
+      const remove = document.getElementById("act-remove");
+      remove && remove.addEventListener("click", () => DH.confirm({ title:`Remove ${m.name}?`, desc:`Are you sure you want to remove ${m.name}?`, confirmLabel:"Remove", icon:"user-minus", onConfirm: () => { DH.toast("Member removed"); setTimeout(()=>location.href="Members.html", 600); } }));
+    }
+
+    document.addEventListener("shell:ready", () => {
+      const email = new URLSearchParams(location.search).get("email");
+      const m = MEMBERS.find(x => x.email === email) || MEMBERS[0];
+      render(m);
+    });
+  </script>
+</body>
+</html>

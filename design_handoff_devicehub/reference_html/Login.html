@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeviceHub — Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="theme/tokens.css" />
+<link rel="stylesheet" href="theme/components.css" />
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  body { min-height: 100vh; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+
+  /* left: the form */
+  .pane-form { display: flex; flex-direction: column; padding: 40px 56px; position: relative; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+  .brand .glyph { width: 32px; height: 32px; border-radius: 9px; background: var(--primary); color: var(--primary-foreground); display: grid; place-items: center; }
+  .brand .glyph svg { width: 19px; height: 19px; }
+  .brand .accent { color: var(--primary); }
+  .form-mid { margin: auto; width: 100%; max-width: 360px; }
+  .form-mid h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  .form-mid .sub { color: var(--muted-foreground); margin-top: 8px; font-size: 15px; line-height: 1.55; }
+  .login-form { margin-top: 28px; display: flex; flex-direction: column; gap: 16px; }
+  .login-form .field-row { display: flex; align-items: center; justify-content: space-between; }
+  .login-form .forgot { font-size: 12.5px; color: var(--primary); font-weight: 500; }
+  .login-form .forgot:hover { text-decoration: underline; }
+  .login-form .btn { height: 44px; font-size: 15px; margin-top: 4px; }
+  .remember { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--muted-foreground); cursor: pointer; user-select: none; }
+  .remember .checkbox { width: 16px; height: 16px; }
+  .remember .checkbox.checked svg { width: 11px; height: 11px; }
+  .managed { display: flex; align-items: center; gap: 8px; margin-top: 18px; padding: 12px 14px; background: var(--secondary); color: var(--secondary-foreground); border-radius: var(--radius-md); font-size: 13px; line-height: 1.45; }
+  .managed svg { width: 16px; height: 16px; flex: none; }
+  .legal { margin-top: 22px; font-size: 12px; color: var(--muted-foreground); line-height: 1.6; }
+  .legal a { color: var(--primary); font-weight: 500; }
+  .foot { font-size: 12px; color: var(--muted-foreground); }
+
+  /* right: brand panel */
+  .pane-art { position: relative; overflow: hidden; background: linear-gradient(155deg, #277E69 0%, #1F6F5F 48%, #103A33 100%); color: #fff; padding: 48px 56px; display: flex; flex-direction: column; }
+  .pane-art .grid-motif { position: absolute; inset: 0; opacity: .14; background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse 80% 80% at 70% 30%, #000 30%, transparent 75%); }
+  .pane-art .blob { position: absolute; border-radius: 9999px; filter: blur(2px); }
+  .pane-art .b1 { width: 320px; height: 320px; right: -80px; top: -60px; background: radial-gradient(circle, rgba(111,207,151,.55), transparent 65%); }
+  .pane-art .b2 { width: 280px; height: 280px; left: -60px; bottom: 40px; background: radial-gradient(circle, rgba(70,188,138,.4), transparent 65%); }
+  .pane-art .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.75); position: relative; }
+  .pane-art .head { font-size: 34px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; margin-top: 18px; max-width: 13ch; position: relative; }
+  .pane-art .head em { font-style: normal; color: #6FCF97; }
+  .stats { margin-top: auto; display: flex; gap: 40px; position: relative; }
+  .stats .n { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+  .stats .l { font-size: 13px; color: rgba(255,255,255,.72); margin-top: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; position: relative; }
+  .chips span { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 9999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); font-size: 13px; font-weight: 500; }
+  .chips span svg { width: 14px; height: 14px; }
+
+  @media (max-width: 880px){ .split { grid-template-columns: 1fr; } .pane-art { display: none; } .pane-form { padding: 32px 24px; } }
+</style>
+</head>
+<body>
+  <div class="split">
+    <div class="pane-form">
+      <div class="brand"><span class="glyph"><i data-lucide="hard-drive"></i></span><span class="wordmark">Device<span class="accent">Hub</span></span></div>
+
+      <div class="form-mid">
+        <h1>Sign in</h1>
+        <p class="sub">Welcome back. Sign in with your Sioux work email to access the device inventory.</p>
+
+        <form class="login-form" id="loginForm" novalidate>
+          <div class="field">
+            <label class="label" for="email">Work email</label>
+            <input class="input" type="email" id="email" placeholder="name@sioux.asia" value="anh.tran@sioux.asia" autocomplete="username" />
+          </div>
+          <div class="field">
+            <div class="field-row">
+              <label class="label" for="password">Password</label>
+              <a class="forgot" href="Forgot Password.html">Forgot password?</a>
+            </div>
+            <input class="input" type="password" id="password" placeholder="••••••••" value="password" autocomplete="current-password" />
+          </div>
+          <label class="remember"><span class="checkbox checked" id="remember"><i data-lucide="check"></i></span> Keep me signed in</label>
+          <button class="btn btn-primary" type="submit">Sign in</button>
+        </form>
+
+        <div class="managed">
+          <i data-lucide="shield-check"></i>
+          <span>Access is limited to IT-managed <b>@sioux.asia</b> accounts. All device activity is logged for audit.</span>
+        </div>
+
+        <p class="legal">By continuing you agree to DeviceHub's <a href="#">acceptable-use policy</a>.</p>
+      </div>
+
+      <div class="foot">© 2026 Sioux Asia · DeviceHub · IT Operations</div>
+    </div>
+
+    <div class="pane-art">
+      <div class="grid-motif"></div>
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="eyebrow">Sioux Asia · IT Operations</div>
+      <div class="head">Every device, <em>accounted for.</em></div>
+      <div class="chips">
+        <span><i data-lucide="laptop"></i> Laptops</span>
+        <span><i data-lucide="monitor"></i> Monitors</span>
+        <span><i data-lucide="server"></i> Servers</span>
+        <span><i data-lucide="printer"></i> Printers</span>
+      </div>
+      <div class="stats">
+        <div><div class="n">1,284</div><div class="l">Devices tracked</div></div>
+        <div><div class="n">8</div><div class="l">Device groups</div></div>
+        <div><div class="n">98.2%</div><div class="l">Inventory accuracy</div></div>
+      </div>
+    </div>
+  </div>
+<script>
+  lucide.createIcons();
+  const remember = document.getElementById("remember");
+  remember && remember.addEventListener("click", () => { remember.classList.toggle("checked"); remember.innerHTML = remember.classList.contains("checked") ? '<i data-lucide="check"></i>' : ''; lucide.createIcons(); });
+  document.getElementById("loginForm").addEventListener("submit", e => { e.preventDefault(); window.location.href = "Overview.html"; });
+</script>
+</body>
+</html>
