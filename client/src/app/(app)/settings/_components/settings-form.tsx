@@ -24,16 +24,13 @@ import type { OrgSettings, UserPreference } from "@/lib/domain/settings";
 import type { OrgSettingsInput, UserPreferenceInput } from "@/lib/domain/settings";
 
 import { SectionNav } from "./section-nav";
-import {
-  saveOrgSettingsAction,
-  saveUserPreferenceAction,
-  purgeRetiredAction,
-} from "../_actions";
+import { useSaveOrgSettings } from "@/features/settings/hooks/use-save-org-settings";
+import { useSaveUserPreference } from "@/features/settings/hooks/use-save-user-preference";
+import { usePurgeRetired } from "@/features/settings/hooks/use-purge-retired";
 
 interface SettingsFormProps {
   initialSettings: OrgSettings;
   initialPrefs: UserPreference | null;
-  memberId: string;
 }
 
 function toSettingsInput(s: OrgSettings): OrgSettingsInput {
@@ -68,6 +65,9 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
   const t = useTranslations("settings");
   const { setTheme } = useTheme();
   const confirm = useConfirm();
+  const saveOrgSettings = useSaveOrgSettings();
+  const saveUserPreference = useSaveUserPreference();
+  const purgeRetired = usePurgeRetired();
 
   const [settings, setSettings] = useState<OrgSettingsInput>(() =>
     toSettingsInput(initialSettings)
@@ -90,12 +90,13 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
 
   async function handleSave() {
     setSaving(true);
-    const result = await saveOrgSettingsAction(settings);
-    setSaving(false);
-    if (result.ok) {
+    try {
+      await saveOrgSettings.mutateAsync(settings);
       toast.success(t("toast.saved"));
-    } else {
-      toast.error(t("toast.failed"));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("toast.failed"));
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -109,7 +110,11 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
     setTheme(theme);
     const updated = { ...prefs, theme };
     setPrefs(updated);
-    await saveUserPreferenceAction(updated);
+    try {
+      await saveUserPreference.mutateAsync(updated);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("toast.failed"));
+    }
   }
 
   async function handleViewChange(value: string) {
@@ -117,13 +122,21 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
     const view = value as UserPreferenceInput["defaultDeviceView"];
     const updated = { ...prefs, defaultDeviceView: view };
     setPrefs(updated);
-    await saveUserPreferenceAction(updated);
+    try {
+      await saveUserPreference.mutateAsync(updated);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("toast.failed"));
+    }
   }
 
   async function handleMonoCodesChange(checked: boolean) {
     const updated = { ...prefs, monoCodes: checked };
     setPrefs(updated);
-    await saveUserPreferenceAction(updated);
+    try {
+      await saveUserPreference.mutateAsync(updated);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("toast.failed"));
+    }
   }
 
   async function handlePurge() {
@@ -134,11 +147,11 @@ export function SettingsForm({ initialSettings, initialPrefs }: SettingsFormProp
       tone: "destructive",
     });
     if (!confirmed) return;
-    const result = await purgeRetiredAction();
-    if (result.ok && result.value) {
-      toast.success(t("toast.purged", { count: result.value.count }));
-    } else {
-      toast.error(t("toast.failed"));
+    try {
+      const count = await purgeRetired.mutateAsync();
+      toast.success(t("toast.purged", { count }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("toast.failed"));
     }
   }
 
