@@ -1,48 +1,60 @@
-import { conditionTone } from "@/lib/domain/devices";
+import { conditionColor } from "@/lib/domain/devices";
 
-const STROKE: Record<"success" | "warning" | "danger", string> = {
-  success: "var(--green-500)",
-  warning: "oklch(0.78 0.13 75)",
-  danger: "var(--destructive)",
-};
+interface ConditionRingProps {
+  condition: number;
+  size?: number;
+  stroke?: number;
+}
 
-export function ConditionRing({ value, size = 84 }: { value: number; size?: number }) {
-  const pct = Math.max(0, Math.min(100, value));
-  const stroke = STROKE[conditionTone(pct)];
-  const strokeWidth = 8;
-  const r = (size - strokeWidth) / 2;
+export function ConditionRing({ condition, size = 96, stroke = 10 }: ConditionRingProps) {
+  const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const offset = c * (1 - pct / 100);
+  const pct = Math.max(0, Math.min(100, condition));
+  const dash = (pct / 100) * c;
+  const color = conditionColor(condition);
+
   return (
-    <div
-      className="relative inline-flex shrink-0 items-center justify-center"
-      style={{ width: size, height: size }}
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      role="img"
+      aria-label={`Condition ${condition}%`}
     >
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="var(--muted)"
-          strokeWidth={strokeWidth}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={stroke}
-          strokeWidth={strokeWidth}
-          strokeDasharray={c}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-xl font-semibold tabular-nums">{pct}%</div>
-      </div>
-    </div>
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke="var(--muted)"
+        strokeWidth={stroke}
+      />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${c}`}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+      />
+      <text
+        x="50%"
+        y="50%"
+        dominantBaseline="middle"
+        textAnchor="middle"
+        className="fill-foreground"
+        style={{
+          fontSize: size / 5,
+          fontWeight: 600,
+          fontVariantNumeric: "tabular-nums",
+          letterSpacing: "-0.02em",
+        }}
+      >
+        {condition}%
+      </text>
+    </svg>
   );
 }

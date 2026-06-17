@@ -43,7 +43,7 @@
           <div class="foot">
             <div class="userchip" id="userchip">
               <span class="avatar">AT</span>
-              <div class="col"><span class="nm">Anh Tran</span><span class="ml">Admin</span></div>
+              <div class="col"><span class="nm">Vinh Huynh</span><span class="ml">Admin</span></div>
               <i data-lucide="chevrons-up-down" style="margin-left:auto;width:15px;height:15px;color:var(--muted-foreground)"></i>
             </div>
           </div>
@@ -90,10 +90,10 @@
       m.innerHTML = `
         <div class="um-head">
           <span class="avatar">AT</span>
-          <div class="col" style="min-width:0"><span class="um-nm">Anh Tran</span><span class="um-em">anh.tran@sioux.asia</span></div>
+          <div class="col" style="min-width:0"><span class="um-nm">Vinh Huynh</span><span class="um-em">vinh.huynh@gmail.com</span></div>
         </div>
         <div class="um-sep"></div>
-        <a class="um-item" href="Member Profile.html?email=anh.tran@sioux.asia"><i data-lucide="user"></i>View profile</a>
+        <a class="um-item" href="Member Profile.html?email=vinh.huynh@gmail.com"><i data-lucide="user"></i>View profile</a>
         <div class="um-sep"></div>
         <div class="um-row">
           <span class="um-row-label"><i data-lucide="languages"></i>Language</span>

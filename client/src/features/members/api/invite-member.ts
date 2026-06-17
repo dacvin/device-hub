@@ -1,19 +1,22 @@
 import { createClient } from "@/lib/supabase/client";
-import { inviteMemberSchema, type InviteMemberInput } from "@/lib/domain/members";
+import type { MemberRole } from "../types";
 
-export async function inviteMember(input: InviteMemberInput, invitedBy: string): Promise<string> {
-  const parsed = inviteMemberSchema.parse(input);
+export interface InviteInput {
+  email: string;
+  role: MemberRole;
+  name?: string;
+}
+
+export async function inviteMember(input: InviteInput): Promise<void> {
+  const email = input.email.trim().toLowerCase();
+  if (!email) throw new Error("Email is required");
   const supabase = createClient();
-  const id = crypto.randomUUID();
-  const { error } = await supabase.from("member").insert({
-    id,
-    name: parsed.name,
-    email: parsed.email,
-    role: parsed.role,
+  const name = (input.name?.trim() || email.split("@")[0]).trim();
+  const { error } = await supabase.from("users").insert({
+    email,
+    name,
+    role: input.role,
     status: "invited",
-    department_id: parsed.departmentId,
-    invited_by: invitedBy,
   });
   if (error) throw error;
-  return id;
 }

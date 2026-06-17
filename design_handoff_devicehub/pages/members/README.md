@@ -51,7 +51,7 @@ reset passwords, deactivate/activate, and remove — individually or in bulk.
 ## Dialog — Invite / Edit member (`#inviteDlg` → `<Dialog>`)
 Single dialog, two modes:
 - **Invite:** title "Invite member", desc "They'll get an email to join with the role you pick. Only
-  admins can invite." Fields: **Work email** (input, hint "Must be an IT-managed @sioux.asia
+  admins can invite." Fields: **Work email** (input, hint "Must be an IT-managed @gmail.com
   account") + **Role** select [Member/Admin]. Submit "Send invite" → toast "Invitation sent".
 - **Edit:** title "Edit {name}", desc "Update this member's role. Email is managed by IT and can't be
   changed." Email field **disabled** + hint hidden; Role select prefilled. Submit "Save" → toast

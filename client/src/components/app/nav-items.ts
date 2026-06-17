@@ -1,23 +1,24 @@
 import {
-  Building2,
+  Boxes,
   Factory,
   HardDrive,
   Layers,
   LayoutDashboard,
-  Settings,
   Users,
   type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
-  // i18n key under "nav" namespace
+  /** i18n key under "nav" namespace */
   labelKey: string;
   href: string;
   icon: LucideIcon;
+  /** When set, this nav item shows a trailing count pill (e.g. devices total). */
+  countKind?: "devices";
 }
 
 export interface NavGroup {
-  // i18n key under "sidebar" namespace
+  /** i18n key under "sidebar" namespace */
   labelKey: string;
   items: NavItem[];
 }
@@ -26,23 +27,22 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     labelKey: "groupMain",
     items: [
-      { labelKey: "overview", href: "/overview", icon: LayoutDashboard },
-      { labelKey: "devices", href: "/devices", icon: HardDrive },
+      { labelKey: "overview", href: "/", icon: LayoutDashboard },
+      { labelKey: "devices", href: "/devices", icon: HardDrive, countKind: "devices" },
     ],
   },
   {
     labelKey: "groupCatalog",
     items: [
-      { labelKey: "departments", href: "/departments", icon: Building2 },
-      { labelKey: "groups", href: "/groups", icon: Layers },
-      { labelKey: "manufacturers", href: "/manufacturers", icon: Factory },
+      { labelKey: "groups", href: "/catalog/groups", icon: Layers },
+      { labelKey: "units", href: "/catalog/units", icon: Boxes },
+      { labelKey: "manufacturers", href: "/catalog/manufacturers", icon: Factory },
     ],
   },
   {
     labelKey: "groupSystem",
     items: [
       { labelKey: "members", href: "/members", icon: Users },
-      { labelKey: "settings", href: "/settings", icon: Settings },
     ],
   },
 ];

@@ -91,7 +91,7 @@ export type Database = {
           inventory_cycle_months: number
           last_check_date: string | null
           location: string | null
-          manufacturer_id: string | null
+          manufacturer_id: string
           model: string | null
           name: string
           notes: string | null
@@ -118,7 +118,7 @@ export type Database = {
           inventory_cycle_months?: number
           last_check_date?: string | null
           location?: string | null
-          manufacturer_id?: string | null
+          manufacturer_id: string
           model?: string | null
           name: string
           notes?: string | null
@@ -145,7 +145,7 @@ export type Database = {
           inventory_cycle_months?: number
           last_check_date?: string | null
           location?: string | null
-          manufacturer_id?: string | null
+          manufacturer_id?: string
           model?: string | null
           name?: string
           notes?: string | null
@@ -246,6 +246,7 @@ export type Database = {
           abbreviation: string | null
           created_at: string
           deleted_at: string | null
+          description: string | null
           id: string
           name: string
           updated_at: string
@@ -254,6 +255,7 @@ export type Database = {
           abbreviation?: string | null
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           id?: string
           name: string
           updated_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           abbreviation?: string | null
           created_at?: string
           deleted_at?: string | null
+          description?: string | null
           id?: string
           name?: string
           updated_at?: string
@@ -329,14 +332,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      app_user_id: { Args: never; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       activity_action: "insert" | "update" | "delete" | "restore"
       device_source: "Purchased" | "Leased" | "Donated" | "Transferred"
-      device_status: "in-use" | "in-storage" | "in-repair" | "retired"
+      device_status: "in-use" | "storage" | "repair" | "retired"
       user_role: "admin" | "member"
-      user_status: "active" | "invited" | "disabled"
+      user_status: "active" | "invited" | "deactivated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -469,9 +473,9 @@ export const Constants = {
     Enums: {
       activity_action: ["insert", "update", "delete", "restore"],
       device_source: ["Purchased", "Leased", "Donated", "Transferred"],
-      device_status: ["in-use", "in-storage", "in-repair", "retired"],
+      device_status: ["in-use", "storage", "repair", "retired"],
       user_role: ["admin", "member"],
-      user_status: ["active", "invited", "disabled"],
+      user_status: ["active", "invited", "deactivated"],
     },
   },
 } as const

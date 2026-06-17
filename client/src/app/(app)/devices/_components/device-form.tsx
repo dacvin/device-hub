@@ -1,28 +1,27 @@
 "use client";
 
-/* eslint-disable react/no-children-prop */
-
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { useForm, type AnyFieldApi } from "@tanstack/react-form";
-import { ArrowLeft, Cpu, Fingerprint, Gauge, Paperclip, ShieldCheck, StickyNote, Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Activity,
+  ArrowLeft,
+  Info,
+  Paperclip,
+  ShieldCheck,
+  StickyNote,
+  Tags,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-  FieldLegend,
-} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -30,841 +29,594 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { PageTopbar } from "@/components/app/page-topbar";
-import { GroupIcon } from "@/components/app/group-icon";
-import { Required } from "@/components/app/required";
-import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
-import {
-  DEVICE_STATUSES,
-  SOURCES,
-  UNITS,
-  deviceFormSchema,
-  type Department,
-  type DeviceFormValues,
-  type DeviceGroup,
-  type Manufacturer,
-} from "@/lib/domain/devices";
+import { useConfirm } from "@/hooks/use-confirm";
+import { GroupIconTile } from "@/features/overview/_components/group-icon-tile";
 import { useCreateDevice } from "@/features/devices/hooks/use-create-device";
 import { useUpdateDevice } from "@/features/devices/hooks/use-update-device";
 import { useDeleteDevice } from "@/features/devices/hooks/use-delete-device";
-import { useInsertPhotos } from "@/features/devices/hooks/use-insert-photos";
-import { useReorderPhotos } from "@/features/devices/hooks/use-reorder-photos";
-import { useRemovePhoto } from "@/features/devices/hooks/use-remove-photo";
-import { useInsertDocuments } from "@/features/devices/hooks/use-insert-documents";
-import { useRemoveDocument } from "@/features/devices/hooks/use-remove-document";
-import {
-  PhotoGallery,
-  type PhotoItem,
-} from "@/app/(app)/devices/_components/photo-gallery";
-import {
-  DocumentList,
-  type DocumentItem,
-} from "@/app/(app)/devices/_components/document-list";
-
-const PHOTO_BUCKET = "device-photos";
-const DOC_BUCKET = "device-documents";
+import { deviceFormSchema, type DeviceFormValues } from "@/lib/zod/device-form";
+import { cn } from "@/lib/utils";
 
 const SECTIONS = [
-  { id: "general",        labelKey: "sectionGeneralLabel",        descKey: "sectionGeneralDescription",        icon: Fingerprint },
-  { id: "classification", labelKey: "sectionClassificationLabel", descKey: "sectionClassificationDescription", icon: Cpu },
-  { id: "lifecycle",      labelKey: "sectionLifecycleLabel",      descKey: "sectionLifecycleDescription",      icon: Gauge },
-  { id: "warranty",       labelKey: "sectionWarrantyLabel",       descKey: "sectionWarrantyDescription",       icon: ShieldCheck },
-  { id: "uploads",        labelKey: "sectionUploadsLabel",        descKey: "sectionUploadsDescription",        icon: Paperclip },
-  { id: "notes",          labelKey: "sectionNotesLabel",          descKey: "sectionNotesDescription",          icon: StickyNote },
+  { id: "general", label: "General", icon: Info },
+  { id: "classification", label: "Classification", icon: Tags },
+  { id: "lifecycle", label: "Lifecycle", icon: Activity },
+  { id: "warranty", label: "Warranty", icon: ShieldCheck },
+  { id: "media", label: "Photos & documents", icon: Paperclip },
+  { id: "notes", label: "Notes", icon: StickyNote },
 ] as const;
+
+type SectionId = (typeof SECTIONS)[number]["id"];
+
+const DEFAULT_VALUES: DeviceFormValues = {
+  name: "",
+  code: "",
+  groupId: "",
+  status: "storage",
+  manufacturerId: "",
+  model: "",
+  serialNumber: "",
+  unitId: "",
+  quantity: 1,
+  specifications: "",
+  source: "",
+  importDate: "",
+  condition: 100,
+  location: "",
+  lastCheckDate: "",
+  inventoryCycleMonths: 12,
+  warrantyStart: "",
+  warrantyEnd: "",
+  notes: "",
+};
+
+interface LookupItem {
+  id: string;
+  name: string;
+}
 
 interface DeviceFormProps {
   mode: "create" | "edit";
-  deviceId?: string;
-  initialValues: DeviceFormValues;
-  initialPhotos: PhotoItem[];
-  initialDocuments: DocumentItem[];
-  groups: DeviceGroup[];
-  departments: Department[];
-  manufacturers: Manufacturer[];
-  pageTitle: string;
-  pageSubtitle?: string;
-  /** Icon key for the group tile rendered in the edit-mode header. */
-  headerGroupIcon?: string | null;
+  initial?: Partial<DeviceFormValues>;
+  device?: { id: string; code: string; name: string; groupIcon: string | null; groupName: string };
+  lookups: {
+    groups: LookupItem[];
+    units: LookupItem[];
+    manufacturers: LookupItem[];
+  };
 }
 
-export function DeviceForm(props: DeviceFormProps) {
+export function DeviceForm({ mode, initial, device, lookups }: DeviceFormProps) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [activeSection, setActiveSection] = useState<string>("general");
+  const confirm = useConfirm();
+  const [activeSection, setActiveSection] = useState<SectionId>("general");
+  const [submitting, setSubmitting] = useState(false);
 
-  const createDevice = useCreateDevice();
-  const updateDevice = useUpdateDevice();
-  const deleteDevice = useDeleteDevice();
-  const insertPhotos = useInsertPhotos();
-  const reorderPhotos = useReorderPhotos();
-  const removePhoto = useRemovePhoto();
-  const insertDocuments = useInsertDocuments();
-  const removeDocument = useRemoveDocument();
-
-  const tForm = useTranslations("devices.form");
-  const tCommon = useTranslations("common");
-  const tStatus = useTranslations("devices.status");
-  const tUnit = useTranslations("devices.unit");
-  const tSource = useTranslations("devices.source");
-
-  const [photos, setPhotos] = useState<PhotoItem[]>(props.initialPhotos);
-  const [documents, setDocuments] = useState<DocumentItem[]>(props.initialDocuments);
-  const originalPhotoOrder = useMemo(
-    () => props.initialPhotos.map((p) => p.dbId).filter(Boolean) as string[],
-    [props.initialPhotos]
-  );
-
-  const form = useForm({
-    defaultValues: props.initialValues,
-    validators: {
-      onSubmit: deviceFormSchema,
-    },
-    onSubmit: async ({ value }) => {
-      startTransition(async () => {
-        try {
-          const device =
-            props.mode === "create"
-              ? await createDevice.mutateAsync(value)
-              : await updateDevice.mutateAsync({ id: props.deviceId!, values: value });
-          const deviceId = device.id;
-          const code = device.code;
-          await persistUploads(deviceId);
-          toast.success(props.mode === "create" ? tForm("createdToast") : tForm("updatedToast"));
-          router.push(`/devices/${encodeURIComponent(code)}`);
-          router.refresh();
-        } catch (e) {
-          toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
-        }
-      });
-    },
+  const form = useForm<DeviceFormValues>({
+    resolver: zodResolver(deviceFormSchema),
+    defaultValues: { ...DEFAULT_VALUES, ...initial },
+    mode: "onBlur",
   });
+  const { register, handleSubmit, watch, setValue, formState, getValues } = form;
+  const createMutation = useCreateDevice();
+  const updateMutation = useUpdateDevice();
+  const deleteMutation = useDeleteDevice();
 
-  async function persistUploads(deviceId: string) {
-    const supabase = createClient();
+  const isDirty = formState.isDirty;
+  const dirtyRef = useRef(isDirty);
+  dirtyRef.current = isDirty;
 
-    // Upload pending photos.
-    const newPhotos: {
-      url: string;
-      fileName: string | null;
-      sizeBytes: number | null;
-      sortOrder: number;
-    }[] = [];
-    for (let i = 0; i < photos.length; i++) {
-      const p = photos[i];
-      if (!p.file) continue;
-      const ext = p.file.name.split(".").pop() ?? "bin";
-      const path = `${deviceId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .upload(path, p.file, { contentType: p.file.type });
-      if (error) throw new Error(`Photo upload failed: ${error.message}`);
-      newPhotos.push({
-        url: path,
-        fileName: p.fileName,
-        sizeBytes: p.sizeBytes,
-        sortOrder: i,
+  // beforeunload guard
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  // Track active section for the nav rail.
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id as SectionId);
+          }
+        }
+      },
+      { rootMargin: "-30% 0px -55% 0px" },
+    );
+    for (const section of SECTIONS) {
+      const el = document.getElementById(section.id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  async function onCancel() {
+    if (dirtyRef.current) {
+      const ok = await confirm({
+        title: "Leave without saving?",
+        description: "Unsaved data on this form will be lost.",
+        confirmLabel: "Leave",
+        tone: "warn",
       });
+      if (!ok) return;
     }
-    if (newPhotos.length > 0) {
-      await insertPhotos.mutateAsync({ deviceId, photos: newPhotos });
-    }
+    router.push(mode === "edit" && device ? `/devices/${device.code}` : "/devices");
+  }
 
-    // Reorder persisted photos that moved.
-    const persistedOrder = photos
-      .map((p, idx) => (p.dbId ? { id: p.dbId, sortOrder: idx } : null))
-      .filter((x): x is { id: string; sortOrder: number } => x !== null);
-    const orderChanged = persistedOrder.some((p, idx) => p.id !== originalPhotoOrder[idx]);
-    if (orderChanged && persistedOrder.length > 0) {
-      await reorderPhotos.mutateAsync({ deviceId, rows: persistedOrder });
-    }
-
-    // Upload pending documents.
-    const newDocs: {
-      url: string;
-      fileName: string;
-      mimeType: string | null;
-      sizeBytes: number | null;
-    }[] = [];
-    for (const d of documents) {
-      if (!d.file) continue;
-      const ext = d.file.name.split(".").pop() ?? "bin";
-      const path = `${deviceId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from(DOC_BUCKET)
-        .upload(path, d.file, { contentType: d.file.type });
-      if (error) throw new Error(`Document upload failed: ${error.message}`);
-      newDocs.push({
-        url: path,
-        fileName: d.fileName,
-        mimeType: d.mimeType,
-        sizeBytes: d.sizeBytes,
+  async function onDelete() {
+    if (!device) return;
+    const ok = await confirm({
+      title: `Delete ${device.name}?`,
+      description: "This moves it to the recycle bin. You can restore it later.",
+      confirmLabel: "Delete",
+      tone: "destructive",
+    });
+    if (!ok) return;
+    try {
+      await deleteMutation.mutateAsync(device.id);
+      toast.success("Device deleted", { description: "Moved to the recycle bin." });
+      setTimeout(() => router.push("/devices"), 600);
+    } catch (err) {
+      toast.error("Delete failed", {
+        description: err instanceof Error ? err.message : String(err),
       });
-    }
-    if (newDocs.length > 0) {
-      await insertDocuments.mutateAsync({ deviceId, docs: newDocs });
     }
   }
 
-  // Scrollspy
-  useEffect(() => {
-    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
-    if (els.length === 0) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActiveSection(visible[0].target.id);
-      },
-      { rootMargin: "-25% 0px -55% 0px", threshold: [0.1, 0.5, 1] }
-    );
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
+  async function onSubmit(values: DeviceFormValues) {
+    setSubmitting(true);
+    try {
+      if (mode === "create") {
+        try {
+          const created = await createMutation.mutateAsync(values);
+          toast.success("Device created", {
+            description: `${created.name} (${created.code}) is now in the inventory.`,
+          });
+          form.reset(getValues());
+          setTimeout(() => router.push("/devices"), 650);
+        } catch (err) {
+          toast.error("Save failed", {
+            description: err instanceof Error ? err.message : String(err),
+          });
+        }
+      } else if (device) {
+        try {
+          const updated = await updateMutation.mutateAsync({ id: device.id, values });
+          toast.success("Changes saved", {
+            description: `${updated.name} has been updated.`,
+          });
+          form.reset(getValues());
+          setTimeout(() => router.push(`/devices/${updated.code}`), 400);
+        } catch (err) {
+          toast.error("Save failed", {
+            description: err instanceof Error ? err.message : String(err),
+          });
+        }
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const condition = watch("condition");
 
   return (
-    <>
-      <PageTopbar
-        title={props.pageTitle}
-        crumb={props.mode === "create" ? props.pageSubtitle : undefined}
-      />
-      <div className="px-7 py-7">
-      {props.mode === "edit" && (
-        <div className="flex items-center gap-3.5 mb-[22px]">
-          <GroupIcon icon={props.headerGroupIcon ?? null} size="lg" />
-          <div className="min-w-0">
-            <h1 className="text-[22px] font-semibold tracking-[-0.02em] leading-7">
-              {props.pageTitle}
-            </h1>
-            {props.pageSubtitle && (
-              <p className="font-mono text-[12.5px] text-muted-foreground mt-0.5">
-                {props.pageSubtitle}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
       <Link
-        href="/devices"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
+        href={mode === "edit" && device ? `/devices/${device.code}` : "/devices"}
+        className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> {tForm("backToDevices")}
+        <ArrowLeft className="size-3.5" aria-hidden />
+        {mode === "edit" && device ? "Back to device" : "Back to devices"}
       </Link>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          form.handleSubmit();
-        }}
-        className="grid grid-cols-1 gap-8 [@media(min-width:1000px)]:grid-cols-[220px_1fr]"
-      >
-        <aside className="hidden [@media(min-width:1000px)]:block">
-          <div className="sticky top-[90px] flex flex-col gap-0.5">
-            {SECTIONS.map((s, i) => {
-              const active = activeSection === s.id;
-              return (
-                <a
-                  key={s.id}
-                  href={`#${s.id}`}
-                  className={cn(
-                    "flex items-center gap-2.5 rounded-md px-3 py-[9px] text-sm transition-colors",
-                    active
-                      ? "bg-secondary text-secondary-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "grid size-[22px] shrink-0 place-items-center rounded-full border text-xs font-semibold",
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border"
-                    )}
-                  >
-                    {i + 1}
-                  </span>
-                  <span>{tForm(s.labelKey)}</span>
-                </a>
-              );
-            })}
-          </div>
-        </aside>
-
-        <div className="space-y-5 min-w-0">
-          {/* General */}
-          <Card id="general" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionGeneralLabel")} description={tForm("sectionGeneralDescription")} icon={Fingerprint} />
-            <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
-                <form.Field
-                  name="name"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>
-                        {tForm("deviceName")} <Required />
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder={tForm("deviceNamePlaceholder")}
-                        aria-invalid={isInvalid(field)}
-                      />
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="code"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>
-                        {tForm("deviceCode")} <Required />
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        onBlur={field.handleBlur}
-                        placeholder={tForm("deviceCodePlaceholder")}
-                        className="font-mono"
-                        aria-invalid={isInvalid(field)}
-                      />
-                      <FieldDescription>{tForm("codeDescription")}</FieldDescription>
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="groupId"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>
-                        {tForm("group")} <Required />
-                      </FieldLabel>
-                      <Select
-                        value={field.state.value || undefined}
-                        onValueChange={(v) => field.handleChange(v)}
-                      >
-                        <SelectTrigger id={field.name} aria-invalid={isInvalid(field)}>
-                          <SelectValue placeholder="Select…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {props.groups.map((g) => (
-                            <SelectItem key={g.id} value={g.id}>
-                              <span className="inline-flex items-center gap-2">
-                                <GroupIcon icon={g.icon} size="sm" />
-                                {g.name}
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="departmentId"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>
-                        {tForm("department")} <Required />
-                      </FieldLabel>
-                      <Select
-                        value={field.state.value || undefined}
-                        onValueChange={(v) => field.handleChange(v)}
-                      >
-                        <SelectTrigger id={field.name} aria-invalid={isInvalid(field)}>
-                          <SelectValue placeholder="Select…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {props.departments.map((d) => (
-                            <SelectItem key={d.id} value={d.id}>
-                              {d.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-              </div>
-            </FieldGroup>
-          </Card>
-
-          {/* Classification */}
-          <Card id="classification" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionClassificationLabel")} description={tForm("sectionClassificationDescription")} icon={Cpu} />
-            <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
-                <form.Field
-                  name="manufacturerId"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("manufacturer")}</FieldLabel>
-                      <Select
-                        value={field.state.value || undefined}
-                        onValueChange={(v) => field.handleChange(v)}
-                      >
-                        <SelectTrigger id={field.name}>
-                          <SelectValue placeholder="Select…" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {props.manufacturers.map((m) => (
-                            <SelectItem key={m.id} value={m.id}>
-                              {m.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="model"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("model")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="serialNumber"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("serialNumber")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        className="font-mono"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <div className="grid grid-cols-[1fr_140px] gap-3">
-                  <form.Field
-                    name="quantity"
-                    children={(field) => (
-                      <FieldWrap field={field}>
-                        <FieldLabel htmlFor={field.name}>{tForm("quantity")}</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="number"
-                          min={1}
-                          value={field.state.value as unknown as number}
-                          onChange={(e) => field.handleChange(Number(e.target.value))}
-                          aria-invalid={isInvalid(field)}
-                        />
-                        <FieldError errors={errs(field)} />
-                      </FieldWrap>
-                    )}
-                  />
-                  <form.Field
-                    name="unit"
-                    children={(field) => (
-                      <FieldWrap field={field}>
-                        <FieldLabel>{tForm("unit")}</FieldLabel>
-                        <ToggleGroup
-                          type="single"
-                          variant="outline"
-                          size="sm"
-                          value={field.state.value}
-                          onValueChange={(v) => v && field.handleChange(v as DeviceFormValues["unit"])}
-                          className="h-9"
-                        >
-                          {UNITS.map((u) => (
-                            <ToggleGroupItem key={u} value={u} className="capitalize text-xs">
-                              {tUnit(u)}
-                            </ToggleGroupItem>
-                          ))}
-                        </ToggleGroup>
-                      </FieldWrap>
-                    )}
-                  />
-                </div>
-              </div>
-              <form.Field
-                name="specifications"
-                children={(field) => (
-                  <FieldWrap field={field}>
-                    <FieldLabel htmlFor={field.name}>{tForm("specifications")}</FieldLabel>
-                    <Textarea
-                      id={field.name}
-                      rows={4}
-                      value={field.state.value ?? ""}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="CPU, RAM, storage, OS, accessories…"
-                    />
-                  </FieldWrap>
-                )}
-              />
-            </FieldGroup>
-          </Card>
-
-          {/* Lifecycle */}
-          <Card id="lifecycle" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionLifecycleLabel")} description={tForm("sectionLifecycleDescription")} icon={Gauge} />
-            <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
-                <form.Field
-                  name="status"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("status")}</FieldLabel>
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(v) => field.handleChange(v as DeviceFormValues["status"])}
-                      >
-                        <SelectTrigger id={field.name}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DEVICE_STATUSES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {tStatus(s)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="source"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("source")}</FieldLabel>
-                      <Select
-                        value={field.state.value ?? undefined}
-                        onValueChange={(v) => field.handleChange(v as DeviceFormValues["source"])}
-                      >
-                        <SelectTrigger id={field.name}>
-                          <SelectValue placeholder="—" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SOURCES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {tSource(s)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="location"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("storageLocation")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder={tForm("locationPlaceholder")}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="importDate"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("importDate")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="date"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="lastCheckDate"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("lastInventoryCheck")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="date"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="inventoryCycleMonths"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("inventoryCycleField")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        min={1}
-                        max={120}
-                        value={field.state.value as unknown as number}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-              </div>
-              <form.Field
-                name="condition"
-                children={(field) => (
-                  <FieldWrap field={field}>
-                    <div className="flex items-center justify-between">
-                      <FieldLabel htmlFor={field.name}>{tForm("condition")}</FieldLabel>
-                      <span className="text-sm font-medium tabular-nums">
-                        {field.state.value}%
-                      </span>
-                    </div>
-                    <Slider
-                      id={field.name}
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={[field.state.value]}
-                      onValueChange={(v) => field.handleChange(v[0])}
-                    />
-                    <FieldDescription>
-                      {tForm("conditionDescription")}
-                    </FieldDescription>
-                  </FieldWrap>
-                )}
-              />
-            </FieldGroup>
-          </Card>
-
-          {/* Warranty */}
-          <Card id="warranty" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionWarrantyLabel")} description={tForm("sectionWarrantyDescription")} icon={ShieldCheck} />
-            <FieldGroup>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
-                <form.Field
-                  name="warrantyStart"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("warrantyStart")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="date"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                      />
-                    </FieldWrap>
-                  )}
-                />
-                <form.Field
-                  name="warrantyEnd"
-                  children={(field) => (
-                    <FieldWrap field={field}>
-                      <FieldLabel htmlFor={field.name}>{tForm("warrantyEnd")}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="date"
-                        value={field.state.value ?? ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid(field)}
-                      />
-                      <FieldError errors={errs(field)} />
-                    </FieldWrap>
-                  )}
-                />
-              </div>
-            </FieldGroup>
-          </Card>
-
-          {/* Uploads */}
-          <Card id="uploads" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionUploadsLabel")} description={tForm("sectionUploadsDescription")} icon={Paperclip} />
-            <FieldGroup>
-              <FieldSet>
-                <FieldLegend>{tForm("devicePhotos")}</FieldLegend>
-                <PhotoGallery
-                  items={photos}
-                  onChange={setPhotos}
-                  onRemovePersisted={async (item) => {
-                    if (item.dbId && item.storagePath) {
-                      try {
-                        await removePhoto.mutateAsync({ deviceId: props.deviceId ?? "", photoId: item.dbId, storagePath: item.storagePath });
-                      } catch (e) {
-                        toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
-                      }
-                    }
-                  }}
-                />
-              </FieldSet>
-              <FieldSet>
-                <FieldLegend>{tForm("documents")}</FieldLegend>
-                <DocumentList
-                  items={documents}
-                  onChange={setDocuments}
-                  onRemovePersisted={async (item) => {
-                    if (item.dbId && item.storagePath) {
-                      try {
-                        await removeDocument.mutateAsync({ deviceId: props.deviceId ?? "", docId: item.dbId, storagePath: item.storagePath });
-                      } catch (e) {
-                        toast.error(e instanceof Error ? e.message : tCommon("saveFailed"));
-                      }
-                    }
-                  }}
-                />
-              </FieldSet>
-            </FieldGroup>
-          </Card>
-
-          {/* Notes */}
-          <Card id="notes" className="p-6 scroll-mt-20">
-            <SectionHeader label={tForm("sectionNotesLabel")} description={tForm("sectionNotesDescription")} icon={StickyNote} />
-            <form.Field
-              name="notes"
-              children={(field) => (
-                <Textarea
-                  rows={4}
-                  value={field.state.value ?? ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder={tForm("notesPlaceholder")}
-                />
-              )}
-            />
-          </Card>
-
-          {/* Action bar */}
-          <div className="mt-6 pt-5 border-t border-border flex items-center gap-2.5">
-            {props.mode === "edit" && props.deviceId && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button">
-                    <Trash2 className="size-4" /> {tForm("deleteDevice")}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{tForm("deleteConfirmTitle")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {tForm("deleteConfirmDescription")}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => {
-                        startTransition(async () => {
-                          try {
-                            await deleteDevice.mutateAsync(props.deviceId!);
-                            router.push("/devices");
-                          } catch (e) {
-                            toast.error(e instanceof Error ? e.message : tCommon("deleteFailed"));
-                          }
-                        });
-                      }}
-                    >
-                      {tCommon("delete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-            {props.mode === "create" && (
-              <span className="text-[13px] text-muted-foreground">
-                {tForm("requiredFields")}
-              </span>
-            )}
-            <div className="ml-auto flex items-center gap-2.5">
-              <Button variant="ghost" asChild>
-                <Link href="/devices">{tCommon("cancel")}</Link>
-              </Button>
-              {props.mode === "create" && (
-                /* TODO: wire draft persistence */
-                <Button variant="outline" type="button">
-                  {tForm("saveAsDraft")}
-                </Button>
-              )}
-              <Button type="submit" disabled={pending}>
-                {pending ? tForm("saving") : props.mode === "create" ? tForm("createDevice") : tForm("saveChanges")}
-              </Button>
-            </div>
+      {mode === "edit" && device ? (
+        <div className="flex items-center gap-4">
+          <GroupIconTile
+            icon={device.groupIcon}
+            groupName={device.groupName}
+            size="md"
+            className="size-12 rounded-xl [&_svg]:size-5"
+          />
+          <div className="min-w-0">
+            <h1 className="text-[22px] font-semibold tracking-[-0.01em]">
+              Edit {device.name}
+            </h1>
+            <div className="font-mono text-[12.5px] text-muted-foreground">{device.code}</div>
           </div>
         </div>
-      </form>
+      ) : null}
+
+      <div
+        className="grid gap-8 items-start"
+        style={{ gridTemplateColumns: "220px minmax(0, 1fr)" }}
+      >
+        <aside className="sticky top-[74px] self-start hidden min-[1000px]:block">
+          <ol className="flex flex-col gap-1">
+            {SECTIONS.map((s, i) => {
+              const Icon = s.icon;
+              const active = activeSection === s.id;
+              return (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] transition-colors",
+                      active
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
+                  >
+                    <span className="size-5 rounded-md bg-card ring-1 ring-foreground/10 grid place-items-center text-[10px] font-semibold tabular-nums">
+                      {i + 1}
+                    </span>
+                    <Icon className="size-3.5" aria-hidden />
+                    <span>{s.label}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+        </aside>
+
+        <div className="flex flex-col gap-5 min-w-0">
+          <SectionShell id="general" title="General" icon={Info}>
+            <FieldGrid>
+              <Field
+                label="Device name"
+                required
+                error={formState.errors.name?.message}
+              >
+                <Input {...register("name")} placeholder="Dell XPS 15 9530" />
+              </Field>
+              <Field
+                label="Device code"
+                required
+                error={formState.errors.code?.message}
+                hint="Auto-suggested from group (prefix DEV-)"
+              >
+                <Input {...register("code")} className="font-mono" placeholder="DEV-2041-XPS" />
+              </Field>
+              <Field label="Group" required error={formState.errors.groupId?.message}>
+                <SelectControl
+                  value={watch("groupId")}
+                  onValueChange={(v) =>
+                    setValue("groupId", v, { shouldDirty: true, shouldValidate: true })
+                  }
+                  placeholder="Choose a group"
+                  options={lookups.groups.map((g) => ({ value: g.id, label: g.name }))}
+                />
+              </Field>
+              <Field
+                label="Status"
+                required
+                error={formState.errors.status?.message}
+                hint="Alerts (warranty / inventory) are tracked separately."
+              >
+                <SelectControl
+                  value={watch("status")}
+                  onValueChange={(v) =>
+                    setValue("status", v as DeviceFormValues["status"], {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    })
+                  }
+                  options={[
+                    { value: "in-use", label: "In use" },
+                    { value: "storage", label: "In storage" },
+                    { value: "repair", label: "In repair" },
+                    { value: "retired", label: "Retired" },
+                  ]}
+                />
+              </Field>
+            </FieldGrid>
+          </SectionShell>
+
+          <SectionShell id="classification" title="Classification" icon={Tags}>
+            <FieldGrid>
+              <Field
+                label="Manufacturer"
+                required
+                error={formState.errors.manufacturerId?.message}
+              >
+                <SelectControl
+                  value={watch("manufacturerId")}
+                  onValueChange={(v) =>
+                    setValue("manufacturerId", v, { shouldDirty: true, shouldValidate: true })
+                  }
+                  placeholder="Choose a manufacturer"
+                  options={lookups.manufacturers.map((m) => ({ value: m.id, label: m.name }))}
+                />
+              </Field>
+              <Field label="Model">
+                <Input {...register("model")} placeholder="XPS 15 9530" />
+              </Field>
+              <Field label="Serial number">
+                <Input {...register("serialNumber")} className="font-mono" placeholder="5KQ8R2" />
+              </Field>
+              <Field label="Unit" required error={formState.errors.unitId?.message}>
+                <UnitToggle
+                  value={watch("unitId")}
+                  units={lookups.units}
+                  onChange={(v) =>
+                    setValue("unitId", v, { shouldDirty: true, shouldValidate: true })
+                  }
+                />
+              </Field>
+              <Field label="Quantity">
+                <Input
+                  type="number"
+                  min={1}
+                  {...register("quantity", { valueAsNumber: true })}
+                />
+              </Field>
+              <Field label="Specifications" fullWidth>
+                <Textarea
+                  {...register("specifications")}
+                  placeholder="Intel i7-13700H · 32GB · 1TB SSD · RTX 4050"
+                  rows={3}
+                />
+              </Field>
+            </FieldGrid>
+          </SectionShell>
+
+          <SectionShell id="lifecycle" title="Lifecycle" icon={Activity}>
+            <FieldGrid>
+              <Field label="Source">
+                <SelectControl
+                  value={watch("source") ?? ""}
+                  onValueChange={(v) =>
+                    setValue("source", v as DeviceFormValues["source"], { shouldDirty: true })
+                  }
+                  placeholder="Choose a source"
+                  options={[
+                    { value: "Purchased", label: "Purchased" },
+                    { value: "Leased", label: "Leased" },
+                    { value: "Donated", label: "Donated" },
+                    { value: "Transferred", label: "Transferred" },
+                  ]}
+                />
+              </Field>
+              <Field label="Import date">
+                <Input type="date" {...register("importDate")} />
+              </Field>
+              <Field
+                label="Condition"
+                fullWidth
+                hint={`${condition ?? 0}%`}
+              >
+                <Slider
+                  value={[Number(condition ?? 100)]}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onValueChange={(v) =>
+                    setValue("condition", v[0], { shouldDirty: true, shouldValidate: true })
+                  }
+                />
+              </Field>
+              <Field label="Storage position" fullWidth>
+                <Input
+                  {...register("location")}
+                  placeholder="HCMC · Floor 4 · Desk E-12"
+                />
+              </Field>
+              <Field label="Last check date">
+                <Input type="date" {...register("lastCheckDate")} />
+              </Field>
+              <Field label="Inventory cycle (months)">
+                <Input
+                  type="number"
+                  min={1}
+                  max={120}
+                  {...register("inventoryCycleMonths", { valueAsNumber: true })}
+                />
+              </Field>
+            </FieldGrid>
+          </SectionShell>
+
+          <SectionShell id="warranty" title="Warranty" icon={ShieldCheck}>
+            <FieldGrid>
+              <Field label="Warranty start">
+                <Input type="date" {...register("warrantyStart")} />
+              </Field>
+              <Field
+                label="Warranty end"
+                error={formState.errors.warrantyEnd?.message}
+              >
+                <Input type="date" {...register("warrantyEnd")} />
+              </Field>
+            </FieldGrid>
+          </SectionShell>
+
+          <SectionShell id="media" title="Photos & documents" icon={Paperclip}>
+            <div className="grid gap-5 md:grid-cols-2">
+              <DropzonePlaceholder
+                title="Device photos"
+                desc="PNG or JPG, up to 5 MB each. The first photo is the cover."
+              />
+              <DropzonePlaceholder
+                title="Documents"
+                desc="Invoices, warranty cards, manuals. PDF, DOCX, XLSX, images."
+              />
+            </div>
+            <p className="text-[12px] text-muted-foreground mt-3">
+              File uploads aren&apos;t wired up in this build yet — coming soon.
+            </p>
+          </SectionShell>
+
+          <SectionShell id="notes" title="Notes" icon={StickyNote}>
+            <Textarea
+              {...register("notes")}
+              rows={5}
+              placeholder="Anything worth knowing about this device…"
+            />
+          </SectionShell>
+        </div>
       </div>
-    </>
+
+      <div className="sticky bottom-0 left-0 right-0 z-20 -mx-7 mt-3 px-7 py-3 border-t border-border bg-background/[0.94] backdrop-blur">
+        <div className="flex items-center gap-2">
+          {mode === "edit" && device ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-destructive hover:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="size-3.5" aria-hidden />
+              Delete device
+            </Button>
+          ) : null}
+          <div className="ml-auto flex items-center gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting}>
+              {mode === "create" ? "Create device" : "Save changes"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }
 
-function SectionHeader({
-  label,
-  description,
+function SectionShell({
+  id,
+  title,
   icon: Icon,
+  children,
 }: {
-  label: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  id: SectionId;
+  title: string;
+  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-2.5 mb-5">
-      <div className="size-[34px] rounded-[9px] bg-secondary text-secondary-foreground grid place-items-center shrink-0">
-        <Icon className="size-[17px]" />
+    <Card id={id} className="shadow-none scroll-mt-24 py-0">
+      <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+        <Icon className="size-3.5 text-muted-foreground" aria-hidden />
+        <h2 className="text-[11px] uppercase tracking-[0.08em] font-semibold text-muted-foreground">
+          {title}
+        </h2>
       </div>
-      <div>
-        <h3 className="text-base font-semibold tracking-tight">{label}</h3>
-        <p className="text-xs text-muted-foreground mt-px">{description}</p>
-      </div>
+      <div className="px-5 pb-5">{children}</div>
+    </Card>
+  );
+}
+
+function FieldGrid({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-5 md:grid-cols-2">{children}</div>;
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  error,
+  fullWidth,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  error?: string;
+  fullWidth?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={cn("flex flex-col gap-1.5 min-w-0", fullWidth && "md:col-span-2")}>
+      <label className="text-[12.5px] font-medium text-foreground">
+        {label}
+        {required ? <span className="text-destructive ml-0.5">*</span> : null}
+      </label>
+      {children}
+      {error ? (
+        <p className="text-[12px] text-destructive">{error}</p>
+      ) : hint ? (
+        <p className="text-[12px] text-muted-foreground">{hint}</p>
+      ) : null}
     </div>
   );
 }
 
-function isInvalid(field: AnyFieldApi): boolean {
-  return field.state.meta.isTouched && !field.state.meta.isValid;
-}
-
-function errs(field: AnyFieldApi): { message: string }[] {
-  return field.state.meta.errors
-    .filter((e: unknown) => e != null)
-    .map((e: unknown) => {
-      if (typeof e === "string") return { message: e };
-      if (e && typeof e === "object" && "message" in e) {
-        return { message: String((e as { message: unknown }).message) };
-      }
-      return { message: String(e) };
-    });
-}
-
-function FieldWrap({
-  field,
-  children,
+function SelectControl({
+  value,
+  onValueChange,
+  options,
+  placeholder,
 }: {
-  field: AnyFieldApi;
-  children: React.ReactNode;
+  value: string;
+  onValueChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
 }) {
-  return <Field data-invalid={isInvalid(field)}>{children}</Field>;
+  return (
+    <Select value={value || undefined} onValueChange={onValueChange}>
+      <SelectTrigger>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt) => (
+          <SelectItem key={opt.value} value={opt.value}>
+            {opt.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function UnitToggle({
+  value,
+  units,
+  onChange,
+}: {
+  value: string;
+  units: LookupItem[];
+  onChange: (v: string) => void;
+}) {
+  const noneSelected = useMemo(() => !value && units[0]?.id, [value, units]);
+  useEffect(() => {
+    if (noneSelected) onChange(units[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(v) => {
+        if (v) onChange(v);
+      }}
+      className="justify-start"
+    >
+      {units.map((u) => (
+        <ToggleGroupItem key={u.id} value={u.id} className="text-[12.5px]">
+          {u.name}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
+
+function DropzonePlaceholder({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div>
+      <div className="text-[12.5px] font-medium mb-2">{title}</div>
+      <div className="rounded-lg border border-dashed border-border bg-muted/40 p-6 text-center">
+        <Upload className="size-5 text-muted-foreground mx-auto mb-2" aria-hidden />
+        <div className="text-[12.5px] text-muted-foreground">{desc}</div>
+      </div>
+    </div>
+  );
 }

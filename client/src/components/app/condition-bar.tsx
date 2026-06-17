@@ -1,32 +1,29 @@
-import { conditionTone } from "@/lib/domain/devices";
+import { conditionColor } from "@/lib/domain/devices";
 import { cn } from "@/lib/utils";
 
-const TONE_FILL: Record<"success" | "warning" | "danger", string> = {
-  success: "bg-[var(--green-500)]",
-  warning: "bg-[oklch(0.78_0.13_75)]",
-  danger: "bg-destructive",
-};
+interface ConditionBarProps {
+  condition: number;
+  className?: string;
+  showLabel?: boolean;
+}
 
 export function ConditionBar({
-  value,
-  showLabel = true,
+  condition,
   className,
-}: {
-  value: number;
-  showLabel?: boolean;
-  className?: string;
-}) {
-  const tone = conditionTone(value);
-  const pct = Math.max(0, Math.min(100, value));
+  showLabel = true,
+}: ConditionBarProps) {
+  const color = conditionColor(condition);
   return (
-    <div className={cn("inline-flex items-center gap-2", className)}>
-      {showLabel && (
-        <span className="text-sm tabular-nums w-[34px]">{pct}%</span>
-      )}
-      <span className="inline-block h-1.5 w-14 rounded-full bg-muted overflow-hidden" aria-hidden>
+    <div className={cn("flex items-center gap-2 min-w-0", className)}>
+      {showLabel ? (
+        <span className="text-[12.5px] font-semibold tabular-nums w-9 text-right shrink-0">
+          {condition}%
+        </span>
+      ) : null}
+      <span className="block h-1.5 rounded-full bg-muted overflow-hidden flex-1 min-w-12 max-w-[88px]">
         <span
-          className={cn("block h-full rounded-full", TONE_FILL[tone])}
-          style={{ width: `${pct}%` }}
+          className="block h-full rounded-full"
+          style={{ width: `${condition}%`, background: color }}
         />
       </span>
     </div>

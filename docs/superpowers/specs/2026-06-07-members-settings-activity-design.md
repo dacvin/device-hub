@@ -60,7 +60,7 @@ Modified:
 
 New modules:
 
-- **`members.ts`** — `Member` row type, `MemberRole`, `MemberStatus`, Zod `inviteMemberSchema` (email regex ending `@sioux.asia`, role, department required), `ROLE_LABEL`, `ROLE_TONE`, `CAPABILITIES` matrix (the table in the handoff), `can(role, capability)` helper
+- **`members.ts`** — `Member` row type, `MemberRole`, `MemberStatus`, Zod `inviteMemberSchema` (email regex ending `@gmail.com`, role, department required), `ROLE_LABEL`, `ROLE_TONE`, `CAPABILITIES` matrix (the table in the handoff), `can(role, capability)` helper
 - **`settings.ts`** — `OrgSettings` row type, `UserPreference` row type, Zod `orgSettingsSchema` (covers every editable field with the same checks as the DB), `userPreferenceSchema`
 - **`activity.ts`** — `Activity` row type, `ActivityAction`, `ACTIVITY_META` mapping each action to `{ icon, verb }` for timeline rendering
 
@@ -72,7 +72,7 @@ Modified:
 
 Extend the existing auth callback at `client/src/app/auth/...` so that after Supabase confirms the user, we upsert into `member` with `id := auth.uid()`, `email`, `name` from `user_metadata`, `status := 'active'`. Idempotent; first-time login creates the row, subsequent logins are no-ops (or refresh `last_active_at`).
 
-If the email is not in `@sioux.asia`, sign-out + redirect to login with an error toast (matches the handoff "Workspace-gated" requirement).
+If the email is not in `@gmail.com`, sign-out + redirect to login with an error toast (matches the handoff "Workspace-gated" requirement).
 
 ## Routes & screens
 
@@ -139,7 +139,7 @@ All new copy goes through `useTranslations(namespace)`. The `nav` namespace alre
 2. **Patch device path** — switch `lib/data/devices.ts` to `rpc('devices_with_flags', ...)`; thread warranty window from `org_settings`. Regression-check existing list/details.
 3. **Domain + data modules** — `members`, `settings`, `activity` + `getCurrentMember()` + `logActivity()`.
 4. **Shell primitives** — Sonner mount, `<AvatarMenu>`, `useConfirm`, state components, shadcn additions.
-5. **Auth bootstrap** — upsert member on first sign-in; `@sioux.asia` gate.
+5. **Auth bootstrap** — upsert member on first sign-in; `@gmail.com` gate.
 6. **Overview** (read-only, lowest risk).
 7. **Members** + invite/role/remove actions + bulk bar.
 8. **Member profile**.

@@ -3,15 +3,18 @@
  * -----------------------------------------------------------------------------
  * Hand-off target: Next.js (App Router) + shadcn/ui + Tailwind v4.
  *
- * These are the SHAPES the UI binds to. A backend already exists — wire these
- * to it. Where the mock seed data (reference_html/theme/data.js) and the mobile
- * mock (reference_html/mobile/mobile-screens.js) disagree, the DESKTOP model is
- * canonical; the mobile mock is older — see §"DIVERGENCE" at the bottom.
+ * These are the SHAPES the UI binds to, written to mirror the Supabase schema
+ * (see supabase/schemas/*.sql). Field names use camelCase here; their DB column
+ * names appear in the JSDoc on each field.
  *
- * VALIDATION NOTE (per hand-off brief): runtime validation (e.g. Zod) is
- * described as BEHAVIOR in JSDoc — `@validate` tags — not encoded as schemas
- * here. Translate each `@validate` line into a Zod refinement when you build
- * the forms. Field requiredness is also reflected by `?` optionality below.
+ * Catalog joins use uuid foreign keys (groupId, unitId, manufacturerId). The UI
+ * is responsible for joining against the Groups / Units / Manufacturers catalogs
+ * to render human names.
+ *
+ * VALIDATION NOTE: runtime validation (e.g. Zod) is described as BEHAVIOR in
+ * JSDoc — `@validate` tags — not encoded as schemas here. Translate each
+ * `@validate` line into a Zod refinement when you build the forms. Field
+ * requiredness is also reflected by `?` optionality below.
  * =========================================================================== */
 
 
@@ -25,8 +28,7 @@
  * (assign → "in-use", send to service → "repair", decommission → "retired").
  * Stored on the device record.
  *
- * NOTE the wire values are hyphen-free for storage/repair: `storage`, `repair`
- * (NOT `in-storage`/`in-repair`). The human label adds the "In ".
+ * Wire values match `public.device_status` enum in Postgres.
  */
 export enum DeviceStatus {
   InUse = "in-use",
@@ -43,28 +45,25 @@ export enum DeviceStatus {
 export enum DeviceFlag {
   /** Warranty ends within the next 90 days (and has not already expired). */
   WarrantyExpiring = "warranty",
-  /** lastCheck + (cycle months) is in the past — overdue for inventory. */
+  /** lastCheckDate + (cycle months) is in the past — overdue for inventory. */
   InventoryOverdue = "inventory",
 }
 
-/** How the device entered the fleet. Lookup-backed (editable list). */
+/** How the device entered the fleet. Wire values match `public.device_source`. */
 export type DeviceSource = "Purchased" | "Leased" | "Donated" | "Transferred";
 
-/** Unit of measure a device is counted in. Lookup-backed (Units catalog). */
-export type DeviceUnit = "Piece" | "Set" | "Box" | (string & {});
-
-/** Access role. Drives the capability matrix (see §"ROLES & PERMISSIONS"). */
+/** Access role. Wire values match `public.user_role` (lowercase). */
 export enum MemberRole {
   /** Full access — manage every device, catalog & member. */
-  Admin = "Admin",
+  Admin = "admin",
   /** Manage and view devices in the inventory. Cannot manage members. */
-  Member = "Member",
+  Member = "member",
 }
 
-/** Account state of a member. */
+/** Account state of a member. Wire values match `public.user_status`. */
 export enum MemberStatus {
   Active = "active",
-  /** Invited but has not yet accepted (no last-active, no join date). */
+  /** Invited but has not yet accepted (no joinedAt, no lastActiveAt). */
   Invited = "invited",
   /** Access revoked; can be re-activated. */
   Deactivated = "deactivated",
@@ -89,185 +88,220 @@ export type Tone =
 /* ─────────────────────────────────────────────────────────────────────────
  * 2. LOOKUP / CATALOG ENTITIES
  *    Each is a small editable table. A catalog row CANNOT be deleted while any
- *    device references it (enforced in the UI — see Groups/Units/Manufacturers
- *    page docs). Counts shown next to each row = number of devices referencing.
+ *    device references it (UI enforces — see Groups/Units/Manufacturers page
+ *    docs). Counts shown next to each row = number of devices referencing.
  * ───────────────────────────────────────────────────────────────────────── */
 
-/** Device category. `name` is the join key used on Device.group. */
+/** Device category. Table: `public.groups`. */
 export interface Group {
-  /** Display name AND foreign key (Device.group stores this string). Unique. */
+  /** DB: `id`. UUID primary key. */
+  id: string;
+  /** DB: `name`. Display name, unique. */
   name: string;
-  /** lucide icon name shown in the row and on device tiles. */
+  /** DB: `icon`. lucide icon name shown in the row and on device tiles. */
   icon: string;
-  /** Default inventory cycle in MONTHS, pre-filled onto new devices of this group. */
-  cycle: number;
+  /** DB: `default_inventory_cycle_months`. Pre-filled onto new devices of this group. */
+  defaultInventoryCycleMonths: number;
 }
 
-/** Vendor. `name` is the join key used on Device.mfr. */
+/** Vendor. Table: `public.manufacturers`. */
 export interface Manufacturer {
-  /** Display name AND foreign key (Device.mfr stores this string). Unique. */
+  /** DB: `id`. UUID primary key. */
+  id: string;
+  /** DB: `name`. Display name, unique. */
   name: string;
-  /** Support URL / contact (rendered monospace). Free text. */
-  support: string;
+  /** DB: `support_contact`. Support URL / contact (rendered monospace). */
+  supportContact: string;
 }
 
-/** Unit of measure. `name` is the join key used on Device.unit. */
+/** Unit of measure. Table: `public.units`. */
 export interface Unit {
-  /** Display name AND foreign key (Device.unit stores this string). Unique. */
+  /** DB: `id`. UUID primary key. */
+  id: string;
+  /** DB: `name`. Display name, unique. */
   name: string;
-  /** Human description shown in the table; optional. */
-  desc?: string;
+  /** DB: `abbreviation`. Short form (e.g. "pc", "set"). Optional. */
+  abbreviation?: string;
+  /** DB: `description`. Human description shown in the table. Optional. */
+  description?: string;
 }
 
 /** The four lookup lists that populate the Create/Edit device selects. */
 export interface Lookups {
-  groups: string[];        // Group.name[]
-  manufacturers: string[]; // Manufacturer.name[]
-  units: string[];         // Unit.name[]
+  groups: Group[];
+  manufacturers: Manufacturer[];
+  units: Unit[];
   sources: DeviceSource[];
 }
 
 
 /* ─────────────────────────────────────────────────────────────────────────
- * 3. DEVICE — the core entity
+ * 3. DEVICE — the core entity. Table: `public.devices`.
  * ───────────────────────────────────────────────────────────────────────── */
 
 export interface Device {
+  /** DB: `id`. UUID primary key. */
+  id: string;
+
   /**
-   * Human-readable asset code, e.g. "DEV-2041-XPS". PRIMARY KEY used in all
-   * row identity, URLs, selection sets, and delete operations.
-   * @validate required · unique · pattern suggested DEV-####-XXX (auto-suggested from group)
+   * DB: `code`. Human-readable asset code, e.g. "DEV-2041-XPS". Unique;
+   * used in URLs and surface displays.
+   * @validate required · unique · pattern suggested DEV-####-XXX
    */
   code: string;
 
-  /** Full device name, e.g. "Dell XPS 15 9530".  @validate required, 1–80 chars */
+  /** DB: `name`. Full device name, e.g. "Dell XPS 15 9530". @validate required, 1–80 chars */
   name: string;
 
-  /** FK → Group.name, e.g. "Laptop".  @validate required, must exist in Lookups.groups */
-  group: string;
+  /** DB: `group_id`. FK → Group.id. @validate required */
+  groupId: string;
 
-  /** FK → Manufacturer.name, e.g. "Dell".  @validate optional, must exist in Lookups.manufacturers */
-  mfr: string;
+  /** DB: `unit_id`. FK → Unit.id. @validate required */
+  unitId: string;
 
-  /** Model designation, e.g. "XPS 15 9530".  @validate optional free text */
+  /** DB: `manufacturer_id`. FK → Manufacturer.id. @validate required */
+  manufacturerId: string;
+
+  /** DB: `model`. Model designation, e.g. "XPS 15 9530". @validate optional free text */
   model: string;
 
-  /** Serial number, rendered monospace, e.g. "5KQ8R2".  @validate optional, unique if present */
-  sn: string;
+  /** DB: `serial_number`. Rendered monospace, e.g. "5KQ8R2". @validate optional, unique if present */
+  serialNumber: string;
+
+  /** DB: `specifications`. Free-text spec line, e.g. "Intel i7-13700H · 32GB · 1TB SSD · RTX 4050". */
+  specifications: string;
+
+  /** DB: `notes`. Free-text notes shown on the Device Details page. Optional. */
+  notes?: string;
 
   /**
-   * Physical condition, integer 0–100 (%). Drives the condition bar/ring color:
+   * DB: `condition`. Integer 0–100 (%). Drives the condition bar/ring color:
    * ≥70 green, 40–69 amber, <40 red (see `conditionColor()` §5).
-   * @validate 0 ≤ cond ≤ 100, integer. Defaults to 100 on create.
+   * @validate 0 ≤ condition ≤ 100, integer. Defaults to 100 on create.
    */
-  cond: number;
+  condition: number;
 
-  /** Free-text location, e.g. "HCMC · Floor 4 · Desk E-12". (a.k.a. "Storage position" on forms) */
-  loc: string;
+  /** DB: `location`. Free-text location, e.g. "HCMC · Floor 4 · Desk E-12". */
+  location: string;
 
-  /** Quantity of identical items tracked under this one record. @validate integer ≥ 1, default 1 */
-  qty: number;
+  /** DB: `quantity`. Identical items tracked under this one record. @validate integer ≥ 1, default 1 */
+  quantity: number;
 
-  /** Lifecycle status. @validate required, one of DeviceStatus */
+  /** DB: `status`. Lifecycle status. @validate required, one of DeviceStatus */
   status: DeviceStatus;
 
-  /** FK → Unit.name, e.g. "Piece". @validate required, must exist in Lookups.units */
-  unit: DeviceUnit;
-
-  /** How it entered the fleet. @validate optional, one of Lookups.sources */
+  /** DB: `source`. How it entered the fleet. @validate optional, one of DeviceSource */
   source: DeviceSource;
 
-  /** Import / acquisition date. ISO 8601 date string "YYYY-MM-DD". */
-  imported: string;
+  /** DB: `import_date`. Import / acquisition date. ISO 8601 date string "YYYY-MM-DD". */
+  importDate: string;
 
-  /** Date of the last inventory check. ISO date string. Used to derive InventoryOverdue. */
-  lastCheck: string;
-
-  /** Inventory cadence in MONTHS (defaulted from the device's Group.cycle). @validate integer ≥ 1 */
-  cycle: number;
-
-  /** Warranty start date. ISO date string. */
-  wStart: string;
-
-  /** Warranty end date. ISO date string. Used to derive WarrantyExpiring + "days remaining". */
-  wEnd: string;
-
-  /** Free-text spec line, e.g. "Intel i7-13700H · 32GB · 1TB SSD · RTX 4050". */
-  spec: string;
+  /** DB: `last_check_date`. Last inventory check. ISO date string. Drives InventoryOverdue. */
+  lastCheckDate: string;
 
   /**
-   * Cover photo URL. OPTIONAL. When present the Device List "Cards" view and
-   * the list thumbnail show the image; when absent they fall back to the
-   * group's lucide icon on a mint tile. Additional photos exist in the upload
-   * gallery but only the cover is surfaced in lists.
+   * DB: `inventory_cycle_months`. Inventory cadence in months
+   * (defaulted from the device's Group.defaultInventoryCycleMonths).
+   * @validate integer in [1, 120]
    */
-  photo?: string;
+  inventoryCycleMonths: number;
 
-  /**
-   * Supporting documents (invoices, warranty cards, manuals). Captured by the
-   * doc dropzone on Create/Edit. Not rendered in lists. Shape suggested below.
-   */
-  documents?: DeviceDocument[];
+  /** DB: `warranty_start`. ISO date string. */
+  warrantyStart: string;
 
-  /**
-   * NOT part of the canonical desktop model. The desktop catalog is Groups/Units/Manufacturers —
-   * there is no Departments catalog and Device has no department. (The Device-List Cards view was
-   * updated to bind real fields — mfr/model/group/loc — instead of a phantom `dept`.) Only add this
-   * if the backend genuinely has Departments; see the DIVERGENCE table at the bottom.
-   */
-  dept?: string;
+  /** DB: `warranty_end`. ISO date string. Drives WarrantyExpiring + "days remaining". */
+  warrantyEnd: string;
+
+  /** DB: `photos` jsonb[]. Cover = entry with `sortOrder === 0`. */
+  photos: DevicePhoto[];
+
+  /** DB: `documents` jsonb[]. Invoices, warranty cards, manuals. */
+  documents: DeviceDocument[];
+
+  /** DB: `created_at`. ISO timestamp. */
+  createdAt: string;
+  /** DB: `updated_at`. ISO timestamp. */
+  updatedAt: string;
+  /** DB: `deleted_at`. ISO timestamp or null. Soft-delete marker. */
+  deletedAt: string | null;
 }
 
-export interface DeviceDocument {
-  name: string;       // "dell-invoice-2023.pdf"
-  size: number;       // bytes
-  url?: string;       // download URL when persisted
+/**
+ * Entry shape for `devices.photos` and `devices.documents` JSONB arrays.
+ * Photos: cover = entry with `sortOrder === 0`.
+ */
+export interface DeviceFileEntry {
+  /** In-bucket key for device-photos / device-documents Storage bucket. */
+  path: string;
+  fileName: string;
+  sizeBytes: number;
+  mimeType: string;
+  /** 0 = cover (photos); arbitrary ordering otherwise. */
+  sortOrder: number;
+  /** ISO timestamp when uploaded. */
+  uploadedAt: string;
 }
 
-/** A device photo in the upload gallery. First photo (index 0) is the cover. */
-export interface DevicePhoto {
-  name: string;
-  src?: string;       // object URL while local; remote URL once stored
-  isCover?: boolean;  // derived: index === 0
-}
+export type DevicePhoto = DeviceFileEntry;
+export type DeviceDocument = DeviceFileEntry;
 
 
 /* ─────────────────────────────────────────────────────────────────────────
- * 4. MEMBER — a person with access to DeviceHub
+ * 4. MEMBER — a person with access to DeviceHub. Table: `public.users`.
  *    Combined shape: list rows use the top fields; the profile page adds the
- *    lower "profile detail" fields. Email is the PRIMARY KEY and is IT-managed
+ *    lower "profile detail" fields. Email is unique and IT-managed
  *    (immutable in-app).
  * ───────────────────────────────────────────────────────────────────────── */
 
 export interface Member {
-  /** Full name. @validate required */
+  /** DB: `id`. UUID primary key. */
+  id: string;
+
+  /**
+   * DB: `auth_user_id`. Linked Supabase auth user. Null until the invitee
+   * accepts and signs in.
+   */
+  authUserId: string | null;
+
+  /** DB: `name`. Full name. @validate required */
   name: string;
 
-  /** Work email. PRIMARY KEY. IT-managed — cannot be edited in-app.
-   *  @validate required · must be @sioux.asia · unique */
+  /**
+   * DB: `email`. Work email. Unique. IT-managed — cannot be edited in-app.
+   * @validate required · must be @gmail.com · unique
+   */
   email: string;
 
-  /** Access role. @validate required, one of MemberRole */
+  /** DB: `phone`. Rendered monospace. Null/empty when unknown. */
+  phone: string | null;
+
+  /** DB: `role`. @validate required, one of MemberRole */
   role: MemberRole;
 
-  /** Account state. @validate required, one of MemberStatus */
+  /** DB: `status`. @validate required, one of MemberStatus */
   status: MemberStatus;
 
-  /** Human "last active" string for display, e.g. "Active now", "2 hours ago", "—". */
-  last: string;
+  /** DB: `joined_at`. ISO date string or null (invited members). */
+  joinedAt: string | null;
 
-  /** True for the currently-signed-in user (renders the "You" pill; limits self-actions). */
+  /** DB: `last_active_at`. ISO timestamp or null. Rendered as humanized "N hours ago". */
+  lastActiveAt: string | null;
+
+  /** DB: `invited_by`. UUID of the member who issued the invite, or null. */
+  invitedBy: string | null;
+
+  /** DB: `created_at`. */
+  createdAt: string;
+  /** DB: `updated_at`. */
+  updatedAt: string;
+  /** DB: `deleted_at`. Soft-delete marker. */
+  deletedAt: string | null;
+
+  /**
+   * Derived (not in DB): true for the currently-signed-in user. Renders the
+   * "You" pill and limits self-actions.
+   */
   you?: boolean;
-
-  // ── profile-detail fields (Member Profile page) ──
-  /** Office, e.g. "HCMC" | "Hanoi". */
-  site?: string;
-  /** Phone, rendered monospace. "—" when unknown. */
-  phone?: string;
-  /** Manager's name, or "—". */
-  manager?: string;
-  /** Join date, ISO date string or "—" for invited members. */
-  joined?: string;
 }
 
 
@@ -279,16 +313,16 @@ export interface Member {
  * Compute the attention flags for a device as of `today`.
  * Rules (must match reference_html/theme/data.js):
  *   • retired devices → always [] (no alerts on decommissioned gear)
- *   • WarrantyExpiring → wEnd is within [today, today+90d] (not already expired)
- *   • InventoryOverdue → lastCheck + cycle months < today
+ *   • WarrantyExpiring → warrantyEnd is within [today, today+90d] (not already expired)
+ *   • InventoryOverdue → lastCheckDate + inventoryCycleMonths < today
  * Order is [warranty, inventory] when both apply.
  */
 export declare function deviceFlags(device: Device, today?: Date): DeviceFlag[];
 
 /** ≥70 → green-500, 40–69 → amber (oklch(0.78 0.13 75)), <40 → destructive red. */
-export declare function conditionColor(cond: number): string;
+export declare function conditionColor(condition: number): string;
 
-/** Whole days between wEnd and today; negative ⇒ expired. Drives "N days remaining". */
+/** Whole days between warrantyEnd and today; negative ⇒ expired. Drives "N days remaining". */
 export declare function warrantyDaysRemaining(device: Device, today?: Date): number;
 
 
@@ -344,26 +378,12 @@ export interface ConfirmOptions {
 
 /** Filters held in Device List state (all empty = show everything). */
 export interface DeviceListFilters {
-  group: string;      // "" = all
+  /** "" = all; otherwise a Group.id (uuid). */
+  groupId: string;
   status: "" | DeviceStatus;
-  mfr: string;        // "" = all
+  /** "" = all; otherwise a Manufacturer.id (uuid). */
+  manufacturerId: string;
   flag: "" | DeviceFlag;
-  q: string;          // free-text search over code+name+sn+model
+  /** Free-text search over code + name + serialNumber + model. */
+  q: string;
 }
-
-
-/* =============================================================================
- * DIVERGENCE — RESOLVED. The mobile mock has been reconciled to this canonical
- * desktop model; the table below records the mapping that was applied.
- * -----------------------------------------------------------------------------
- *  Concept    | Canonical (desktop AND mobile) | Mobile mock — was (now removed)
- *  -----------|--------------------------------|------------------------------------
- *  Roles      | Admin, Member                  | IT Admin, Manager, Viewer
- *  Catalogs   | Groups, Units, Manufacturers   | Departments, Groups, Manufacturers
- *  Status key | "storage", "repair"            | "in-storage", "in-repair"
- *  Member     | site (no dept)                 | dept
- *
- *  Both surfaces now bind these same types. If the backend genuinely needs
- *  Departments or a 3-tier role model, add it deliberately in ONE place and
- *  extend both surfaces — don't reintroduce the split.
- * =========================================================================== */

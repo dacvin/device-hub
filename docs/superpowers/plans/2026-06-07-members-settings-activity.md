@@ -765,7 +765,7 @@ export function mapMemberRow(row: MemberJoinedRow): Member {
 
 export const inviteMemberSchema = z.object({
   name: z.string().min(1).max(120),
-  email: z.string().email().regex(/@sioux\.asia$/i, "Email must be a @sioux.asia address"),
+  email: z.string().email().regex(/@sioux\.asia$/i, "Email must be a @gmail.com address"),
   role: z.enum(["it_admin", "manager", "viewer"]),
   departmentId: z.string().uuid().nullable(),
 });
@@ -1607,7 +1607,7 @@ git commit -m "feat(shell): floating bulk action bar primitive"
 
 Read the existing file first. After `exchangeCodeForSession` succeeds, we need to:
 1. Get the user.
-2. Reject if email doesn't end with `@sioux.asia`.
+2. Reject if email doesn't end with `@gmail.com`.
 3. Upsert into `member` with `id := user.id`, `email`, `name` from metadata; on conflict, just touch `last_active_at`.
 
 Replace the body after the successful `exchangeCodeForSession`:
@@ -1702,13 +1702,13 @@ cd client && pnpm db:gen-types
 cd client && pnpm tsc --noEmit && pnpm lint && pnpm dev
 ```
 
-Smoke: sign out + sign back in with a `@sioux.asia` Google account; verify a member row appears in DB (use Supabase Studio).
+Smoke: sign out + sign back in with a `@gmail.com` Google account; verify a member row appears in DB (use Supabase Studio).
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add client/src/app/auth/callback/route.ts supabase/schemas/06_rls.sql supabase/migrations/*_member_self_insert.sql client/src/types/database.types.ts
-git commit -m "feat(auth): bootstrap member on first sign-in; gate @sioux.asia domain"
+git commit -m "feat(auth): bootstrap member on first sign-in; gate @gmail.com domain"
 ```
 
 ---
@@ -2922,7 +2922,7 @@ Cross-referencing the spec to ensure every requirement has a task:
 - ✅ Patch existing device path to use the function — Phase 2
 - ✅ Domain + data modules (members, settings, activity, auth) — Phase 3 + 2.1
 - ✅ Shell primitives (Toaster, AvatarMenu, useConfirm, state components, BulkActionBar) — Phase 4
-- ✅ Auth bootstrap (`@sioux.asia` gate + member upsert) — Phase 5
+- ✅ Auth bootstrap (`@gmail.com` gate + member upsert) — Phase 5
 - ✅ Overview screen (KPIs, lifecycle, group share, attention, activity) — Phase 6
 - ✅ Members screen (list, role filter, summary, bulk, invite) — Phase 7
 - ✅ Member profile (header, details, devices managed, permissions, activity) — Phase 8

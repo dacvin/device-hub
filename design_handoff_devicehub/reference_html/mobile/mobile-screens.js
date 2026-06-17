@@ -25,12 +25,12 @@
   ];
 
   const MEMBERS = [
-    { name:"Anh Tran", email:"anh.tran@sioux.asia", role:"Admin", roleTone:"primary", roleIcon:"shield-check", site:"HCMC", devices:42, status:"active", you:true },
-    { name:"Quan Bui", email:"quan.bui@sioux.asia", role:"Admin", roleTone:"primary", roleIcon:"shield-check", site:"HCMC", devices:38, status:"active" },
-    { name:"Mai Pham", email:"mai.pham@sioux.asia", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:9, status:"active" },
-    { name:"Khoa Le", email:"khoa.le@sioux.asia", role:"Member", roleTone:"secondary", roleIcon:"user", site:"Hanoi", devices:6, status:"active" },
-    { name:"Tuan Vo", email:"tuan.vo@sioux.asia", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:0, status:"active" },
-    { name:"Linh Dang", email:"linh.dang@sioux.asia", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:0, status:"invited" },
+    { name:"Vinh Huynh", email:"vinh.huynh@gmail.com", role:"Admin", roleTone:"primary", roleIcon:"shield-check", site:"HCMC", devices:42, status:"active", you:true },
+    { name:"Quan Bui", email:"quan.bui@gmail.com", role:"Admin", roleTone:"primary", roleIcon:"shield-check", site:"HCMC", devices:38, status:"active" },
+    { name:"Mai Pham", email:"mai.pham@gmail.com", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:9, status:"active" },
+    { name:"Khoa Le", email:"khoa.le@gmail.com", role:"Member", roleTone:"secondary", roleIcon:"user", site:"Hanoi", devices:6, status:"active" },
+    { name:"Tuan Vo", email:"tuan.vo@gmail.com", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:0, status:"active" },
+    { name:"Linh Dang", email:"linh.dang@gmail.com", role:"Member", roleTone:"secondary", roleIcon:"user", site:"HCMC", devices:0, status:"invited" },
   ];
   const initials = n => n.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
 
@@ -77,7 +77,7 @@
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
           Continue with Google
         </div>
-        <div class="mob-note">${ic("shield-check")}<span>Access is limited to IT-managed @sioux.asia accounts.</span></div>
+        <div class="mob-note">${ic("shield-check")}<span>Access is limited to IT-managed @gmail.com accounts.</span></div>
       </div>`),
 
     overview: (nav) => screen(
@@ -158,7 +158,7 @@
         <div class="mob-card">
           <div class="mob-sechead">${ic("history")}Recent activity</div>
           <div class="mob-tl">
-            <div class="mob-tlrow"><span class="mob-tldot">${ic("circle-dot")}</span><div><div class="ti">Status set to <b>In use</b></div><div class="tm">by Anh Tran · 2 days ago</div></div></div>
+            <div class="mob-tlrow"><span class="mob-tldot">${ic("circle-dot")}</span><div><div class="ti">Status set to <b>In use</b></div><div class="tm">by Vinh Huynh · 2 days ago</div></div></div>
             <div class="mob-tlrow"><span class="mob-tldot">${ic("user-check")}</span><div><div class="ti">Moved to Desk E-12</div><div class="tm">5 days ago</div></div></div>
             <div class="mob-tlrow"><span class="mob-tldot">${ic("plus")}</span><div><div class="ti">Registered</div><div class="tm">12 Mar 2024</div></div></div>
           </div>
@@ -194,7 +194,7 @@
     more: (nav) => screen(
       head({ title:"More", avatar:"AT" }) +
       `<div class="mob-body">
-        <div class="mob-card" style="display:flex;align-items:center;gap:13px;padding:16px"><span class="mob-avatar" style="width:46px;height:46px;font-size:16px">AT</span><div style="flex:1"><div style="font-size:16px;font-weight:600">Anh Tran</div><div style="font-size:12.5px;color:var(--muted-foreground)">anh.tran@sioux.asia</div></div>${badge("primary","Admin",false)}</div>
+        <div class="mob-card" style="display:flex;align-items:center;gap:13px;padding:16px"><span class="mob-avatar" style="width:46px;height:46px;font-size:16px">AT</span><div style="flex:1"><div style="font-size:16px;font-weight:600">Vinh Huynh</div><div style="font-size:12.5px;color:var(--muted-foreground)">vinh.huynh@gmail.com</div></div>${badge("primary","Admin",false)}</div>
         <div class="mob-section-label">Catalog</div>
         <div class="mob-card">
           <div class="mob-row"><span class="ric">${ic("boxes")}</span><span class="rm"><div class="rt">Units</div></span><span class="mob-badge muted">3</span><span class="chev">${ic("chevron-right")}</span></div>
@@ -250,7 +250,7 @@
     memberProfile: (nav) => screen(
       head({ title:"Profile", back:true, actions:`<span class="mob-iconbtn">${ic("pencil")}</span>` }) +
       `<div class="mob-body">
-        <div class="mob-phead"><span class="pa">AT</span><div class="pn">Anh Tran</div><div class="pe">anh.tran@sioux.asia</div><div class="pb">${badge("primary","Admin",false)}${badge("success","Active",true)}</div></div>
+        <div class="mob-phead"><span class="pa">AT</span><div class="pn">Vinh Huynh</div><div class="pe">vinh.huynh@gmail.com</div><div class="pb">${badge("primary","Admin",false)}${badge("success","Active",true)}</div></div>
         <div class="mob-card">
           <div class="mob-sechead">${ic("id-card")}Details</div>
           <div class="mob-dl"><div><div class="k">Site</div><div class="v">HCMC</div></div><div><div class="k">Phone</div><div class="v mono">+84 28 7100 1010</div></div><div><div class="k">Member since</div><div class="v">Mar 2021</div></div><div><div class="k">Last active</div><div class="v">Active now</div></div></div>

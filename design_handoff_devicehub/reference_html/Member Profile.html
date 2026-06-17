@@ -103,14 +103,14 @@
     };
     // capability matrix per role — drives the Permissions card
     const MEMBERS = [
-      { name:"Anh Tran",   email:"anh.tran@sioux.asia",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1010", manager:"—",          joined:"2021-03-08", last:"Active now",  status:"active", you:true },
-      { name:"Quan Bui",   email:"quan.bui@sioux.asia",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1011", manager:"Anh Tran",   joined:"2021-09-14", last:"2 hours ago", status:"active" },
-      { name:"Mai Pham",   email:"mai.pham@sioux.asia",   role:"Member", site:"HCMC",  phone:"+84 28 7100 1042", manager:"Anh Tran",   joined:"2022-05-02", last:"Yesterday",   status:"active" },
-      { name:"Khoa Le",    email:"khoa.le@sioux.asia",    role:"Member", site:"Hanoi", phone:"+84 24 7100 2030", manager:"Anh Tran",   joined:"2022-11-21", last:"3 days ago",  status:"active" },
-      { name:"Hoa Nguyen", email:"hoa.nguyen@sioux.asia", role:"Member", site:"Hanoi", phone:"+84 24 7100 2031", manager:"Anh Tran",   joined:"2023-01-09", last:"1 week ago",  status:"active" },
-      { name:"Phuong Ho",  email:"phuong.ho@sioux.asia",  role:"Member", site:"HCMC",  phone:"+84 28 7100 1050", manager:"Anh Tran",   joined:"2023-04-17", last:"4 days ago",  status:"active" },
-      { name:"Tuan Vo",    email:"tuan.vo@sioux.asia",    role:"Member", site:"HCMC",  phone:"+84 28 7100 1061", manager:"Phuong Ho",  joined:"2024-02-26", last:"2 weeks ago", status:"deactivated" },
-      { name:"Linh Dang",  email:"linh.dang@sioux.asia",  role:"Member", site:"HCMC",  phone:"—",                manager:"Phuong Ho",  joined:"—",          last:"—",           status:"invited" },
+      { name:"Vinh Huynh",   email:"vinh.huynh@gmail.com",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1010", manager:"—",          joined:"2021-03-08", last:"Active now",  status:"active", you:true },
+      { name:"Quan Bui",   email:"quan.bui@gmail.com",   role:"Admin",  site:"HCMC",  phone:"+84 28 7100 1011", manager:"Vinh Huynh",   joined:"2021-09-14", last:"2 hours ago", status:"active" },
+      { name:"Mai Pham",   email:"mai.pham@gmail.com",   role:"Member", site:"HCMC",  phone:"+84 28 7100 1042", manager:"Vinh Huynh",   joined:"2022-05-02", last:"Yesterday",   status:"active" },
+      { name:"Khoa Le",    email:"khoa.le@gmail.com",    role:"Member", site:"Hanoi", phone:"+84 24 7100 2030", manager:"Vinh Huynh",   joined:"2022-11-21", last:"3 days ago",  status:"active" },
+      { name:"Hoa Nguyen", email:"hoa.nguyen@gmail.com", role:"Member", site:"Hanoi", phone:"+84 24 7100 2031", manager:"Vinh Huynh",   joined:"2023-01-09", last:"1 week ago",  status:"active" },
+      { name:"Phuong Ho",  email:"phuong.ho@gmail.com",  role:"Member", site:"HCMC",  phone:"+84 28 7100 1050", manager:"Vinh Huynh",   joined:"2023-04-17", last:"4 days ago",  status:"active" },
+      { name:"Tuan Vo",    email:"tuan.vo@gmail.com",    role:"Member", site:"HCMC",  phone:"+84 28 7100 1061", manager:"Phuong Ho",  joined:"2024-02-26", last:"2 weeks ago", status:"deactivated" },
+      { name:"Linh Dang",  email:"linh.dang@gmail.com",  role:"Member", site:"HCMC",  phone:"—",                manager:"Phuong Ho",  joined:"—",          last:"—",           status:"invited" },
     ];
 
     function fmt(iso){ if(!iso || iso==="—") return "—"; const dt=new Date(iso); return dt.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}); }
@@ -176,7 +176,7 @@
           <div class="section-title"><i data-lucide="history"></i>Recent activity</div>
           <div class="timeline">
             ${m.status === "invited"
-              ? `<div class="tl-item"><span class="tl-dot"><i data-lucide="mail"></i></span><div><div class="ti">Invitation sent</div><div class="tm">by Anh Tran · awaiting acceptance</div></div></div>`
+              ? `<div class="tl-item"><span class="tl-dot"><i data-lucide="mail"></i></span><div><div class="ti">Invitation sent</div><div class="tm">by Vinh Huynh · awaiting acceptance</div></div></div>`
               : `<div class="tl-item"><span class="tl-dot"><i data-lucide="log-in"></i></span><div><div class="ti">Signed in</div><div class="tm">${m.last}</div></div></div>
                  <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Updated a device record</div><div class="tm">recently</div></div></div>
                  <div class="tl-item"><span class="tl-dot"><i data-lucide="user-plus"></i></span><div><div class="ti">Joined the workspace</div><div class="tm">${fmt(m.joined)}</div></div></div>`}

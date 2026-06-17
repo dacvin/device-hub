@@ -9,7 +9,7 @@
 -- key for device-photos / device-documents.
 -- ============================================================
 
-create type public.device_status as enum ('in-use', 'in-storage', 'in-repair', 'retired');
+create type public.device_status as enum ('in-use', 'storage', 'repair', 'retired');
 create type public.device_source as enum ('Purchased', 'Leased', 'Donated', 'Transferred');
 
 create table public.devices (
@@ -19,7 +19,7 @@ create table public.devices (
 
   group_id        uuid not null references public.groups(id)        on delete restrict,
   unit_id         uuid not null references public.units(id)         on delete restrict,
-  manufacturer_id uuid          references public.manufacturers(id) on delete set null,
+  manufacturer_id uuid not null references public.manufacturers(id) on delete restrict,
 
   model           text,
   serial_number   text,
@@ -30,7 +30,7 @@ create table public.devices (
   location        text,
   quantity        int  not null default 1   check (quantity >= 1),
   source          public.device_source,
-  status          public.device_status not null default 'in-storage',
+  status          public.device_status not null default 'storage',
 
   import_date            date,
   last_check_date        date,

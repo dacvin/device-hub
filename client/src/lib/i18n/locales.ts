@@ -1,13 +1,14 @@
-export const SUPPORTED_LOCALES = ["vi", "en"] as const;
+export const SUPPORTED_LOCALES = ["en", "vi", "zh"] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
-export const DEFAULT_LOCALE: Locale = "vi";
+export const DEFAULT_LOCALE: Locale = "en";
 
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
 export const LOCALE_LABELS: Record<Locale, string> = {
-  vi: "Tiếng Việt",
   en: "English",
+  vi: "Tiếng Việt",
+  zh: "中文",
 };
 
 export function isLocale(value: unknown): value is Locale {

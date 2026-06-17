@@ -5,7 +5,7 @@
 -- ============================================================
 
 create type public.user_role   as enum ('admin', 'member');
-create type public.user_status as enum ('active', 'invited', 'disabled');
+create type public.user_status as enum ('active', 'invited', 'deactivated');
 
 create table public.users (
   id              uuid primary key default gen_random_uuid(),

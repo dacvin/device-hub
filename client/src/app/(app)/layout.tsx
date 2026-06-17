@@ -1,51 +1,18 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Sidebar, type SidebarUser } from "@/components/app/sidebar";
-import { AvatarMenu } from "@/components/app/avatar-menu";
-import { Toaster } from "@/components/ui/sonner";
-import { ConfirmProvider } from "@/hooks/use-confirm";
-import { MobileBottomNav } from "@/components/app/mobile-bottom-nav";
+import { AppShell } from "@/components/app/app-shell";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Auth gate only. All data fetching happens client-side via TanStack hooks.
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const sidebarUser: SidebarUser = {
-    id: user.id,
-    name:
-      (user.user_metadata?.full_name as string | undefined) ??
-      (user.user_metadata?.name as string | undefined) ??
-      user.email ??
-      "User",
-    email: user.email ?? "",
-    initials: deriveInitials(
-      (user.user_metadata?.full_name as string | undefined) ?? user.email ?? "U"
-    ),
-  };
-
-  return (
-    <div className="min-h-screen flex bg-background text-foreground">
-      <Sidebar user={sidebarUser} />
-      <div className="flex-1 min-w-0 flex flex-col">
-        <ConfirmProvider>
-          <main className="flex-1 min-w-0 pb-20 min-[980px]:pb-0">
-            <div className="max-w-[1320px] mx-auto">{children}</div>
-          </main>
-        </ConfirmProvider>
-      </div>
-      <div className="fixed top-3 right-3 z-30 min-[980px]:hidden">
-        <AvatarMenu variant="icon" user={sidebarUser} />
-      </div>
-      <Toaster richColors position="bottom-right" />
-      <MobileBottomNav />
-    </div>
-  );
-}
-
-function deriveInitials(s: string): string {
-  const parts = s.replace(/@.+$/, "").split(/[\s._-]+/).filter(Boolean);
-  if (parts.length === 0) return "U";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
+  return <AppShell>{children}</AppShell>;
 }

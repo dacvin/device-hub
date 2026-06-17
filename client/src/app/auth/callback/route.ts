@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/overview";
+  const next = url.searchParams.get("next") ?? "/";
 
   if (!code) {
     url.pathname = "/login";
@@ -32,36 +32,38 @@ export async function GET(request: NextRequest) {
     (user.user_metadata?.name as string | undefined) ??
     user.email;
 
-  // If an invited row exists with this email under a different id (created
-  // via the invite flow before this user signed up), delete it so the upsert
-  // below can claim the email under the real auth.uid().
+  // Link the auth.users row to the invited public.users row by email.
+  // If an invited row exists, fill in auth_user_id + flip to active. If no
+  // row exists yet, create one (self-signup not via invite).
   const { data: existing } = await supabase
-    .from("member")
-    .select("id")
+    .from("users")
+    .select("id, auth_user_id")
     .eq("email", user.email)
     .maybeSingle();
-  if (existing && existing.id !== user.id) {
-    await supabase.from("member").delete().eq("id", existing.id);
+
+  if (existing) {
+    if (existing.auth_user_id !== user.id) {
+      await supabase
+        .from("users")
+        .update({
+          auth_user_id: user.id,
+          status: "active",
+          last_active_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+    }
+  } else {
+    await supabase.from("users").insert({
+      auth_user_id: user.id,
+      email: user.email,
+      name,
+      role: "member",
+      status: "active",
+      last_active_at: new Date().toISOString(),
+    });
   }
 
-  const { error: upsertError } = await supabase
-    .from("member")
-    .upsert(
-      {
-        id: user.id,
-        email: user.email,
-        name,
-        status: "active",
-        last_active_at: new Date().toISOString(),
-      },
-      { onConflict: "id" },
-    );
-  if (upsertError) {
-    console.error("member upsert failed", upsertError);
-    // Continue — RLS will surface the issue on the next page.
-  }
-
-  url.pathname = next.startsWith("/") ? next : "/overview";
+  url.pathname = next.startsWith("/") ? next : "/";
   url.search = "";
   return NextResponse.redirect(url);
 }

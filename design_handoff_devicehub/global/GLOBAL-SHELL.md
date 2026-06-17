@@ -56,12 +56,12 @@ Three labelled groups (data in `shell.js → NAV_MAIN/NAV_CATALOG/NAV_SYSTEM`):
 
 ## 3. User chip + user menu (popover)
 
-Bottom of the sidebar: **`.userchip`** = avatar (initials "AT" on primary) + name "Anh Tran" +
+Bottom of the sidebar: **`.userchip`** = avatar (initials "AT" on primary) + name "Vinh Huynh" +
 role "Admin" + a `chevrons-up-down` glyph. Click → **popover menu** anchored above it:
 
 | Item | Action |
 |---|---|
-| header (avatar · name · `anh.tran@sioux.asia`) | — |
+| header (avatar · name · `vinh.huynh@gmail.com`) | — |
 | **View profile** (`user`) | → `/members/[email]` (own member profile) |
 | **Language** (`languages`) — inline `<select>` EN / Tiếng Việt / 中文 | persists `localStorage["dh-lang"]`, toasts "Language updated". (i18n is stubbed — wire to your i18n lib.) |
 | **Dark/Light mode** toggle (`moon`/`sun`) | flips `.dark` on `<html>`, persists `localStorage["dh-theme"]` |

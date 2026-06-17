@@ -7,15 +7,18 @@ export const queryKeys = {
     photos: (deviceId: string) => ["devices", deviceId, "photos"] as const,
     documents: (deviceId: string) => ["devices", deviceId, "documents"] as const,
   },
+  overview: {
+    summary: ["overview", "summary"] as const,
+  },
   groups: {
     all: ["groups"] as const,
     withCounts: ["groups", "with-counts"] as const,
     byId: (id: string) => ["groups", "by-id", id] as const,
   },
-  departments: {
-    all: ["departments"] as const,
-    withCounts: ["departments", "with-counts"] as const,
-    byId: (id: string) => ["departments", "by-id", id] as const,
+  units: {
+    all: ["units"] as const,
+    withCounts: ["units", "with-counts"] as const,
+    byId: (id: string) => ["units", "by-id", id] as const,
   },
   manufacturers: {
     all: ["manufacturers"] as const,
@@ -24,20 +27,12 @@ export const queryKeys = {
   },
   members: {
     all: ["members"] as const,
-    list: (filters: unknown) => ["members", "list", filters] as const,
-    byId: (id: string) => ["members", "by-id", id] as const,
-    deviceCount: (departmentId: string | null) => ["members", "device-count", departmentId] as const,
+    byEmail: (email: string) => ["members", "by-email", email] as const,
+    current: ["members", "current"] as const,
   },
-  orgSettings: ["org-settings"] as const,
-  userPreference: (userId: string) => ["user-preference", userId] as const,
   activity: {
     recent: (limit: number) => ["activity", "recent", limit] as const,
-    byActor: (actorId: string, limit: number) => ["activity", "by-actor", actorId, limit] as const,
-    byEntity: (entityType: string, entityId: string, limit: number) =>
+    forEntity: (entityType: string, entityId: string, limit: number) =>
       ["activity", "by-entity", entityType, entityId, limit] as const,
-  },
-  storage: {
-    photoUrls: (paths: string[]) => ["storage", "photo-urls", paths] as const,
-    documentUrls: (paths: string[]) => ["storage", "document-urls", paths] as const,
   },
 } as const;

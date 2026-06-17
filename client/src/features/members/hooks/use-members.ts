@@ -1,10 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
-import { listMembers, type MemberListFilters } from "@/features/members/api/get-members";
 import { queryKeys } from "@/lib/queries/keys";
+import { listMembers } from "../api/list-members";
+import {
+  getCurrentUserRow,
+  getMemberByEmail,
+} from "../api/get-member-by-email";
 
-export function useMembers(filters: MemberListFilters = {}) {
+export function useMembers() {
   return useQuery({
-    queryKey: queryKeys.members.list(filters),
-    queryFn: () => listMembers(filters),
+    queryKey: queryKeys.members.all,
+    queryFn: listMembers,
+  });
+}
+
+export function useMemberByEmail(email: string) {
+  return useQuery({
+    queryKey: queryKeys.members.byEmail(email),
+    queryFn: () => getMemberByEmail(email),
+    enabled: !!email,
+  });
+}
+
+export function useCurrentUser() {
+  return useQuery({
+    queryKey: queryKeys.members.current,
+    queryFn: getCurrentUserRow,
   });
 }

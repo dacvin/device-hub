@@ -120,13 +120,13 @@ Off-nav routes: `/devices/new` (Create), `/devices/[code]` (Details), `/devices/
 - `/devices?group=Laptop` · `?status=in-use` · `?mfr=Dell` · `?flag=warranty` — pre-applies that
   Device-List filter. Catalog rows and the Overview charts link here.
 - `/members/[email]` — Member Profile is keyed by URL-encoded email
-  (e.g. `…?email=anh.tran%40sioux.asia` in the mock; use a real `[email]` segment).
+  (e.g. `…?email=vinh.huynh%40gmail.com` in the mock; use a real `[email]` segment).
 
 ---
 
 ## 6. Roles & permissions
 
-Two roles (canonical desktop model). The mock signs you in as **Anh Tran · Admin**.
+Two roles (canonical desktop model). The mock signs you in as **Vinh Huynh · Admin**.
 
 | Capability | Admin | Member |
 |---|:--:|:--:|

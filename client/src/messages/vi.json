@@ -7,11 +7,10 @@
   "nav": {
     "overview": "Tổng quan",
     "devices": "Thiết bị",
-    "departments": "Phòng ban",
     "groups": "Nhóm",
+    "units": "Đơn vị",
     "manufacturers": "Nhà sản xuất",
-    "members": "Thành viên",
-    "settings": "Cài đặt"
+    "members": "Thành viên"
   },
   "login": {
     "signInTitle": "Đăng nhập DeviceHub",
@@ -19,6 +18,7 @@
     "emailLabel": "Email",
     "emailPlaceholder": "ban@congty.com",
     "passwordLabel": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu?",
     "signInButton": "Đăng nhập",
     "signingIn": "Đang đăng nhập…",
     "orDivider": "hoặc",
@@ -47,11 +47,12 @@
   },
   "avatarMenu": {
     "viewProfile": "Xem hồ sơ",
-    "accountSettings": "Cài đặt tài khoản",
     "lightMode": "Giao diện sáng",
     "darkMode": "Giao diện tối",
     "language": "Ngôn ngữ",
-    "signOut": "Đăng xuất"
+    "signOut": "Đăng xuất",
+    "signOutConfirmTitle": "Đăng xuất?",
+    "signOutConfirmDesc": "Bạn sẽ được đưa về màn hình đăng nhập."
   },
   "mobileNav": {
     "more": "Khác",

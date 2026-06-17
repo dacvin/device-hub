@@ -155,8 +155,8 @@
       <div class="card" style="padding:22px">
         <div class="section-title"><i data-lucide="history"></i>Recent activity</div>
         <div class="timeline">
-          <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Condition updated to 92%</div><div class="tm">Anh Tran · 02 Mar 2026</div></div></div>
-          <div class="tl-item"><span class="tl-dot"><i data-lucide="map-pin"></i></span><div><div class="ti">Moved to Desk E-12</div><div class="tm">Anh Tran · 14 Jan 2025</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Condition updated to 92%</div><div class="tm">Vinh Huynh · 02 Mar 2026</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><i data-lucide="map-pin"></i></span><div><div class="ti">Moved to Desk E-12</div><div class="tm">Vinh Huynh · 14 Jan 2025</div></div></div>
           <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="ti">Device created</div><div class="tm">Le Minh · 14 Aug 2023</div></div></div>
         </div>
       </div>`;
@@ -178,9 +178,9 @@
       if (curTab==="details") inner = `<div class="stack">${card("identification")}${card("specs")}${card("allocation")}</div>`;
       if (curTab==="lifecycle") inner = `<div class="stack">${card("lifecycle")}${card("warranty")}<div class="card" style="padding:22px"><div class="section-title"><i data-lucide="gauge"></i>Condition</div><div class="ring-wrap" style="margin-top:16px">${ring(d.cond)}<div><div style="font-size:14px;font-weight:500">Good condition</div><div style="font-size:12px;color:var(--muted-foreground);margin-top:2px">Last assessed ${fmt(d.lastCheck)}</div></div></div></div></div>`;
       if (curTab==="history") inner = `<div class="card" style="padding:22px"><div class="section-title"><i data-lucide="history"></i>Full history</div><div class="timeline" style="margin-top:18px">
-          <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Condition updated to 92%</div><div class="tm">Anh Tran · 02 Mar 2026</div></div></div>
-          <div class="tl-item"><span class="tl-dot"><i data-lucide="shield-check"></i></span><div><div class="ti">Warranty verified with Dell</div><div class="tm">Anh Tran · 11 Apr 2025</div></div></div>
-          <div class="tl-item"><span class="tl-dot"><i data-lucide="map-pin"></i></span><div><div class="ti">Moved to Desk E-12</div><div class="tm">Anh Tran · 14 Jan 2025</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><i data-lucide="pencil"></i></span><div><div class="ti">Condition updated to 92%</div><div class="tm">Vinh Huynh · 02 Mar 2026</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><i data-lucide="shield-check"></i></span><div><div class="ti">Warranty verified with Dell</div><div class="tm">Vinh Huynh · 11 Apr 2025</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><i data-lucide="map-pin"></i></span><div><div class="ti">Moved to Desk E-12</div><div class="tm">Vinh Huynh · 14 Jan 2025</div></div></div>
           <div class="tl-item"><span class="tl-dot"><i data-lucide="plus"></i></span><div><div class="ti">Device created</div><div class="tm">Le Minh · 14 Aug 2023</div></div></div>
         </div></div>`;
       document.getElementById("body").innerHTML = inner;

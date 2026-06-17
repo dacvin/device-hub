@@ -1,66 +1,38 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Download, Plus } from "lucide-react";
-import { useDevices } from "@/features/devices/hooks/use-devices";
-import type { DeviceListFilters } from "@/features/devices/api/get-devices";
-import { useGroups } from "@/features/groups/hooks/use-groups";
-import { useDepartments } from "@/features/departments/hooks/use-departments";
-import { useManufacturers } from "@/features/manufacturers/hooks/use-manufacturers";
 import { PageShell } from "@/components/app/page-shell";
 import { Button } from "@/components/ui/button";
 import { DeviceListClient } from "./_components/device-list-client";
-import { DevicesPageSkeleton } from "./_components/page-skeleton";
+import { DeviceSearchInput } from "./_components/device-toolbar";
 
 export default function DevicesPage() {
-  const t = useTranslations("devices.list");
   const params = useSearchParams();
-  const filters: DeviceListFilters = {
-    q: params.get("q") ?? undefined,
-    group: params.get("group") ?? undefined,
-    dept: params.get("dept") ?? undefined,
-    status: params.get("status") ?? undefined,
-    mfr: params.get("mfr") ?? undefined,
-    flag: params.get("flag") ?? undefined,
-  };
-  const view = params.get("view") === "cards" ? "cards" : "table";
-
-  const devicesQ = useDevices(filters);
-  const groupsQ = useGroups();
-  const deptsQ = useDepartments();
-  const mfrsQ = useManufacturers();
-
-  if (devicesQ.isPending || groupsQ.isPending || deptsQ.isPending || mfrsQ.isPending) {
-    return <DevicesPageSkeleton />;
-  }
+  const q = params.get("q") ?? "";
 
   return (
     <PageShell
-      title={t("title")}
-      crumb={t("subtitle")}
+      title="Devices"
+      crumb="Asset inventory across the fleet"
       actions={
         <>
-          <Button variant="outline" size="sm">
-            <Download className="size-4" /> {t("export")}
+          <DeviceSearchInput initial={q} />
+          <Button variant="outline" size="sm" className="h-9" type="button">
+            <Download className="size-3.5" aria-hidden />
+            Export
           </Button>
-          <Button size="sm" asChild>
+          <Button asChild size="sm" className="h-9">
             <Link href="/devices/new">
-              <Plus className="size-4" /> {t("addDevice")}
+              <Plus className="size-3.5" aria-hidden />
+              Create device
             </Link>
           </Button>
         </>
       }
     >
-      <DeviceListClient
-        devices={devicesQ.data ?? []}
-        groups={groupsQ.data ?? []}
-        departments={deptsQ.data ?? []}
-        manufacturers={mfrsQ.data ?? []}
-        initialFilters={filters}
-        initialView={view}
-      />
+      <DeviceListClient />
     </PageShell>
   );
 }

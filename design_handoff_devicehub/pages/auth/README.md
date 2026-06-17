@@ -21,16 +21,16 @@ The art pane is pure CSS — no image asset. The wordmark is live type (no logo 
 ## Sign in (`/login`)
 - **Heading:** "Sign in" + sub "Welcome back. Sign in with your Sioux work email to access the device
   inventory."
-- **Form:** Work email (prefilled `anh.tran@sioux.asia` in mock) · Password (with **"Forgot
+- **Form:** Work email (prefilled `vinh.huynh@gmail.com` in mock) · Password (with **"Forgot
   password?"** link → `/forgot-password`) · **"Keep me signed in"** checkbox (custom, toggles) ·
   **Sign in** button (h44).
-- **Managed notice** (mint panel, `shield-check`): "Access is limited to IT-managed @sioux.asia
+- **Managed notice** (mint panel, `shield-check`): "Access is limited to IT-managed @gmail.com
   accounts. All device activity is logged for audit."
 - **Legal** line with acceptable-use link.
 - **Art pane:** headline "Every device, *accounted for.*"; capability chips (Laptops/Monitors/
   Servers/Printers); stat row (1,284 tracked · 8 groups · 98.2% accuracy).
 - **Behavior:** submit → `/` (Overview). Wire to real auth (the mock does no validation). Restrict to
-  `@sioux.asia`.
+  `@gmail.com`.
 
 ## Reset password (`/forgot-password`)
 - **Back to sign in** link → `/login`.

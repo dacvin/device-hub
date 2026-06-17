@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -13,7 +14,7 @@ export function LoginForm() {
   const t = useTranslations("login");
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") ?? "/overview";
+  const next = params.get("next") ?? "/";
   const oauthError = params.get("error");
 
   const [email, setEmail] = useState("");
@@ -64,7 +65,15 @@ export function LoginForm() {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="login-password">{t("passwordLabel")}</FieldLabel>
+          <div className="flex items-center justify-between">
+            <FieldLabel htmlFor="login-password">{t("passwordLabel")}</FieldLabel>
+            <Link
+              href="/forgot-password"
+              className="text-[12px] text-muted-foreground hover:text-foreground"
+            >
+              {t("forgotPassword")}
+            </Link>
+          </div>
           <Input
             id="login-password"
             type="password"
