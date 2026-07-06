@@ -1,0 +1,23 @@
+{
+  // Format on save with Prettier, and auto-fix ESLint problems on save.
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // Only format files that have a Prettier config, which keeps Prettier scoped to
+  // client/ (where .prettierrc.json lives) and off the Deno-managed functions.
+  "prettier.requireConfig": true,
+
+  // The ESLint flat config lives in client/ — auto-detect the working directory.
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  // Supabase Edge Functions run on Deno. Enable the Deno language server + lint
+  // ONLY for the functions folder so the rest of the workspace keeps VSCode's
+  // built-in TypeScript server (used by the Next.js app in client/). The Deno
+  // extension auto-detects supabase/functions/deno.json — no importMap setting.
+  // `deno fmt` runs via CLI / pre-commit (a single root can't scope format-on-save
+  // to a subfolder — same language, one formatter wins).
+  "deno.enablePaths": ["./supabase/functions"],
+  "deno.lint": true
+}
