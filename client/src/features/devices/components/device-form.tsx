@@ -196,7 +196,6 @@ export function DeviceForm({
       }}
       className="space-y-4"
     >
-      {/* General */}
       <Section icon={Info} title={t('sectionGeneral')} description={t('sectionGeneralDesc')}>
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -307,7 +306,6 @@ export function DeviceForm({
         </div>
       </Section>
 
-      {/* Classification */}
       <Section
         icon={Tag}
         title={t('sectionClassification')}
@@ -422,7 +420,6 @@ export function DeviceForm({
         </div>
       </Section>
 
-      {/* Lifecycle */}
       <Section
         icon={Activity}
         title={t('sectionLifecycle')}
@@ -497,7 +494,6 @@ export function DeviceForm({
         </div>
       </Section>
 
-      {/* Warranty */}
       <Section
         icon={ShieldCheck}
         title={t('sectionWarranty')}
@@ -521,7 +517,6 @@ export function DeviceForm({
         </div>
       </Section>
 
-      {/* Photos & documents */}
       <Section icon={Paperclip} title={t('sectionMedia')} description={t('sectionMediaDesc')}>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-3">
@@ -539,7 +534,6 @@ export function DeviceForm({
         </div>
       </Section>
 
-      {/* Notes */}
       <Section icon={ScrollText} title={t('sectionNotes')} description={t('sectionNotesDesc')}>
         <form.Field name="notes">
           {(field) => (

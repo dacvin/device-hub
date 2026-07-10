@@ -29,7 +29,6 @@ const TONE: Record<DeviceActivityAction, string> = {
 
 type T = (key: string, values?: Record<string, string | number>) => string;
 
-// Recent for <7 days ("2 days ago"), else an absolute medium date ("14 Aug 2023").
 function relativeOrDate(iso: string, locale: string): string {
   const ms = Date.now() - new Date(iso).getTime();
   const days = Math.round(ms / 86_400_000);
@@ -44,7 +43,6 @@ function relativeOrDate(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(iso));
 }
 
-// Turn a before/after snapshot pair into one human line, most-salient change first.
 function describe(e: DeviceActivityEntry, t: T, tRoot: T): string {
   if (e.action === 'insert') return t('activityCreated');
   if (e.action === 'delete') return t('activityDeleted');

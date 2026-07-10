@@ -7,8 +7,6 @@ import { getDevicesQueryOptions } from './get-paginated-devices';
 
 import type { DeviceActivityAction } from './get-recent-activities';
 
-// before/after are full snake_case row snapshots, so any field-level diff is
-// reconstructable client-side without extra columns.
 export type DeviceActivityEntry = {
   id: string;
   action: DeviceActivityAction;
