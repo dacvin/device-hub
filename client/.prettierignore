@@ -9,3 +9,8 @@ pnpm-lock.yaml
 
 # Generated
 next-env.d.ts
+src/types/database.types.ts
+
+# Agent docs (managed by astryx / vendored — don't reformat)
+.claude
+CLAUDE.md
