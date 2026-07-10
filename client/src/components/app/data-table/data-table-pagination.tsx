@@ -38,7 +38,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
   const total = Math.max(pageCount, 1);
 
   return (
-    <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
+    <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-3">
       <p className="text-muted-foreground order-2 hidden font-mono text-xs tracking-[-0.01em] tabular-nums sm:order-1 sm:block sm:text-left">
         {t('pageOf', { current, total })}
       </p>
@@ -120,7 +120,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
             ))}
           </SelectContent>
         </Select>
-        <span className="text-muted-foreground text-xs">{t('perPage')}</span>
+        <span className="text-muted-foreground hidden text-xs sm:inline">{t('perPage')}</span>
       </div>
     </div>
   );
