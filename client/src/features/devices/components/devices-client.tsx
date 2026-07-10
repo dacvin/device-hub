@@ -1,9 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
-import { HardDrive, Plus, Search, X } from 'lucide-react';
+import { HardDrive, MapPin, Plus, Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import type { ColumnFiltersState, FilterFn, Table } from '@tanstack/react-table';
@@ -19,7 +20,7 @@ import { useDevicesList } from '../api/get-devices-list';
 import { useSoftDeleteDevice } from '../api/soft-delete-device';
 import { DeviceStatuses } from '../constants/device';
 import { DeviceDeleteDialog } from './device-delete-dialog';
-import { STATUS_LABEL_KEY, StatusDot } from './device-status-indicator';
+import { DeviceStatusBadge, STATUS_LABEL_KEY, StatusDot } from './device-status-indicator';
 import { deviceColumns } from './devices-columns';
 import { DevicesSkeleton } from './devices-skeleton';
 
@@ -99,6 +100,36 @@ function DevicesToolbar({
         )}
       </div>
     </div>
+  );
+}
+
+function DeviceMobileCard({ device }: { device: DeviceListItem }) {
+  const tRoot = useTranslations();
+  return (
+    <Link
+      href={`/devices/${device.id}`}
+      className="hover:bg-secondary/50 active:bg-secondary block px-4 py-3 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-muted-foreground font-mono text-xs tracking-[-0.01em] tabular-nums">
+            {device.code}
+          </p>
+          <p className="truncate font-medium">{device.name}</p>
+        </div>
+        <DeviceStatusBadge status={device.status} t={tRoot} />
+      </div>
+      <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
+        {device.groupName && <span className="min-w-0 truncate">{device.groupName}</span>}
+        {device.location && (
+          <span className="flex shrink-0 items-center gap-1">
+            <MapPin className="size-3" />
+            {device.location}
+          </span>
+        )}
+        <span className="ml-auto shrink-0 font-mono tabular-nums">{device.condition}%</span>
+      </div>
+    </Link>
   );
 }
 
@@ -207,6 +238,7 @@ export function DevicesClient() {
             router.push(`/devices/${d.id}`);
           }}
           renderToolbar={(table) => <DevicesToolbar table={table} groupOptions={groupOptions} />}
+          renderMobileCard={(d) => <DeviceMobileCard device={d} />}
           emptyState={emptyState}
         />
       )}

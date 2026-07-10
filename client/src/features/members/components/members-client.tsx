@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -13,10 +14,11 @@ import { FacetedFilter } from '@/components/app/faceted-filter';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { UserAvatar } from '@/components/user-avatar';
 
 import { useMembersList } from '../api/get-members-list';
 import { UserRoles, UserStatuses } from '../constants/member';
-import { ROLE_LABEL_KEY, STATUS_LABEL_KEY } from './member-badges';
+import { ROLE_LABEL_KEY, RoleBadge, STATUS_LABEL_KEY, StatusIndicator } from './member-badges';
 import { memberColumns } from './members-columns';
 import { MembersSkeleton } from './members-skeleton';
 
@@ -95,6 +97,30 @@ function MembersToolbar({ table }: { table: Table<MemberListItem> }) {
   );
 }
 
+function MemberMobileCard({ member }: { member: MemberListItem }) {
+  const tRoot = useTranslations();
+  return (
+    <Link
+      href={`/members/${member.id}`}
+      className="hover:bg-secondary/50 active:bg-secondary flex items-center gap-3 px-4 py-3 transition-colors"
+    >
+      <UserAvatar
+        name={member.name}
+        className="size-9"
+        fallbackClassName="bg-muted text-xs font-medium"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{member.name}</p>
+        <p className="text-muted-foreground truncate text-xs">{member.email}</p>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1">
+        <RoleBadge role={member.role} t={tRoot} />
+        <StatusIndicator status={member.status} t={tRoot} />
+      </div>
+    </Link>
+  );
+}
+
 export function MembersClient({
   isAdmin,
   currentUserId,
@@ -153,6 +179,7 @@ export function MembersClient({
             router.push(`/members/${m.id}`);
           }}
           renderToolbar={(table) => <MembersToolbar table={table} />}
+          renderMobileCard={(m) => <MemberMobileCard member={m} />}
           emptyState={emptyState}
         />
       )}

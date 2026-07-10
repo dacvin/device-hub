@@ -49,6 +49,7 @@ export function DataTable<TData>({
   selectedLabel,
   clearLabel = 'Clear',
   renderBulkActions,
+  renderMobileCard,
   initialColumnFilters,
   className,
 }: {
@@ -67,6 +68,9 @@ export function DataTable<TData>({
   clearLabel?: string;
   /** Bulk actions shown in the selection bar; receives selected rows + a clear fn. */
   renderBulkActions?: (rows: TData[], clearSelection: () => void) => ReactNode;
+  /** Per-row card for small screens. When set, the table is hidden below `md` and
+   * these cards (over the same filtered/sorted/paginated rows) render instead. */
+  renderMobileCard?: (row: TData) => ReactNode;
   initialColumnFilters?: ColumnFiltersState;
   className?: string;
 }) {
@@ -170,7 +174,7 @@ export function DataTable<TData>({
       </div>
 
       <div className="bg-card min-h-0 flex-1 overflow-hidden rounded-lg border shadow-xs">
-        <div className="h-full overflow-auto">
+        <div className={cn('h-full overflow-auto', renderMobileCard && 'hidden md:block')}>
           <Table>
             <TableHeader className="bg-secondary sticky top-0 z-10">
               {table.getHeaderGroups().map((hg) => (
@@ -225,6 +229,23 @@ export function DataTable<TData>({
             </TableBody>
           </Table>
         </div>
+        {renderMobileCard && (
+          <div className="h-full overflow-auto md:hidden">
+            {rows.length ? (
+              <ul className="divide-y">
+                {rows.map((row) => (
+                  <li key={row.id}>{renderMobileCard(row.original)}</li>
+                ))}
+              </ul>
+            ) : (
+              (emptyState ?? (
+                <div className="text-muted-foreground flex h-64 items-center justify-center text-sm">
+                  No results.
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
       <DataTablePagination table={table} />
     </div>

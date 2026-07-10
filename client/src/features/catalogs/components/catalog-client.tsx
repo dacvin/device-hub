@@ -163,6 +163,19 @@ export function CatalogClient<
                 }}
               />
             )}
+            renderMobileCard={(item) => (
+              <div className="flex items-center gap-3 px-4 py-3">
+                <span className="min-w-0 flex-1 truncate font-medium">{item.name}</span>
+                <CatalogRowActions
+                  name={item.name}
+                  onEdit={() => {
+                    setEditing(item);
+                    setDialogOpen(true);
+                  }}
+                  onDelete={() => remove(item.id)}
+                />
+              </div>
+            )}
             renderToolbar={(table) => (
               <div className="relative sm:max-w-xs">
                 <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
