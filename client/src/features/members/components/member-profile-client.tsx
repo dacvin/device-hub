@@ -70,10 +70,13 @@ export function MemberProfileClient({
             className="size-14"
             fallbackClassName="bg-muted text-base font-medium"
           />
-          <div className="flex flex-wrap items-center gap-2">
-            <RoleBadge role={member.role} t={tRoot} />
-            <StatusIndicator status={member.status} t={tRoot} />
-            {isSelf && <span className="text-muted-foreground text-sm">· {t('you')}</span>}
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-muted-foreground truncate text-sm">{member.email}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <RoleBadge role={member.role} t={tRoot} />
+              <StatusIndicator status={member.status} t={tRoot} />
+              {isSelf && <span className="text-muted-foreground text-sm">· {t('you')}</span>}
+            </div>
           </div>
         </div>
 
