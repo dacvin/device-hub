@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Field, FieldLabel } from '@/components/ui/field';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { cn } from '@/lib/utils';
@@ -206,8 +207,8 @@ export function DeviceFkField({
 
   return (
     <div className="flex items-end gap-2">
-      <div className="min-w-0 flex-1 space-y-2">
-        <label className="text-sm leading-none font-medium">{label}</label>
+      <Field className="min-w-0 flex-1">
+        <FieldLabel>{label}</FieldLabel>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -258,7 +259,7 @@ export function DeviceFkField({
             </Command>
           </PopoverContent>
         </Popover>
-      </div>
+      </Field>
 
       <Button
         type="button"
