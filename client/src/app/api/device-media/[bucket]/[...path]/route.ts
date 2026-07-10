@@ -4,6 +4,16 @@ import { createClient } from '@/lib/supabase/server';
 
 const ALLOWED_BUCKETS = new Set(['device-photos', 'device-documents']);
 
+// Raster image types safe to serve inline for the photos bucket. Anything else
+// (incl. SVG/HTML) is served as an opaque download to avoid same-origin XSS.
+const INLINE_IMAGE_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+]);
+
 // Auth-gated proxy for private storage objects: <img>/downloads send the session
 // cookie, we verify it, then stream the object. Stable same-origin URL (no signing,
 // no expiry) that only authenticated users can read.
@@ -23,10 +33,15 @@ export async function GET(
   const { data, error } = await supabase.storage.from(bucket).download(path.join('/'));
   if (error) return new NextResponse('Not found', { status: 404 });
 
-  return new NextResponse(data, {
-    headers: {
-      'Content-Type': data.type || 'application/octet-stream',
-      'Cache-Control': 'private, max-age=3600',
-    },
-  });
+  const inlineImage = bucket === 'device-photos' && INLINE_IMAGE_TYPES.has(data.type);
+  const headers: Record<string, string> = {
+    'Content-Type': inlineImage ? data.type : 'application/octet-stream',
+    'Cache-Control': 'private, max-age=3600',
+    // Neutralize same-origin XSS from user uploads: never sniff, never execute.
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Security-Policy': "default-src 'none'; sandbox",
+  };
+  if (!inlineImage) headers['Content-Disposition'] = 'attachment';
+
+  return new NextResponse(data, { headers });
 }
