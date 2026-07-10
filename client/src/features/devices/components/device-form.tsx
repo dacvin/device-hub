@@ -9,6 +9,7 @@ import type { AnyFieldApi } from '@tanstack/react-form';
 import type { LucideIcon } from 'lucide-react';
 import type { z } from 'zod';
 
+import { DatePicker } from '@/components/app/date-picker';
 import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -456,7 +457,17 @@ export function DeviceForm({
             <form.Field name="importDate">
               {(field) => (
                 <FieldRow field={field} label={t('fieldImportDate')}>
-                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                  {(isInvalid) => (
+                    <DatePicker
+                      id={fieldId(field.name)}
+                      value={fieldText(field.state.value)}
+                      onChange={(v) => {
+                        field.handleChange(v);
+                      }}
+                      placeholder={t('empty')}
+                      ariaInvalid={isInvalid}
+                    />
+                  )}
                 </FieldRow>
               )}
             </form.Field>
@@ -479,7 +490,17 @@ export function DeviceForm({
             <form.Field name="lastCheckDate">
               {(field) => (
                 <FieldRow field={field} label={t('fieldLastCheckDate')}>
-                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                  {(isInvalid) => (
+                    <DatePicker
+                      id={fieldId(field.name)}
+                      value={fieldText(field.state.value)}
+                      onChange={(v) => {
+                        field.handleChange(v);
+                      }}
+                      placeholder={t('empty')}
+                      ariaInvalid={isInvalid}
+                    />
+                  )}
                 </FieldRow>
               )}
             </form.Field>
@@ -503,14 +524,34 @@ export function DeviceForm({
           <form.Field name="warrantyStart">
             {(field) => (
               <FieldRow field={field} label={t('fieldWarrantyStart')}>
-                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                {(isInvalid) => (
+                  <DatePicker
+                    id={fieldId(field.name)}
+                    value={fieldText(field.state.value)}
+                    onChange={(v) => {
+                      field.handleChange(v);
+                    }}
+                    placeholder={t('empty')}
+                    ariaInvalid={isInvalid}
+                  />
+                )}
               </FieldRow>
             )}
           </form.Field>
           <form.Field name="warrantyEnd">
             {(field) => (
               <FieldRow field={field} label={t('fieldWarrantyEnd')}>
-                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                {(isInvalid) => (
+                  <DatePicker
+                    id={fieldId(field.name)}
+                    value={fieldText(field.state.value)}
+                    onChange={(v) => {
+                      field.handleChange(v);
+                    }}
+                    placeholder={t('empty')}
+                    ariaInvalid={isInvalid}
+                  />
+                )}
               </FieldRow>
             )}
           </form.Field>
