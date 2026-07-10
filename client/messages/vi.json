@@ -145,7 +145,14 @@
     "activityDeleted": "Đã xóa thiết bị",
     "activityRestored": "Đã khôi phục thiết bị",
     "activityMovedTo": "Chuyển đến {location}",
-    "activityEmpty": "Chưa có hoạt động"
+    "activityEmpty": "Chưa có hoạt động",
+    "sectionGeneral": "Chung",
+    "sectionGeneralDesc": "Định danh và quyền sở hữu thiết bị.",
+    "sectionClassificationDesc": "Hãng, kiểu máy và thông số kỹ thuật.",
+    "sectionLifecycleDesc": "Nguồn gốc, tình trạng và chu kỳ kiểm kê.",
+    "sectionWarrantyDesc": "Thời hạn bảo hành từ nhà cung cấp.",
+    "sectionMediaDesc": "Ảnh thiết bị và các tệp liên quan.",
+    "sectionNotesDesc": "Thông tin khác cần ghi lại."
   },
   "login": {
     "heading": "Chào mừng trở lại",

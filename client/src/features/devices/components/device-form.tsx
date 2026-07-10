@@ -3,9 +3,10 @@
 import type { ReactNode } from 'react';
 
 import { useForm } from '@tanstack/react-form';
-import { Loader2 } from 'lucide-react';
+import { Activity, Info, Loader2, Paperclip, ScrollText, ShieldCheck, Tag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { AnyFieldApi } from '@tanstack/react-form';
+import type { LucideIcon } from 'lucide-react';
 import type { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
@@ -102,12 +103,30 @@ function TextControl({
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
   return (
-    <section className="space-y-4">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      {children}
-    </section>
+    <Card className="gap-0 py-0">
+      <div className="flex items-start gap-3 border-b px-5 py-4">
+        <span className="bg-accent text-primary flex size-9 shrink-0 items-center justify-center rounded-md">
+          <Icon className="size-4" />
+        </span>
+        <div className="space-y-0.5">
+          <h3 className="font-semibold">{title}</h3>
+          <p className="text-muted-foreground text-sm">{description}</p>
+        </div>
+      </div>
+      <CardContent className="p-5">{children}</CardContent>
+    </Card>
   );
 }
 
@@ -175,378 +194,377 @@ export function DeviceForm({
         e.stopPropagation();
         void form.handleSubmit();
       }}
+      className="space-y-4"
     >
-      <Card>
-        <CardContent className="space-y-8">
-          {/* Identity */}
-          <Section title={t('sectionIdentity')}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <form.Field name="code">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldCode')} required>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="name">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldName')} required>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
-                  </FieldRow>
-                )}
-              </form.Field>
-            </div>
-          </Section>
-
-          {/* Classification */}
-          <Section title={t('sectionClassification')}>
-            <div className="space-y-4">
-              <form.Field name="groupId">
-                {(field) => (
-                  <DeviceFkField
-                    field={field}
-                    label={t('fieldGroup')}
-                    placeholder={t('fieldGroup')}
-                    search={groupSearch}
-                    initialItem={initialFk?.group ?? null}
-                    addNewLabel={t('addNewGroup')}
-                    onSelectItem={(item) => {
-                      const months = item?.auxiliaryData?.defaultInventoryCycleMonths;
-                      if (months) form.setFieldValue('inventoryCycleMonths', months);
-                    }}
-                    addNew={{
-                      title: t('addNewGroup'),
-                      schema: createGroupFormSchema,
-                      defaultValues: { name: '', icon: '', defaultInventoryCycleMonths: 12 },
-                      create: async (values) => {
-                        const g = await createGroup.mutateAsync(values as never);
-                        return {
-                          id: g.id,
-                          name: g.name,
-                          defaultInventoryCycleMonths: g.defaultInventoryCycleMonths,
-                        };
-                      },
-                      invalidateKey: getGroupsQueryOptions().queryKey,
-                      renderFields: (f) => (
-                        <>
-                          <f.Field name="name">
-                            {(x) => (
-                              <FieldRow field={x} label={tRoot('catalogs.fieldName')} required>
-                                {(inv) => <TextControl field={x} isInvalid={inv} />}
-                              </FieldRow>
-                            )}
-                          </f.Field>
-                          <f.Field name="icon">
-                            {(x) => (
-                              <FieldRow field={x} label={tRoot('catalogs.fieldIcon')} required>
-                                {() => (
-                                  <IconPicker
-                                    value={fieldText(x.state.value)}
-                                    onChange={(v) => {
-                                      x.handleChange(v);
-                                    }}
-                                  />
-                                )}
-                              </FieldRow>
-                            )}
-                          </f.Field>
-                          <f.Field name="defaultInventoryCycleMonths">
-                            {(x) => (
-                              <FieldRow field={x} label={tRoot('catalogs.fieldCycle')}>
-                                {(inv) => <TextControl field={x} isInvalid={inv} type="number" />}
-                              </FieldRow>
-                            )}
-                          </f.Field>
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-              </form.Field>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <form.Field name="unit">
-                  {(field) => (
-                    <FieldRow field={field} label={t('fieldUnit')} required>
-                      {() => (
-                        <Select
-                          value={fieldText(field.state.value)}
-                          onValueChange={(v) => {
-                            field.handleChange(v as never);
-                          }}
-                        >
-                          <SelectTrigger id={fieldId(field.name)} className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {unitOptions.map((o) => (
-                              <SelectItem key={o.value} value={o.value}>
-                                {o.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </FieldRow>
-                  )}
-                </form.Field>
-
-                <form.Field name="manufacturerId">
-                  {(field) => (
-                    <DeviceFkField
-                      field={field}
-                      label={t('fieldManufacturer')}
-                      placeholder={t('fieldManufacturer')}
-                      search={manufacturerSearch}
-                      initialItem={initialFk?.manufacturer ?? null}
-                      addNewLabel={t('addNewManufacturer')}
-                      addNew={{
-                        title: t('addNewManufacturer'),
-                        schema: createManufacturerFormSchema,
-                        defaultValues: { name: '', supportContact: '' },
-                        create: async (values) => {
-                          const m = await createManufacturer.mutateAsync(values as never);
-                          return { id: m.id, name: m.name };
-                        },
-                        invalidateKey: getManufacturersQueryOptions().queryKey,
-                        renderFields: (f) => (
-                          <>
-                            <f.Field name="name">
-                              {(x) => (
-                                <FieldRow field={x} label={tRoot('catalogs.fieldName')} required>
-                                  {(inv) => <TextControl field={x} isInvalid={inv} />}
-                                </FieldRow>
-                              )}
-                            </f.Field>
-                            <f.Field name="supportContact">
-                              {(x) => (
-                                <FieldRow field={x} label={tRoot('catalogs.fieldSupportContact')}>
-                                  {(inv) => <TextControl field={x} isInvalid={inv} />}
-                                </FieldRow>
-                              )}
-                            </f.Field>
-                          </>
-                        ),
-                      }}
-                    />
-                  )}
-                </form.Field>
-
-                <form.Field name="model">
-                  {(field) => (
-                    <FieldRow field={field} label={t('fieldModel')}>
-                      {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
-                    </FieldRow>
-                  )}
-                </form.Field>
-                <form.Field name="serialNumber">
-                  {(field) => (
-                    <FieldRow field={field} label={t('fieldSerialNumber')}>
-                      {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
-                    </FieldRow>
-                  )}
-                </form.Field>
-              </div>
-
-              <form.Field name="specifications">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldSpecifications')}>
-                    {(isInvalid) => (
-                      <Textarea
-                        id={fieldId(field.name)}
-                        value={fieldText(field.state.value)}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => {
-                          field.handleChange(e.target.value);
-                        }}
-                        aria-invalid={isInvalid}
-                      />
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-            </div>
-          </Section>
-
-          {/* Status & condition */}
-          <Section title={t('sectionStatus')}>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <form.Field name="status">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldStatus')} required>
-                    {() => (
-                      <Select
-                        value={fieldText(field.state.value)}
-                        onValueChange={(v) => {
-                          field.handleChange(v as never);
-                        }}
-                      >
-                        <SelectTrigger id={fieldId(field.name)} className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DeviceStatuses.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {tRoot(STATUS_LABEL_KEY[s])}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="condition">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldCondition')}>
-                    {(isInvalid) => (
-                      <TextControl field={field} isInvalid={isInvalid} type="number" />
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="quantity">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldQuantity')}>
-                    {(isInvalid) => (
-                      <TextControl field={field} isInvalid={isInvalid} type="number" />
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="source">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldSource')}>
-                    {() => (
-                      <Select
-                        value={fieldText(field.state.value) || NONE}
-                        onValueChange={(v) => {
-                          field.handleChange((v === NONE ? '' : v) as never);
-                        }}
-                      >
-                        <SelectTrigger id={fieldId(field.name)} className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NONE}>{t('empty')}</SelectItem>
-                          {DeviceSources.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {t(`source${s}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="location">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldLocation')}>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
-                  </FieldRow>
-                )}
-              </form.Field>
-            </div>
-          </Section>
-
-          {/* Lifecycle & warranty */}
-          <Section title={t('sectionLifecycle')}>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <form.Field name="importDate">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldImportDate')}>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="lastCheckDate">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldLastCheckDate')}>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="inventoryCycleMonths">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldInventoryCycleMonths')}>
-                    {(isInvalid) => (
-                      <TextControl field={field} isInvalid={isInvalid} type="number" />
-                    )}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="warrantyStart">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldWarrantyStart')}>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
-                  </FieldRow>
-                )}
-              </form.Field>
-              <form.Field name="warrantyEnd">
-                {(field) => (
-                  <FieldRow field={field} label={t('fieldWarrantyEnd')}>
-                    {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
-                  </FieldRow>
-                )}
-              </form.Field>
-            </div>
-          </Section>
-
-          {/* Notes */}
-          <Section title={t('sectionNotes')}>
-            <form.Field name="notes">
+      {/* General */}
+      <Section icon={Info} title={t('sectionGeneral')} description={t('sectionGeneralDesc')}>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="name">
               {(field) => (
-                <FieldRow field={field} label={t('fieldNotes')}>
-                  {(isInvalid) => (
-                    <Textarea
-                      id={fieldId(field.name)}
+                <FieldRow field={field} label={t('fieldName')} required>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="code">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldCode')} required>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
+                </FieldRow>
+              )}
+            </form.Field>
+          </div>
+          <div className="grid items-end gap-4 sm:grid-cols-2">
+            <form.Field name="groupId">
+              {(field) => (
+                <DeviceFkField
+                  field={field}
+                  label={t('fieldGroup')}
+                  placeholder={t('fieldGroup')}
+                  search={groupSearch}
+                  initialItem={initialFk?.group ?? null}
+                  addNewLabel={t('addNewGroup')}
+                  onSelectItem={(item) => {
+                    const months = item?.auxiliaryData?.defaultInventoryCycleMonths;
+                    if (months) form.setFieldValue('inventoryCycleMonths', months);
+                  }}
+                  addNew={{
+                    title: t('addNewGroup'),
+                    schema: createGroupFormSchema,
+                    defaultValues: { name: '', icon: '', defaultInventoryCycleMonths: 12 },
+                    create: async (values) => {
+                      const g = await createGroup.mutateAsync(values as never);
+                      return {
+                        id: g.id,
+                        name: g.name,
+                        defaultInventoryCycleMonths: g.defaultInventoryCycleMonths,
+                      };
+                    },
+                    invalidateKey: getGroupsQueryOptions().queryKey,
+                    renderFields: (f) => (
+                      <>
+                        <f.Field name="name">
+                          {(x) => (
+                            <FieldRow field={x} label={tRoot('catalogs.fieldName')} required>
+                              {(inv) => <TextControl field={x} isInvalid={inv} />}
+                            </FieldRow>
+                          )}
+                        </f.Field>
+                        <f.Field name="icon">
+                          {(x) => (
+                            <FieldRow field={x} label={tRoot('catalogs.fieldIcon')} required>
+                              {() => (
+                                <IconPicker
+                                  value={fieldText(x.state.value)}
+                                  onChange={(v) => {
+                                    x.handleChange(v);
+                                  }}
+                                />
+                              )}
+                            </FieldRow>
+                          )}
+                        </f.Field>
+                        <f.Field name="defaultInventoryCycleMonths">
+                          {(x) => (
+                            <FieldRow field={x} label={tRoot('catalogs.fieldCycle')}>
+                              {(inv) => <TextControl field={x} isInvalid={inv} type="number" />}
+                            </FieldRow>
+                          )}
+                        </f.Field>
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="status">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldStatus')} required>
+                  {() => (
+                    <Select
                       value={fieldText(field.state.value)}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value);
+                      onValueChange={(v) => {
+                        field.handleChange(v as never);
                       }}
-                      aria-invalid={isInvalid}
-                    />
+                    >
+                      <SelectTrigger id={fieldId(field.name)} className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DeviceStatuses.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {tRoot(STATUS_LABEL_KEY[s])}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </FieldRow>
               )}
             </form.Field>
-          </Section>
-
-          {/* Media */}
-          <Section title={t('sectionMedia')}>
-            <div className="space-y-3">
-              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                {t('photosLabel')}
-              </p>
-              <DevicePhotosField media={photos} />
-            </div>
-            <div className="space-y-3">
-              <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-                {t('documentsLabel')}
-              </p>
-              <DeviceDocumentsField media={documents} />
-            </div>
-          </Section>
-
-          <div className="flex justify-end gap-2 border-t pt-6">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              {t('cancel')}
-            </Button>
-            <form.Subscribe
-              selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting && <Loader2 className="animate-spin" />}
-                  {t('save')}
-                </Button>
-              )}
-            </form.Subscribe>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </Section>
+
+      {/* Classification */}
+      <Section
+        icon={Tag}
+        title={t('sectionClassification')}
+        description={t('sectionClassificationDesc')}
+      >
+        <div className="space-y-4">
+          <div className="grid items-end gap-4 sm:grid-cols-2">
+            <form.Field name="manufacturerId">
+              {(field) => (
+                <DeviceFkField
+                  field={field}
+                  label={t('fieldManufacturer')}
+                  placeholder={t('fieldManufacturer')}
+                  search={manufacturerSearch}
+                  initialItem={initialFk?.manufacturer ?? null}
+                  addNewLabel={t('addNewManufacturer')}
+                  addNew={{
+                    title: t('addNewManufacturer'),
+                    schema: createManufacturerFormSchema,
+                    defaultValues: { name: '', supportContact: '' },
+                    create: async (values) => {
+                      const m = await createManufacturer.mutateAsync(values as never);
+                      return { id: m.id, name: m.name };
+                    },
+                    invalidateKey: getManufacturersQueryOptions().queryKey,
+                    renderFields: (f) => (
+                      <>
+                        <f.Field name="name">
+                          {(x) => (
+                            <FieldRow field={x} label={tRoot('catalogs.fieldName')} required>
+                              {(inv) => <TextControl field={x} isInvalid={inv} />}
+                            </FieldRow>
+                          )}
+                        </f.Field>
+                        <f.Field name="supportContact">
+                          {(x) => (
+                            <FieldRow field={x} label={tRoot('catalogs.fieldSupportContact')}>
+                              {(inv) => <TextControl field={x} isInvalid={inv} />}
+                            </FieldRow>
+                          )}
+                        </f.Field>
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            </form.Field>
+            <form.Field name="model">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldModel')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="serialNumber">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldSerialNumber')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="unit">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldUnit')} required>
+                  {() => (
+                    <Select
+                      value={fieldText(field.state.value)}
+                      onValueChange={(v) => {
+                        field.handleChange(v as never);
+                      }}
+                    >
+                      <SelectTrigger id={fieldId(field.name)} className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unitOptions.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="quantity">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldQuantity')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="number" />}
+                </FieldRow>
+              )}
+            </form.Field>
+          </div>
+          <form.Field name="specifications">
+            {(field) => (
+              <FieldRow field={field} label={t('fieldSpecifications')}>
+                {(isInvalid) => (
+                  <Textarea
+                    id={fieldId(field.name)}
+                    value={fieldText(field.state.value)}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => {
+                      field.handleChange(e.target.value);
+                    }}
+                    aria-invalid={isInvalid}
+                  />
+                )}
+              </FieldRow>
+            )}
+          </form.Field>
+        </div>
+      </Section>
+
+      {/* Lifecycle */}
+      <Section icon={Activity} title={t('sectionLifecycle')} description={t('sectionLifecycleDesc')}>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="source">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldSource')}>
+                  {() => (
+                    <Select
+                      value={fieldText(field.state.value) || NONE}
+                      onValueChange={(v) => {
+                        field.handleChange((v === NONE ? '' : v) as never);
+                      }}
+                    >
+                      <SelectTrigger id={fieldId(field.name)} className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={NONE}>{t('empty')}</SelectItem>
+                        {DeviceSources.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {t(`source${s}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="importDate">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldImportDate')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                </FieldRow>
+              )}
+            </form.Field>
+          </div>
+          <form.Field name="condition">
+            {(field) => (
+              <FieldRow field={field} label={t('fieldCondition')}>
+                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="number" />}
+              </FieldRow>
+            )}
+          </form.Field>
+          <form.Field name="location">
+            {(field) => (
+              <FieldRow field={field} label={t('fieldLocation')}>
+                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} />}
+              </FieldRow>
+            )}
+          </form.Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="lastCheckDate">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldLastCheckDate')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+                </FieldRow>
+              )}
+            </form.Field>
+            <form.Field name="inventoryCycleMonths">
+              {(field) => (
+                <FieldRow field={field} label={t('fieldInventoryCycleMonths')}>
+                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="number" />}
+                </FieldRow>
+              )}
+            </form.Field>
+          </div>
+        </div>
+      </Section>
+
+      {/* Warranty */}
+      <Section icon={ShieldCheck} title={t('sectionWarranty')} description={t('sectionWarrantyDesc')}>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.Field name="warrantyStart">
+            {(field) => (
+              <FieldRow field={field} label={t('fieldWarrantyStart')}>
+                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+              </FieldRow>
+            )}
+          </form.Field>
+          <form.Field name="warrantyEnd">
+            {(field) => (
+              <FieldRow field={field} label={t('fieldWarrantyEnd')}>
+                {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="date" />}
+              </FieldRow>
+            )}
+          </form.Field>
+        </div>
+      </Section>
+
+      {/* Photos & documents */}
+      <Section icon={Paperclip} title={t('sectionMedia')} description={t('sectionMediaDesc')}>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="space-y-3">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {t('photosLabel')}
+            </p>
+            <DevicePhotosField media={photos} />
+          </div>
+          <div className="space-y-3">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {t('documentsLabel')}
+            </p>
+            <DeviceDocumentsField media={documents} />
+          </div>
+        </div>
+      </Section>
+
+      {/* Notes */}
+      <Section icon={ScrollText} title={t('sectionNotes')} description={t('sectionNotesDesc')}>
+        <form.Field name="notes">
+          {(field) => (
+            <FieldRow field={field} label={t('fieldNotes')}>
+              {(isInvalid) => (
+                <Textarea
+                  id={fieldId(field.name)}
+                  value={fieldText(field.state.value)}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value);
+                  }}
+                  aria-invalid={isInvalid}
+                />
+              )}
+            </FieldRow>
+          )}
+        </form.Field>
+      </Section>
+
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          {t('cancel')}
+        </Button>
+        <form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}>
+          {({ canSubmit, isSubmitting }) => (
+            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting && <Loader2 className="animate-spin" />}
+              {t('save')}
+            </Button>
+          )}
+        </form.Subscribe>
+      </div>
     </form>
   );
 }

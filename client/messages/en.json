@@ -145,7 +145,14 @@
     "activityDeleted": "Device deleted",
     "activityRestored": "Device restored",
     "activityMovedTo": "Moved to {location}",
-    "activityEmpty": "No activity yet"
+    "activityEmpty": "No activity yet",
+    "sectionGeneral": "General",
+    "sectionGeneralDesc": "Identity and ownership of the device.",
+    "sectionClassificationDesc": "Make, model and technical detail.",
+    "sectionLifecycleDesc": "Source, condition and inventory cadence.",
+    "sectionWarrantyDesc": "Coverage window from the supplier.",
+    "sectionMediaDesc": "A device photo and any supporting files.",
+    "sectionNotesDesc": "Anything else worth recording."
   },
   "login": {
     "heading": "Welcome back",
