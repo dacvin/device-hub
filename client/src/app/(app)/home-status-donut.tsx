@@ -2,7 +2,12 @@
 
 import { Label, Pie, PieChart } from 'recharts';
 
-import { type ChartConfig, ChartContainer } from '@/components/ui/chart';
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
 import { DeviceStatuses } from '@/features/devices/constants/device';
 import type { DeviceStatus } from '@/features/devices/types/device';
 
@@ -24,11 +29,13 @@ export function HomeStatusDonut({
   labels: Record<DeviceStatus, string>;
   totalLabel: string;
 }) {
-  const data = DeviceStatuses.filter((s) => byStatus[s] > 0).map((s) => ({
-    status: s,
-    count: byStatus[s],
-    fill: COLOR[s],
-  }));
+  const data = DeviceStatuses.filter((s) => byStatus[s] > 0)
+    .map((s) => ({
+      status: s,
+      count: byStatus[s],
+      fill: COLOR[s],
+    }))
+    .sort((a, b) => b.count - a.count);
 
   const config = Object.fromEntries(
     DeviceStatuses.map((s) => [s, { label: labels[s], color: COLOR[s] }]),
@@ -37,6 +44,7 @@ export function HomeStatusDonut({
   return (
     <ChartContainer config={config} className="mx-auto aspect-square max-h-[200px] w-full">
       <PieChart>
+        <ChartTooltip cursor={false} content={<ChartTooltipContent nameKey="status" hideLabel />} />
         <Pie data={data} dataKey="count" nameKey="status" innerRadius={58} strokeWidth={4}>
           <Label
             content={({ viewBox }) => {

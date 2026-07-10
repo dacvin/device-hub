@@ -162,15 +162,17 @@ export function HomeFleetOverview() {
               totalLabel={t('devices.title').toLowerCase()}
             />
             <ul className="space-y-2.5">
-              {DeviceStatuses.map((s) => (
-                <li key={s} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="flex items-center gap-2">
-                    <StatusDot status={s} />
-                    {t(STATUS_LABEL_KEY[s])}
-                  </span>
-                  <span className={cn(NUM, 'font-semibold')}>{stats.byStatus[s]}</span>
-                </li>
-              ))}
+              {[...DeviceStatuses]
+                .sort((a, b) => stats.byStatus[b] - stats.byStatus[a])
+                .map((s) => (
+                  <li key={s} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="flex items-center gap-2">
+                      <StatusDot status={s} />
+                      {t(STATUS_LABEL_KEY[s])}
+                    </span>
+                    <span className={cn(NUM, 'font-semibold')}>{stats.byStatus[s]}</span>
+                  </li>
+                ))}
             </ul>
           </div>
         </SectionCard>
