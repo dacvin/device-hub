@@ -3,13 +3,12 @@
 import type { ReactNode } from 'react';
 
 import { useForm } from '@tanstack/react-form';
-import { Activity, Info, Loader2, Paperclip, ScrollText, ShieldCheck, Tag } from 'lucide-react';
+import { Activity, Info, Paperclip, ScrollText, ShieldCheck, Tag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { AnyFieldApi } from '@tanstack/react-form';
 import type { LucideIcon } from 'lucide-react';
 import type { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -131,19 +130,19 @@ function Section({
 }
 
 export function DeviceForm({
+  formId,
   defaultValues,
   initialFk,
   initialPhotos = [],
   initialDocuments = [],
   onSubmit,
-  onCancel,
 }: {
+  formId: string;
   defaultValues: CreateDeviceFormValues;
   initialFk?: { group?: FkOption; manufacturer?: FkOption };
   initialPhotos?: DeviceFileDescriptor[];
   initialDocuments?: DeviceFileDescriptor[];
   onSubmit: (values: CreateDeviceFormValues, media: DeviceFormMedia) => Promise<void>;
-  onCancel: () => void;
 }) {
   const t = useTranslations('devices');
   const tRoot = useTranslations();
@@ -189,6 +188,7 @@ export function DeviceForm({
 
   return (
     <form
+      id={formId}
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -423,7 +423,11 @@ export function DeviceForm({
       </Section>
 
       {/* Lifecycle */}
-      <Section icon={Activity} title={t('sectionLifecycle')} description={t('sectionLifecycleDesc')}>
+      <Section
+        icon={Activity}
+        title={t('sectionLifecycle')}
+        description={t('sectionLifecycleDesc')}
+      >
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <form.Field name="source">
@@ -494,7 +498,11 @@ export function DeviceForm({
       </Section>
 
       {/* Warranty */}
-      <Section icon={ShieldCheck} title={t('sectionWarranty')} description={t('sectionWarrantyDesc')}>
+      <Section
+        icon={ShieldCheck}
+        title={t('sectionWarranty')}
+        description={t('sectionWarrantyDesc')}
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <form.Field name="warrantyStart">
             {(field) => (
@@ -551,20 +559,6 @@ export function DeviceForm({
           )}
         </form.Field>
       </Section>
-
-      <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          {t('cancel')}
-        </Button>
-        <form.Subscribe selector={(s) => ({ canSubmit: s.canSubmit, isSubmitting: s.isSubmitting })}>
-          {({ canSubmit, isSubmitting }) => (
-            <Button type="submit" disabled={!canSubmit || isSubmitting}>
-              {isSubmitting && <Loader2 className="animate-spin" />}
-              {t('save')}
-            </Button>
-          )}
-        </form.Subscribe>
-      </div>
     </form>
   );
 }

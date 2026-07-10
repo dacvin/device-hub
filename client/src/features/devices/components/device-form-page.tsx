@@ -2,10 +2,12 @@
 
 import { notFound, useRouter } from 'next/navigation';
 
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { PageLayout } from '@/components/app/page-layout';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useCreateDevice } from '../api/create-device';
@@ -17,6 +19,34 @@ import { type CreateDeviceFormValues, DEVICE_FORM_DEFAULTS } from '../validation
 import { DeviceForm } from './device-form';
 
 import type { FkOption } from './device-fk-field';
+
+const FORM_ID = 'device-form';
+
+function FormActions({
+  formId,
+  saving,
+  onCancel,
+  cancelLabel,
+  saveLabel,
+}: {
+  formId: string;
+  saving: boolean;
+  onCancel: () => void;
+  cancelLabel: string;
+  saveLabel: string;
+}) {
+  return (
+    <>
+      <Button type="button" variant="outline" onClick={onCancel}>
+        {cancelLabel}
+      </Button>
+      <Button type="submit" form={formId} disabled={saving}>
+        {saving && <Loader2 className="animate-spin" />}
+        {saveLabel}
+      </Button>
+    </>
+  );
+}
 
 export function DeviceCreatePage() {
   const t = useTranslations('devices');
@@ -44,12 +74,21 @@ export function DeviceCreatePage() {
       backHref="/devices"
       backLabel={t('back')}
       contentWidth={760}
+      actions={
+        <FormActions
+          formId={FORM_ID}
+          saving={create.isPending || commitMedia.isPending}
+          cancelLabel={t('cancel')}
+          saveLabel={t('save')}
+          onCancel={() => {
+            router.push('/devices');
+          }}
+        />
+      }
     >
       <DeviceForm
+        formId={FORM_ID}
         defaultValues={{ ...DEVICE_FORM_DEFAULTS, code: nextCode ?? '' }}
-        onCancel={() => {
-          router.push('/devices');
-        }}
         onSubmit={async (values: CreateDeviceFormValues, media) => {
           let device;
           try {
@@ -139,15 +178,24 @@ export function DeviceEditPage({ deviceId }: { deviceId: string }) {
       backHref={`/devices/${deviceId}`}
       backLabel={t('back')}
       contentWidth={760}
+      actions={
+        <FormActions
+          formId={FORM_ID}
+          saving={update.isPending || commitMedia.isPending}
+          cancelLabel={t('cancel')}
+          saveLabel={t('save')}
+          onCancel={() => {
+            router.push(`/devices/${deviceId}`);
+          }}
+        />
+      }
     >
       <DeviceForm
+        formId={FORM_ID}
         defaultValues={defaults}
         initialFk={initialFk}
         initialPhotos={initialPhotos}
         initialDocuments={initialDocuments}
-        onCancel={() => {
-          router.push(`/devices/${deviceId}`);
-        }}
         onSubmit={async (values, media) => {
           try {
             await update.mutateAsync({ deviceId, data: values });
