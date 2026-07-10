@@ -1,0 +1,162 @@
+'use client';
+
+import Link from 'next/link';
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+
+import { Pencil, Trash2 } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
+
+import { DataTableColumnHeader } from '@/components/app/data-table/data-table-column-header';
+import { IconButton } from '@/components/app/icon-button';
+import { cn } from '@/lib/utils';
+
+import { DeviceStatusBadge } from './device-status-indicator';
+
+import type { DeviceListItem } from '../types/device';
+
+function conditionColor(condition: number): string {
+  if (condition >= 80) return 'text-status-in-use';
+  if (condition >= 50) return 'text-status-repair';
+  return 'text-status-retired';
+}
+
+function conditionBar(condition: number): string {
+  if (condition >= 80) return 'bg-status-in-use';
+  if (condition >= 50) return 'bg-status-repair';
+  return 'bg-status-retired';
+}
+
+type T = (key: string) => string;
+
+export function deviceColumns({
+  t,
+  tRoot,
+  router,
+  onDelete,
+}: {
+  t: T;
+  tRoot: T;
+  router: AppRouterInstance;
+  onDelete: (device: DeviceListItem) => void;
+}): ColumnDef<DeviceListItem>[] {
+  return [
+    {
+      accessorKey: 'code',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('colCode')} />,
+      cell: ({ row }) => (
+        <Link
+          href={`/devices/${row.original.id}`}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+          className="text-primary font-mono font-medium tracking-[-0.01em] tabular-nums hover:underline"
+        >
+          {row.original.code}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('colName')} />,
+      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      meta: { className: 'max-w-[26ch] truncate' },
+    },
+    {
+      accessorKey: 'groupName',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('colGroup')} />,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.groupName ?? t('empty')}</span>
+      ),
+      filterFn: 'arrIncludesSome',
+      meta: { className: 'hidden md:table-cell' },
+    },
+    {
+      accessorKey: 'manufacturerName',
+      header: t('colManufacturer'),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.manufacturerName ?? t('empty')}</span>
+      ),
+      enableSorting: false,
+      meta: { className: 'hidden lg:table-cell' },
+    },
+    {
+      accessorKey: 'status',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('colStatus')} />,
+      cell: ({ row }) => <DeviceStatusBadge status={row.original.status} t={tRoot} />,
+      filterFn: 'arrIncludesSome',
+    },
+    {
+      accessorKey: 'condition',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('colCondition')} className="justify-end" />
+      ),
+      cell: ({ row }) => {
+        const c = row.original.condition;
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <div className="bg-muted h-1.5 w-16 overflow-hidden rounded-full">
+              <div
+                className={cn('h-full rounded-full', conditionBar(c))}
+                style={{ width: `${c}%` }}
+              />
+            </div>
+            <span
+              className={cn(
+                'w-9 text-right font-mono text-xs tracking-[-0.01em] tabular-nums',
+                conditionColor(c),
+              )}
+            >
+              {c}%
+            </span>
+          </div>
+        );
+      },
+      meta: { className: 'text-right' },
+    },
+    {
+      accessorKey: 'location',
+      header: t('colLocation'),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.location ?? t('empty')}</span>
+      ),
+      enableSorting: false,
+      meta: { className: 'hidden lg:table-cell' },
+    },
+    {
+      id: 'actions',
+      header: () => null,
+      meta: { className: 'w-0' },
+      enableSorting: false,
+      cell: ({ row }) => {
+        const d = row.original;
+        return (
+          <div className="flex justify-end gap-1">
+            <IconButton
+              label={t('edit')}
+              variant="ghost"
+              size="icon-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/devices/${d.id}/edit`);
+              }}
+            >
+              <Pencil />
+            </IconButton>
+            <IconButton
+              label={t('delete')}
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(d);
+              }}
+            >
+              <Trash2 />
+            </IconButton>
+          </div>
+        );
+      },
+    },
+  ];
+}
