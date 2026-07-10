@@ -1,19 +1,24 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+
 import { Button } from '@/components/ui/button';
 
 export const MainErrorFallback = () => {
+  const t = useTranslations();
+
   return (
     <div
-      className="flex h-screen w-screen flex-col items-center justify-center text-red-500"
       role="alert"
+      className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center"
     >
-      <h2 className="text-lg font-semibold">Ooops, something went wrong :( </h2>
+      <h2 className="text-lg font-semibold">{t('errors.generic')}</h2>
       <Button
-        className="mt-4"
         onClick={() => {
           window.location.assign(window.location.origin);
         }}
       >
-        Refresh
+        {t('errors.refresh')}
       </Button>
     </div>
   );

@@ -3,11 +3,12 @@ import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 
 import { env } from '@/config/env';
+import type { Database } from '@/types/database.types';
 
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(
+  return createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {

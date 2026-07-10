@@ -32,8 +32,49 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not run code between createServerClient and getClaims().
   // getClaims() refreshes the auth token; do not remove it, or SSR users may be
-  // randomly logged out. (No redirect here: this scaffold has no auth routes yet.)
-  await supabase.auth.getClaims();
+  // randomly logged out.
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims ?? null;
+
+  const { pathname } = request.nextUrl;
+  const isPublic = pathname.startsWith('/login') || pathname.startsWith('/auth');
+
+  // A signed-in user has no reason to see the login page — send them to the app.
+  // Scoped to /login only: /auth/set-password must stay reachable while
+  // authenticated (the invite/recovery token creates a session precisely so the
+  // user can set a password there). A deactivated session falls through to the
+  // active-user gate below on the next request and is signed out.
+  if (claims && pathname.startsWith('/login')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+
+  if (!claims && !isPublic) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  // Second gate: authenticated but not an active allowlisted user → sign out.
+  if (claims && !isPublic) {
+    const { data: appUser } = await supabase
+      .from('users')
+      .select('status')
+      .eq('auth_user_id', claims.sub)
+      .is('deleted_at', null)
+      .maybeSingle();
+
+    if (!appUser || appUser.status !== 'active') {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.search = 'error=not_invited';
+      // Carry the cookie-clearing headers set by signOut() onto the redirect.
+      return NextResponse.redirect(url, { headers: supabaseResponse.headers });
+    }
+  }
 
   return supabaseResponse;
 }
