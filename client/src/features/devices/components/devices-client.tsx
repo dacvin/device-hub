@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-import { PHOTOS_BUCKET, useSignedUrls } from '../api/device-media';
+import { deviceMediaUrl, PHOTOS_BUCKET } from '../api/device-media';
 import { useDevicesList } from '../api/get-devices-list';
 import { useSoftDeleteDevice } from '../api/soft-delete-device';
 import { DeviceStatuses } from '../constants/device';
@@ -192,12 +192,6 @@ export function DevicesClient() {
     return names.map((n) => ({ value: n, label: n }));
   }, [devices]);
 
-  const coverPaths = useMemo(
-    () => devices.map((d) => d.coverPath).filter((p): p is string => !!p),
-    [devices],
-  );
-  const { data: coverUrls } = useSignedUrls(PHOTOS_BUCKET, coverPaths);
-
   const emptyState =
     devices.length === 0 ? (
       <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
@@ -280,7 +274,7 @@ export function DevicesClient() {
           renderMobileCard={(d) => (
             <DeviceMobileCard
               device={d}
-              coverUrl={d.coverPath ? coverUrls?.[d.coverPath] : undefined}
+              coverUrl={d.coverPath ? deviceMediaUrl(PHOTOS_BUCKET, d.coverPath) : undefined}
             />
           )}
           emptyState={emptyState}

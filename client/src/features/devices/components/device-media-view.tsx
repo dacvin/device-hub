@@ -8,10 +8,9 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-import { DOCUMENTS_BUCKET, PHOTOS_BUCKET, useSignedUrls } from '../api/device-media';
+import { deviceMediaUrl, DOCUMENTS_BUCKET, PHOTOS_BUCKET } from '../api/device-media';
 
 import type { DeviceFileDescriptor } from '../types/device';
 
@@ -42,14 +41,6 @@ export function DeviceMediaView({
   documents: DeviceFileDescriptor[];
 }) {
   const t = useTranslations('devices');
-  const { data: photoUrls } = useSignedUrls(
-    PHOTOS_BUCKET,
-    photos.map((p) => p.path),
-  );
-  const { data: docUrls } = useSignedUrls(
-    DOCUMENTS_BUCKET,
-    documents.map((d) => d.path),
-  );
   const [lightbox, setLightbox] = useState<{ url: string; name: string } | null>(null);
 
   return (
@@ -67,34 +58,27 @@ export function DeviceMediaView({
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {photos.map((p) => {
-              const url = photoUrls?.[p.path];
+              const url = deviceMediaUrl(PHOTOS_BUCKET, p.path);
               return (
                 <button
                   key={p.path}
                   type="button"
-                  disabled={!url}
                   onClick={() => {
-                    if (url) setLightbox({ url, name: p.fileName });
+                    setLightbox({ url, name: p.fileName });
                   }}
                   className="group bg-muted focus-visible:ring-ring relative aspect-square overflow-hidden rounded-xl border focus-visible:ring-2 focus-visible:outline-none"
                 >
-                  {url ? (
-                    <>
-                      <Image
-                        src={url}
-                        alt={p.fileName}
-                        fill
-                        unoptimized
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
-                        <Maximize2 className="size-5 text-white drop-shadow" />
-                      </span>
-                    </>
-                  ) : (
-                    <Skeleton className="size-full" />
-                  )}
+                  <Image
+                    src={url}
+                    alt={p.fileName}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
+                    <Maximize2 className="size-5 text-white drop-shadow" />
+                  </span>
                 </button>
               );
             })}
@@ -115,7 +99,7 @@ export function DeviceMediaView({
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2">
             {documents.map((d) => {
-              const url = docUrls?.[d.path];
+              const url = deviceMediaUrl(DOCUMENTS_BUCKET, d.path);
               const ext = fileExt(d.fileName);
               return (
                 <li
@@ -136,31 +120,15 @@ export function DeviceMediaView({
                       {humanSize(d.sizeBytes)}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('download')}
-                    disabled={!url}
-                    onClick={() => {
-                      if (url) window.open(url, '_blank', 'noopener');
-                    }}
-                  >
-                    <ExternalLink />
+                  <Button variant="ghost" size="icon" aria-label={t('download')} asChild>
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink />
+                    </a>
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('download')}
-                    disabled={!url}
-                    asChild={!!url}
-                  >
-                    {url ? (
-                      <a href={url} download={d.fileName}>
-                        <Download />
-                      </a>
-                    ) : (
+                  <Button variant="ghost" size="icon" aria-label={t('download')} asChild>
+                    <a href={url} download={d.fileName}>
                       <Download />
-                    )}
+                    </a>
                   </Button>
                 </li>
               );

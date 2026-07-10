@@ -13,6 +13,10 @@ export const PHOTOS_BUCKET = 'device-photos';
 export const DOCUMENTS_BUCKET = 'device-documents';
 export type MediaBucket = typeof PHOTOS_BUCKET | typeof DOCUMENTS_BUCKET;
 
+export function deviceMediaUrl(bucket: MediaBucket, path: string): string {
+  return `/api/device-media/${bucket}/${path}`;
+}
+
 function extFor(file: File): string {
   const fromName = file.name.includes('.') ? file.name.split('.').pop() : '';
   return (fromName || file.type.split('/')[1] || 'bin').toLowerCase();
