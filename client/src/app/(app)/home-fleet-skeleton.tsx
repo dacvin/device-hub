@@ -1,9 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
-function SectionCardSkeleton({ rows }: { rows: number }) {
+function SectionCardSkeleton({ rows, className }: { rows: number; className?: string }) {
   return (
-    <Card className="gap-0 py-0">
+    <Card className={cn('gap-0 py-0', className)}>
       <div className="flex items-center gap-2 border-b px-5 py-4">
         <Skeleton className="size-4 rounded" />
         <Skeleton className="h-4 w-32" />
@@ -37,13 +38,13 @@ export function HomeFleetSkeleton() {
           </Card>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCardSkeleton rows={4} />
-        <SectionCardSkeleton rows={6} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <SectionCardSkeleton rows={4} className="lg:col-span-2" />
+        <SectionCardSkeleton rows={6} className="lg:col-span-3" />
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCardSkeleton rows={5} />
-        <SectionCardSkeleton rows={5} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <SectionCardSkeleton rows={5} className="lg:col-span-3" />
+        <SectionCardSkeleton rows={5} className="lg:col-span-2" />
       </div>
     </div>
   );

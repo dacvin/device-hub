@@ -56,14 +56,16 @@ function SectionCard({
   icon: Icon,
   action,
   children,
+  className,
 }: {
   title: string;
   icon: LucideIcon;
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <Card className="gap-0 py-0">
+    <Card className={cn('gap-0 py-0', className)}>
       <div className="flex items-center justify-between gap-2 border-b px-5 py-4">
         <div className="flex items-center gap-2">
           <Icon className="text-primary size-4" />
@@ -149,9 +151,9 @@ export function HomeFleetOverview() {
         />
       </div>
 
-      {/* Status donut + recently added */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <SectionCard title={t('home.sectionStatus')} icon={Activity}>
+      {/* Status donut + due for check */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <SectionCard title={t('home.sectionStatus')} icon={Activity} className="lg:col-span-2">
           <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-2">
             <HomeStatusDonut
               byStatus={stats.byStatus}
@@ -176,6 +178,7 @@ export function HomeFleetOverview() {
         <SectionCard
           title={t('home.sectionDueCheck')}
           icon={CalendarClock}
+          className="lg:col-span-3"
           action={
             stats.dueCount > 0 ? (
               <Badge variant="secondary" className="text-status-retired">
@@ -189,10 +192,11 @@ export function HomeFleetOverview() {
       </div>
 
       {/* Activity + group breakdown */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
         <SectionCard
           title={t('home.sectionRecent')}
           icon={History}
+          className="lg:col-span-3"
           action={
             <Link
               href="/devices"
@@ -205,7 +209,7 @@ export function HomeFleetOverview() {
           <HomeRecentActivity items={activities ?? []} />
         </SectionCard>
 
-        <SectionCard title={t('home.sectionGroups')} icon={Layers}>
+        <SectionCard title={t('home.sectionGroups')} icon={Layers} className="lg:col-span-2">
           {stats.topGroups.length === 0 ? (
             <p className="text-muted-foreground text-sm">{t('home.emptyBreakdown')}</p>
           ) : (

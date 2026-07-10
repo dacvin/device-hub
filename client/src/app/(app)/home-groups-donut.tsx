@@ -5,12 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Label, Pie, PieChart } from 'recharts';
 
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
+import { type ChartConfig, ChartContainer } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
 
 // A fixed palette for the group slices; "Others" always uses the muted tone.
@@ -63,7 +58,6 @@ export function HomeGroupsDonut({
     <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-2">
       <ChartContainer config={config} className="mx-auto aspect-square max-h-[200px] w-full">
         <PieChart>
-          <ChartTooltip cursor={false} content={<ChartTooltipContent nameKey="key" hideLabel />} />
           <Pie data={data} dataKey="count" nameKey="key" innerRadius={58} strokeWidth={4}>
             <Label
               content={({ viewBox }) => {
