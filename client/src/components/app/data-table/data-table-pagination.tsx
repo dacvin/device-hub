@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { Table } from '@tanstack/react-table';
 
@@ -35,25 +35,15 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
   const pageIndex = table.getState().pagination.pageIndex;
   const pageCount = table.getPageCount();
   const current = pageIndex + 1;
+  const total = Math.max(pageCount, 1);
 
   return (
     <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-3">
-      <p className="text-muted-foreground order-2 text-center font-mono text-xs tracking-[-0.01em] tabular-nums sm:order-1 sm:text-left">
-        {t('pageOf', { current, total: Math.max(pageCount, 1) })}
+      <p className="text-muted-foreground order-2 hidden font-mono text-xs tracking-[-0.01em] tabular-nums sm:order-1 sm:block sm:text-left">
+        {t('pageOf', { current, total })}
       </p>
 
       <div className="order-1 flex items-center justify-center gap-1 sm:order-2">
-        <IconButton
-          label={t('firstPage')}
-          variant="outline"
-          size="icon-sm"
-          onClick={() => {
-            table.setPageIndex(0);
-          }}
-          disabled={!table.getCanPreviousPage()}
-        >
-          <ChevronsLeft />
-        </IconButton>
         <IconButton
           label={t('previousPage')}
           variant="outline"
@@ -66,30 +56,38 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
           <ChevronLeft />
         </IconButton>
 
-        {pageWindow(current, Math.max(pageCount, 1)).map((p, i) =>
-          p === 'ellipsis' ? (
-            <span key={`e${i}`} className="text-muted-foreground px-1 text-sm">
-              …
-            </span>
-          ) : (
-            <Button
-              key={p}
-              variant={p === current ? 'default' : 'ghost'}
-              size="icon-sm"
-              aria-label={t('page', { page: p })}
-              aria-current={p === current ? 'page' : undefined}
-              onClick={() => {
-                table.setPageIndex(p - 1);
-              }}
-              className={cn(
-                'font-mono tracking-[-0.01em] tabular-nums',
-                p !== current && 'text-muted-foreground',
-              )}
-            >
-              {p}
-            </Button>
-          ),
-        )}
+        {/* Numbered window on sm+ */}
+        <div className="hidden items-center gap-1 sm:flex">
+          {pageWindow(current, total).map((p, i) =>
+            p === 'ellipsis' ? (
+              <span key={`e${i}`} className="text-muted-foreground px-1 text-sm">
+                …
+              </span>
+            ) : (
+              <Button
+                key={p}
+                variant={p === current ? 'default' : 'ghost'}
+                size="icon-sm"
+                aria-label={t('page', { page: p })}
+                aria-current={p === current ? 'page' : undefined}
+                onClick={() => {
+                  table.setPageIndex(p - 1);
+                }}
+                className={cn(
+                  'font-mono tracking-[-0.01em] tabular-nums',
+                  p !== current && 'text-muted-foreground',
+                )}
+              >
+                {p}
+              </Button>
+            ),
+          )}
+        </div>
+
+        {/* Compact indicator on mobile */}
+        <span className="min-w-28 px-2 text-center font-mono text-sm tracking-[-0.01em] tabular-nums sm:hidden">
+          {t('pageOf', { current, total })}
+        </span>
 
         <IconButton
           label={t('nextPage')}
@@ -101,17 +99,6 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
           disabled={!table.getCanNextPage()}
         >
           <ChevronRight />
-        </IconButton>
-        <IconButton
-          label={t('lastPage')}
-          variant="outline"
-          size="icon-sm"
-          onClick={() => {
-            table.setPageIndex(pageCount - 1);
-          }}
-          disabled={!table.getCanNextPage()}
-        >
-          <ChevronsRight />
         </IconButton>
       </div>
 
