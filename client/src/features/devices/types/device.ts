@@ -21,6 +21,7 @@ export type DeviceListItem = {
   groupName: string | null;
   manufacturerName: string | null;
   createdAt: string;
+  coverPath?: string | null;
 };
 
 // A photo/document entry inside devices.photos / devices.documents JSONB arrays.

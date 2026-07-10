@@ -173,7 +173,14 @@ export function DataTable<TData>({
         )}
       </div>
 
-      <div className="bg-card min-h-0 flex-1 overflow-hidden rounded-lg border shadow-xs">
+      <div
+        className={cn(
+          'min-h-0 flex-1 overflow-hidden',
+          renderMobileCard
+            ? 'md:bg-card md:rounded-lg md:border md:shadow-xs'
+            : 'bg-card rounded-lg border shadow-xs',
+        )}
+      >
         <div className={cn('h-full overflow-auto', renderMobileCard && 'hidden md:block')}>
           <Table>
             <TableHeader className="bg-secondary sticky top-0 z-10">
@@ -232,11 +239,13 @@ export function DataTable<TData>({
         {renderMobileCard && (
           <div className="h-full overflow-auto md:hidden">
             {rows.length ? (
-              <ul className="divide-y">
+              <div className="grid grid-cols-1 gap-3 pb-2 sm:grid-cols-2">
                 {rows.map((row) => (
-                  <li key={row.id}>{renderMobileCard(row.original)}</li>
+                  <div key={row.id} className="flex">
+                    {renderMobileCard(row.original)}
+                  </div>
                 ))}
-              </ul>
+              </div>
             ) : (
               (emptyState ?? (
                 <div className="text-muted-foreground flex h-64 items-center justify-center text-sm">

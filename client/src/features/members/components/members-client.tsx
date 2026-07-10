@@ -102,7 +102,7 @@ function MemberMobileCard({ member }: { member: MemberListItem }) {
   return (
     <Link
       href={`/members/${member.id}`}
-      className="hover:bg-secondary/50 active:bg-secondary flex items-center gap-3 px-4 py-3 transition-colors"
+      className="bg-card hover:border-primary/40 flex size-full items-center gap-3 rounded-lg border p-3 transition-colors active:scale-[0.99]"
     >
       <UserAvatar
         name={member.name}

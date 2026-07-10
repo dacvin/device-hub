@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -15,7 +16,9 @@ import { FacetedFilter } from '@/components/app/faceted-filter';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
+import { PHOTOS_BUCKET, useSignedUrls } from '../api/device-media';
 import { useDevicesList } from '../api/get-devices-list';
 import { useSoftDeleteDevice } from '../api/soft-delete-device';
 import { DeviceStatuses } from '../constants/device';
@@ -103,31 +106,61 @@ function DevicesToolbar({
   );
 }
 
-function DeviceMobileCard({ device }: { device: DeviceListItem }) {
+function DeviceMobileCard({ device, coverUrl }: { device: DeviceListItem; coverUrl?: string }) {
   const tRoot = useTranslations();
   return (
     <Link
       href={`/devices/${device.id}`}
-      className="hover:bg-secondary/50 active:bg-secondary block px-4 py-3 transition-colors"
+      className="bg-card hover:border-primary/40 flex size-full flex-col overflow-hidden rounded-lg border transition-colors active:scale-[0.99]"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-muted-foreground font-mono text-xs tracking-[-0.01em] tabular-nums">
-            {device.code}
-          </p>
-          <p className="truncate font-medium">{device.name}</p>
-        </div>
-        <DeviceStatusBadge status={device.status} t={tRoot} />
-      </div>
-      <div className="text-muted-foreground mt-2 flex items-center gap-3 text-xs">
-        {device.groupName && <span className="min-w-0 truncate">{device.groupName}</span>}
-        {device.location && (
-          <span className="flex shrink-0 items-center gap-1">
-            <MapPin className="size-3" />
-            {device.location}
-          </span>
+      <div className="bg-muted relative aspect-[16/10] w-full overflow-hidden">
+        {coverUrl ? (
+          <Image
+            src={coverUrl}
+            alt=""
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 100vw, 50vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="text-muted-foreground/40 flex size-full items-center justify-center">
+            <HardDrive className="size-8" />
+          </div>
         )}
-        <span className="ml-auto shrink-0 font-mono tabular-nums">{device.condition}%</span>
+        <div className="absolute top-2 right-2">
+          <DeviceStatusBadge status={device.status} t={tRoot} />
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col gap-2 p-3">
+        <span className="text-muted-foreground font-mono text-xs tracking-[-0.01em] tabular-nums">
+          {device.code}
+        </span>
+        <p className="leading-snug font-medium">{device.name}</p>
+        {(device.groupName ?? device.location) && (
+          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+            {device.groupName && <span className="min-w-0 truncate">{device.groupName}</span>}
+            {device.location && (
+              <span className="flex shrink-0 items-center gap-1">
+                <MapPin className="size-3" />
+                {device.location}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="mt-auto flex items-center gap-2 pt-1">
+          <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
+            <div
+              className={cn('h-full rounded-full', {
+                'bg-status-in-use': device.condition >= 80,
+                'bg-status-repair': device.condition >= 50 && device.condition < 80,
+                'bg-status-retired': device.condition < 50,
+              })}
+              style={{ width: `${device.condition}%` }}
+            />
+          </div>
+          <span className="font-mono text-xs font-medium tabular-nums">{device.condition}%</span>
+        </div>
       </div>
     </Link>
   );
@@ -158,6 +191,12 @@ export function DevicesClient() {
     names.sort((a, b) => a.localeCompare(b));
     return names.map((n) => ({ value: n, label: n }));
   }, [devices]);
+
+  const coverPaths = useMemo(
+    () => devices.map((d) => d.coverPath).filter((p): p is string => !!p),
+    [devices],
+  );
+  const { data: coverUrls } = useSignedUrls(PHOTOS_BUCKET, coverPaths);
 
   const emptyState =
     devices.length === 0 ? (
@@ -238,7 +277,12 @@ export function DevicesClient() {
             router.push(`/devices/${d.id}`);
           }}
           renderToolbar={(table) => <DevicesToolbar table={table} groupOptions={groupOptions} />}
-          renderMobileCard={(d) => <DeviceMobileCard device={d} />}
+          renderMobileCard={(d) => (
+            <DeviceMobileCard
+              device={d}
+              coverUrl={d.coverPath ? coverUrls?.[d.coverPath] : undefined}
+            />
+          )}
           emptyState={emptyState}
         />
       )}

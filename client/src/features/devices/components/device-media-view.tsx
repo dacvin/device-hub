@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 
 import { Download, ExternalLink, FileText, ImageOff, Maximize2 } from 'lucide-react';
@@ -79,11 +80,13 @@ export function DeviceMediaView({
                 >
                   {url ? (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={url}
                         alt={p.fileName}
-                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        fill
+                        unoptimized
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <span className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/30 group-hover:opacity-100">
                         <Maximize2 className="size-5 text-white drop-shadow" />
@@ -177,8 +180,15 @@ export function DeviceMediaView({
             <DialogTitle className="truncate">{lightbox?.name}</DialogTitle>
           </DialogHeader>
           {lightbox && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={lightbox.url} alt={lightbox.name} className="h-auto w-full rounded-md" />
+            <Image
+              src={lightbox.url}
+              alt={lightbox.name}
+              width={0}
+              height={0}
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="h-auto w-full rounded-md"
+            />
           )}
         </DialogContent>
       </Dialog>
