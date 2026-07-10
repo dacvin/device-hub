@@ -38,6 +38,7 @@ type DeviceRow = {
   name: string;
   status: DeviceListItem['status'];
   condition: number;
+  quantity: number;
   location: string | null;
   created_at: string;
   group: { name: string } | null;
@@ -55,7 +56,7 @@ export const getPaginatedDevices = async (
   let query = supabase
     .from('devices')
     .select(
-      'id, code, name, status, condition, location, created_at, group:groups(name), manufacturer:manufacturers(name)',
+      'id, code, name, status, condition, quantity, location, created_at, group:groups(name), manufacturer:manufacturers(name)',
       { count: 'exact' },
     )
     .is('deleted_at', null);
@@ -75,6 +76,7 @@ export const getPaginatedDevices = async (
     name: d.name,
     status: d.status,
     condition: d.condition,
+    quantity: d.quantity,
     location: d.location,
     groupName: d.group?.name ?? null,
     manufacturerName: d.manufacturer?.name ?? null,

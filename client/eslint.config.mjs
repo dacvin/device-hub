@@ -78,7 +78,7 @@ export default defineConfig([
             {
               target: './src/features/devices',
               from: './src/features',
-              except: ['./devices', './catalogs', './activity', './members'],
+              except: ['./devices', './catalogs', './activity', './members', './checkouts'],
             },
             {
               target: './src/features/members',

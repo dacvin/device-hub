@@ -1,4 +1,11 @@
-import { Boxes, HardDrive, LayoutDashboard, type LucideIcon, Users } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  Boxes,
+  HardDrive,
+  LayoutDashboard,
+  type LucideIcon,
+  Users,
+} from 'lucide-react';
 
 export interface NavItem {
   // i18n keys under the "nav" namespace
@@ -11,6 +18,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { labelKey: 'dashboard', descKey: 'dashboardDesc', href: '/', icon: LayoutDashboard },
   { labelKey: 'devices', descKey: 'devicesDesc', href: '/devices', icon: HardDrive },
+  { labelKey: 'checkouts', descKey: 'checkoutsDesc', href: '/checkouts', icon: ArrowLeftRight },
   { labelKey: 'catalog', descKey: 'catalogDesc', href: '/catalogs', icon: Boxes },
   { labelKey: 'members', descKey: 'membersDesc', href: '/members', icon: Users },
 ];

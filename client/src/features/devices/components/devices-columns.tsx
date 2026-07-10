@@ -26,18 +26,20 @@ function conditionBar(condition: number): string {
   return 'bg-status-retired';
 }
 
-type T = (key: string) => string;
+type T = (key: string, values?: Record<string, string | number>) => string;
 
 export function deviceColumns({
   t,
   tRoot,
   router,
   onDelete,
+  onLoanByDeviceId,
 }: {
   t: T;
   tRoot: T;
   router: AppRouterInstance;
   onDelete: (device: DeviceListItem) => void;
+  onLoanByDeviceId: Map<string, number>;
 }): ColumnDef<DeviceListItem>[] {
   return [
     {
@@ -58,7 +60,19 @@ export function deviceColumns({
     {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('colName')} />,
-      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+      cell: ({ row }) => {
+        const onLoan = onLoanByDeviceId.get(row.original.id);
+        return (
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{row.original.name}</span>
+            {onLoan !== undefined && (
+              <span className="bg-status-in-use-soft text-status-in-use inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
+                {tRoot('checkouts.nOut', { n: onLoan })}
+              </span>
+            )}
+          </div>
+        );
+      },
       meta: { className: 'max-w-[26ch] truncate' },
     },
     {
@@ -111,6 +125,16 @@ export function deviceColumns({
           </div>
         );
       },
+      meta: { className: 'text-right' },
+    },
+    {
+      accessorKey: 'quantity',
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title={t('colQuantity')} className="justify-end" />
+      ),
+      cell: ({ row }) => (
+        <span className="block text-right font-mono tabular-nums">{row.original.quantity}</span>
+      ),
       meta: { className: 'text-right' },
     },
     {

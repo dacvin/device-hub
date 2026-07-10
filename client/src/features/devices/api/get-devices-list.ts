@@ -13,6 +13,7 @@ type Row = {
   name: string;
   status: DeviceStatus;
   condition: number;
+  quantity: number;
   location: string | null;
   serial_number: string | null;
   created_at: string;
@@ -29,7 +30,7 @@ export const getDevicesList = async (): Promise<DeviceListItem[]> => {
   const { data, error } = await supabase
     .from('devices')
     .select(
-      'id, code, name, status, condition, location, serial_number, created_at, photos, group:groups(name), manufacturer:manufacturers(name)',
+      'id, code, name, status, condition, quantity, location, serial_number, created_at, photos, group:groups(name), manufacturer:manufacturers(name)',
     )
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
@@ -42,6 +43,7 @@ export const getDevicesList = async (): Promise<DeviceListItem[]> => {
     name: d.name,
     status: d.status,
     condition: d.condition,
+    quantity: d.quantity,
     location: d.location,
     serialNumber: d.serial_number,
     groupName: d.group?.name ?? null,

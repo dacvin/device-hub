@@ -7,8 +7,11 @@ import { getDevicesQueryOptions } from './get-paginated-devices';
 
 import type { DeviceActivityAction } from './get-recent-activities';
 
+export type DeviceActivityEntityType = 'devices' | 'checkouts' | 'checkins';
+
 export type DeviceActivityEntry = {
   id: string;
+  entityType: DeviceActivityEntityType;
   action: DeviceActivityAction;
   actorName: string | null;
   createdAt: string;
@@ -18,6 +21,7 @@ export type DeviceActivityEntry = {
 
 type Row = {
   id: string;
+  entity_type: DeviceActivityEntityType;
   action: DeviceActivityAction;
   created_at: string;
   before: Record<string, unknown> | null;
@@ -30,11 +34,38 @@ export const getDeviceActivity = async (
   limit = 8,
 ): Promise<DeviceActivityEntry[]> => {
   const supabase = createClient();
+
+  const devicesClause = `and(entity_type.eq.devices,entity_id.eq.${deviceId})`;
+
+  const { data: checkouts, error: checkoutsError } = await supabase
+    .from('checkouts')
+    .select('id')
+    .eq('device_id', deviceId);
+  if (checkoutsError) throw checkoutsError;
+  const checkoutIds = checkouts.map((c) => c.id);
+
+  let checkinIds: string[] = [];
+  if (checkoutIds.length > 0) {
+    const { data: checkins, error: checkinsError } = await supabase
+      .from('checkins')
+      .select('id')
+      .in('checkout_id', checkoutIds);
+    if (checkinsError) throw checkinsError;
+    checkinIds = checkins.map((c) => c.id);
+  }
+
+  const clauses = [devicesClause];
+  if (checkoutIds.length > 0) {
+    clauses.push(`and(entity_type.eq.checkouts,entity_id.in.(${checkoutIds.join(',')}))`);
+  }
+  if (checkinIds.length > 0) {
+    clauses.push(`and(entity_type.eq.checkins,entity_id.in.(${checkinIds.join(',')}))`);
+  }
+
   const { data, error } = await supabase
     .from('activities')
-    .select('id, action, created_at, before, after, actor:users(name)')
-    .eq('entity_type', 'devices')
-    .eq('entity_id', deviceId)
+    .select('id, entity_type, action, created_at, before, after, actor:users(name)')
+    .or(clauses.join(','))
     .order('created_at', { ascending: false })
     .limit(limit)
     .overrideTypes<Row[]>();
@@ -42,6 +73,7 @@ export const getDeviceActivity = async (
 
   return data.map((r) => ({
     id: r.id,
+    entityType: r.entity_type,
     action: r.action,
     actorName: r.actor?.name ?? null,
     createdAt: r.created_at,

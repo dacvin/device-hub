@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import { HardDrive, MapPin, Plus, Search, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -16,6 +17,8 @@ import { FacetedFilter } from '@/components/app/faceted-filter';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getCheckoutsQueryOptions } from '@/features/checkouts/api/get-checkouts';
+import { fetchLoanStatusFor } from '@/features/checkouts/api/get-device-loan-status';
 import { cn } from '@/lib/utils';
 
 import { deviceMediaUrl, PHOTOS_BUCKET } from '../api/device-media';
@@ -182,9 +185,22 @@ export function DevicesClient() {
   );
 
   const devices = useMemo(() => data ?? [], [data]);
+  const deviceIds = useMemo(() => devices.map((d) => d.id), [devices]);
+  const { data: loanStatus } = useQuery({
+    queryKey: [...getCheckoutsQueryOptions().queryKey, 'loan-status', deviceIds],
+    queryFn: () => fetchLoanStatusFor(deviceIds),
+    enabled: deviceIds.length > 0,
+  });
+  const onLoanByDeviceId = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of loanStatus ?? []) {
+      if (s.onLoan > 0) map.set(s.deviceId, s.onLoan);
+    }
+    return map;
+  }, [loanStatus]);
   const columns = useMemo(
-    () => deviceColumns({ t, tRoot, router, onDelete: setDeleting }),
-    [t, tRoot, router],
+    () => deviceColumns({ t, tRoot, router, onDelete: setDeleting, onLoanByDeviceId }),
+    [t, tRoot, router, onLoanByDeviceId],
   );
   const groupOptions = useMemo(() => {
     const names = [...new Set(devices.map((d) => d.groupName).filter((n): n is string => !!n))];

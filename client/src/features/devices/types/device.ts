@@ -16,6 +16,7 @@ export type DeviceListItem = {
   name: string;
   status: DeviceStatus;
   condition: number;
+  quantity: number;
   location: string | null;
   serialNumber?: string | null;
   groupName: string | null;

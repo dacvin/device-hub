@@ -1,11 +1,13 @@
 'use client';
 
-import { Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { LucideIcon } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { CHECKIN_OUTCOME_LABEL_KEY } from '@/features/checkouts/constants/checkout';
 import { cn } from '@/lib/utils';
+import type { CheckinOutcome } from '@/features/checkouts/types/checkout';
 
 import { type DeviceActivityEntry, useDeviceActivity } from '../api/get-device-activity';
 import { STATUS_LABEL_KEY } from './device-status-indicator';
@@ -27,6 +29,8 @@ const TONE: Record<DeviceActivityAction, string> = {
   restore: 'text-status-storage bg-status-storage-soft',
 };
 
+const CHECKOUT_TONE = 'text-muted-foreground bg-muted';
+
 type T = (key: string, values?: Record<string, string | number>) => string;
 
 function relativeOrDate(iso: string, locale: string): string {
@@ -44,6 +48,24 @@ function relativeOrDate(iso: string, locale: string): string {
 }
 
 function describe(e: DeviceActivityEntry, t: T, tRoot: T): string {
+  if (e.entityType === 'checkouts') {
+    if (e.action === 'insert') {
+      return tRoot('checkouts.activityCheckedOut', { borrower: e.after.borrower_name as string });
+    }
+    if (e.action === 'delete') return tRoot('checkouts.activityCheckoutRemoved');
+    return t('activityUpdated');
+  }
+  if (e.entityType === 'checkins') {
+    if (e.action === 'insert') {
+      const outcome = e.after.outcome as CheckinOutcome;
+      return tRoot('checkouts.activityCheckedIn', {
+        qty: e.after.quantity as number,
+        outcome: tRoot(CHECKIN_OUTCOME_LABEL_KEY[outcome]),
+      });
+    }
+    return t('activityUpdated');
+  }
+
   if (e.action === 'insert') return t('activityCreated');
   if (e.action === 'delete') return t('activityDeleted');
   if (e.action === 'restore') return t('activityRestored');
@@ -95,13 +117,14 @@ export function DeviceActivityFeed({ deviceId }: { deviceId: string }) {
   return (
     <ul className="space-y-3.5">
       {data.map((e) => {
-        const Icon = ICON[e.action];
+        const isCheckoutRelated = e.entityType === 'checkouts' || e.entityType === 'checkins';
+        const Icon = isCheckoutRelated ? ArrowLeftRight : ICON[e.action];
         return (
           <li key={e.id} className="flex gap-3">
             <span
               className={cn(
                 'mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full',
-                TONE[e.action],
+                isCheckoutRelated ? CHECKOUT_TONE : TONE[e.action],
               )}
             >
               <Icon className="size-3.5" />

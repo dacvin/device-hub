@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 
 import {
   AlertTriangle,
+  ArrowLeftRight,
   CalendarClock,
   CalendarDays,
   Fingerprint,
@@ -26,6 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CheckoutsPanel } from '@/features/checkouts/components/checkouts-panel';
 import { cn } from '@/lib/utils';
 
 import { fromDbDescriptors } from '../api/device-media';
@@ -341,6 +343,10 @@ export function DeviceDetailClient({ deviceId }: { deviceId: string }) {
               photos={fromDbDescriptors(device.photos)}
               documents={fromDbDescriptors(device.documents)}
             />
+          </Section>
+
+          <Section icon={ArrowLeftRight} title={t('sectionCheckouts')}>
+            <CheckoutsPanel deviceId={deviceId} deviceName={device.name} />
           </Section>
         </div>
 
