@@ -78,6 +78,141 @@ export type Database = {
           },
         ]
       }
+      checkins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string | null
+          checkout_id: string
+          condition: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          outcome: Database["public"]["Enums"]["checkin_outcome"]
+          photos: Json
+          quantity: number
+          split_to_device_id: string | null
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          checkout_id: string
+          condition?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outcome: Database["public"]["Enums"]["checkin_outcome"]
+          photos?: Json
+          quantity: number
+          split_to_device_id?: string | null
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          checkout_id?: string
+          condition?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          outcome?: Database["public"]["Enums"]["checkin_outcome"]
+          photos?: Json
+          quantity?: number
+          split_to_device_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkins_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_checkout_id_fkey"
+            columns: ["checkout_id"]
+            isOneToOne: false
+            referencedRelation: "checkouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkins_split_to_device_id_fkey"
+            columns: ["split_to_device_id"]
+            isOneToOne: false
+            referencedRelation: "device_loan_status"
+            referencedColumns: ["device_id"]
+          },
+          {
+            foreignKeyName: "checkins_split_to_device_id_fkey"
+            columns: ["split_to_device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkouts: {
+        Row: {
+          borrower_name: string
+          checked_out_at: string
+          checked_out_by: string | null
+          created_at: string
+          device_id: string
+          expected_return_date: string | null
+          id: string
+          notes: string | null
+          photos: Json
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          borrower_name: string
+          checked_out_at?: string
+          checked_out_by?: string | null
+          created_at?: string
+          device_id: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          photos?: Json
+          quantity: number
+          updated_at?: string
+        }
+        Update: {
+          borrower_name?: string
+          checked_out_at?: string
+          checked_out_by?: string | null
+          created_at?: string
+          device_id?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          photos?: Json
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkouts_checked_out_by_fkey"
+            columns: ["checked_out_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checkouts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "device_loan_status"
+            referencedColumns: ["device_id"]
+          },
+          {
+            foreignKeyName: "checkouts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       devices: {
         Row: {
           code: string
@@ -100,6 +235,7 @@ export type Database = {
           serial_number: string | null
           source: Database["public"]["Enums"]["device_source"] | null
           specifications: string | null
+          split_from_device_id: string | null
           status: Database["public"]["Enums"]["device_status"]
           unit: Database["public"]["Enums"]["device_unit"]
           updated_at: string
@@ -127,6 +263,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
+          split_from_device_id?: string | null
           status?: Database["public"]["Enums"]["device_status"]
           unit?: Database["public"]["Enums"]["device_unit"]
           updated_at?: string
@@ -154,6 +291,7 @@ export type Database = {
           serial_number?: string | null
           source?: Database["public"]["Enums"]["device_source"] | null
           specifications?: string | null
+          split_from_device_id?: string | null
           status?: Database["public"]["Enums"]["device_status"]
           unit?: Database["public"]["Enums"]["device_unit"]
           updated_at?: string
@@ -173,6 +311,20 @@ export type Database = {
             columns: ["manufacturer_id"]
             isOneToOne: false
             referencedRelation: "manufacturers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devices_split_from_device_id_fkey"
+            columns: ["split_from_device_id"]
+            isOneToOne: false
+            referencedRelation: "device_loan_status"
+            referencedColumns: ["device_id"]
+          },
+          {
+            foreignKeyName: "devices_split_from_device_id_fkey"
+            columns: ["split_from_device_id"]
+            isOneToOne: false
+            referencedRelation: "devices"
             referencedColumns: ["id"]
           },
         ]
@@ -292,14 +444,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      device_loan_status: {
+        Row: {
+          active_checkouts: number | null
+          available: number | null
+          device_id: string | null
+          has_overdue: boolean | null
+          on_loan: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       app_user_id: { Args: never; Returns: string }
+      check_in: {
+        Args: {
+          p_checkout_id: string
+          p_condition?: number
+          p_notes?: string
+          p_outcome: Database["public"]["Enums"]["checkin_outcome"]
+          p_photos?: Json
+          p_quantity: number
+          p_split?: boolean
+          p_split_code?: string
+        }
+        Returns: {
+          checked_in_at: string
+          checked_in_by: string | null
+          checkout_id: string
+          condition: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          outcome: Database["public"]["Enums"]["checkin_outcome"]
+          photos: Json
+          quantity: number
+          split_to_device_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "checkins"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       activity_action: "insert" | "update" | "delete" | "restore"
+      checkin_outcome: "normal" | "consumed" | "other"
       device_source: "Purchased" | "Leased" | "Donated" | "Transferred"
       device_status: "in-use" | "storage" | "repair" | "retired"
       device_unit: "piece" | "set" | "unit" | "box" | "item"
@@ -436,6 +630,7 @@ export const Constants = {
   public: {
     Enums: {
       activity_action: ["insert", "update", "delete", "restore"],
+      checkin_outcome: ["normal", "consumed", "other"],
       device_source: ["Purchased", "Leased", "Donated", "Transferred"],
       device_status: ["in-use", "storage", "repair", "retired"],
       device_unit: ["piece", "set", "unit", "box", "item"],
