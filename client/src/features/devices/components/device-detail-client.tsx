@@ -345,7 +345,7 @@ export function DeviceDetailClient({ deviceId }: { deviceId: string }) {
         </div>
 
         {/* Summary sidebar */}
-        <div className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+        <div className="space-y-4 lg:sticky lg:top-0 lg:self-start">
           <Card className="py-0">
             <CardContent className="space-y-4 p-5">
               <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
