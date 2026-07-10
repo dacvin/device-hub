@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { Server } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { HubMark } from '@/components/app-wordmark';
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +32,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string } }) 
       <SidebarHeader className="p-3">
         <Link href="/" className="flex items-center gap-2.5 p-1">
           <div className="bg-sidebar-primary text-sidebar-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
-            <Server className="size-5" />
+            <HubMark className="size-5" />
           </div>
           <span className="text-base font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
             DeviceHub
