@@ -7,7 +7,6 @@ import { ChevronsUpDown, Languages, LogOut, Monitor, Moon, Sun } from 'lucide-re
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
 
-import { UserAvatar } from '@/components/app/user-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { UserAvatar } from '@/components/user-avatar';
 import { signOut } from '@/lib/auth/sign-out';
 import { setLocale } from '@/lib/set-locale';
 

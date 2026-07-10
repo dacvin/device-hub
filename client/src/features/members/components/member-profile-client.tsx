@@ -6,8 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { PageLayout } from '@/components/app/page-layout';
-import { UserAvatar } from '@/components/app/user-avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UserAvatar } from '@/components/user-avatar';
 
 import { getUserQueryOptions, useUser } from '../api/get-user';
 import { getUserActivityQueryOptions, useUserActivity } from '../api/get-user-activity';
