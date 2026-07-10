@@ -32,7 +32,7 @@ create table public.devices (
 
   condition       int  not null default 100 check (condition between 0 and 100),
   location        text,
-  quantity        int  not null default 1   check (quantity >= 1),
+  quantity        int  not null default 1   check (quantity >= 0),
   source          public.device_source,
   status          public.device_status not null default 'storage',
 
@@ -44,6 +44,8 @@ create table public.devices (
 
   photos     jsonb not null default '[]'::jsonb check (jsonb_typeof(photos) = 'array'),
   documents  jsonb not null default '[]'::jsonb check (jsonb_typeof(documents) = 'array'),
+  -- provenance: set when this record was split off from another device on check-in
+  split_from_device_id uuid references public.devices(id) on delete set null,
 
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),

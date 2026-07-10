@@ -2,9 +2,9 @@
 -- 08_storage_policies_test.sql
 -- Tests the device-file storage.objects RLS policies + buckets
 -- defined in schemas/_core.sql:
---   - device-photos / device-documents buckets exist and are private
+--   - device-photos / device-documents / checkout-photos buckets exist and are private
 --   - 4 policies (read/write/update/delete) exist on storage.objects
---   - authenticated has full CRUD on objects in those two buckets
+--   - authenticated has full CRUD on objects in those buckets
 --   - anon is denied
 --   - the policies are bucket-scoped (a non-device bucket is denied)
 --
@@ -19,7 +19,7 @@
 -- DELETE cannot be exercised here.
 -- ============================================================
 BEGIN;
-SELECT plan(12);
+SELECT plan(16);
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
@@ -35,6 +35,11 @@ SELECT extensions.is(
   (SELECT public FROM storage.buckets WHERE id = 'device-documents'),
   false,
   'device-documents bucket exists and is private'
+);
+SELECT extensions.is(
+  (SELECT public FROM storage.buckets WHERE id = 'checkout-photos'),
+  false,
+  'checkout-photos bucket exists and is private'
 );
 
 -- ============================================================
@@ -96,6 +101,25 @@ SELECT extensions.is(
   'authenticated can SELECT its device-photos object'
 );
 
+-- authenticated INSERT into checkout-photos — succeeds
+INSERT INTO storage.objects (bucket_id, name)
+VALUES ('checkout-photos', 'rlstest/checkout-1.png');
+
+SELECT extensions.is(
+  (SELECT count(*)::integer FROM storage.objects
+   WHERE bucket_id = 'checkout-photos' AND name = 'rlstest/checkout-1.png'),
+  1,
+  'authenticated can INSERT an object into checkout-photos'
+);
+
+-- authenticated SELECT — the object is visible (read policy)
+SELECT extensions.is(
+  (SELECT count(*)::integer FROM storage.objects
+   WHERE bucket_id = 'checkout-photos' AND name = 'rlstest/checkout-1.png'),
+  1,
+  'authenticated can SELECT its checkout-photos object'
+);
+
 -- authenticated INSERT into device-documents — succeeds
 INSERT INTO storage.objects (bucket_id, name)
 VALUES ('device-documents', 'rlstest/manual-1.txt');
@@ -130,6 +154,13 @@ SELECT extensions.throws_ok(
     VALUES ('device-photos', 'rlstest/anon.png')$$,
   NULL,
   'anon cannot INSERT into device-photos'
+);
+
+SELECT extensions.throws_ok(
+  $$INSERT INTO storage.objects (bucket_id, name)
+    VALUES ('checkout-photos', 'rlstest/anon-checkout.png')$$,
+  NULL,
+  'anon cannot INSERT into checkout-photos'
 );
 
 RESET ROLE;

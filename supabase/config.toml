@@ -73,6 +73,8 @@ schema_paths = [
   # activities last: its actor_id FK needs public.users, and its activity_action
   # enum only needs to exist before the first trigger insert (seed time).
   "./schemas/activities.sql",
+  # checkouts/checkins depend on devices + users.
+  "./schemas/checkouts.sql",
 ]
 
 [db.seed]
@@ -144,6 +146,11 @@ allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
 [storage.buckets.device-documents]
 public = false
 file_size_limit = "20MiB"
+
+[storage.buckets.checkout-photos]
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
 
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]

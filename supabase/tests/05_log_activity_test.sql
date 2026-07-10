@@ -5,7 +5,7 @@
 -- activities rows (action, entity_label, before/after snapshots).
 -- ============================================================
 BEGIN;
-SELECT plan(21);
+SELECT plan(24);
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
@@ -213,6 +213,63 @@ SELECT extensions.is(
       AND entity_id = 'a0000000-0005-0005-0005-000000000001'::uuid),
   5,
   'total 5 activity rows for the test entity'
+);
+
+-- ============================================================
+-- UPDATE on a table without deleted_at (checkouts) must not crash.
+-- A1 attached log_activity to checkouts/checkins, which have no
+-- deleted_at column; the restore check must read it from the jsonb
+-- snapshot (NULL when absent) instead of the record field directly.
+-- ============================================================
+INSERT INTO public.groups (id, name)
+VALUES ('a0000000-0005-0005-0005-000000000002'::uuid, 'Log Test Group');
+
+INSERT INTO public.manufacturers (id, name)
+VALUES ('a0000000-0005-0005-0005-000000000003'::uuid, 'Log Test Manufacturer');
+
+INSERT INTO public.devices (id, code, name, group_id, manufacturer_id)
+VALUES (
+  'a0000000-0005-0005-0005-000000000004'::uuid, 'LOGTEST-001', 'Log Test Device',
+  'a0000000-0005-0005-0005-000000000002'::uuid, 'a0000000-0005-0005-0005-000000000003'::uuid
+);
+
+INSERT INTO public.checkouts (id, device_id, borrower_name, quantity)
+VALUES (
+  'a0000000-0005-0005-0005-000000000005'::uuid,
+  'a0000000-0005-0005-0005-000000000004'::uuid, 'Log Test Borrower', 1
+);
+
+SELECT extensions.lives_ok(
+  $$ UPDATE public.checkouts SET notes = 'x'
+     WHERE id = 'a0000000-0005-0005-0005-000000000005'::uuid $$,
+  'UPDATE on checkouts (no deleted_at column) does not raise'
+);
+
+SELECT extensions.is(
+  (SELECT count(*)::integer FROM public.activities
+    WHERE entity_type = 'checkouts'
+      AND entity_id = 'a0000000-0005-0005-0005-000000000005'::uuid
+      AND action = 'update'),
+  1,
+  'checkouts UPDATE writes exactly one activity row with action=update'
+);
+
+-- ============================================================
+-- Restore detection still works for a deleted_at table (devices).
+-- ============================================================
+UPDATE public.devices SET deleted_at = now()
+WHERE id = 'a0000000-0005-0005-0005-000000000004'::uuid;
+
+UPDATE public.devices SET deleted_at = NULL
+WHERE id = 'a0000000-0005-0005-0005-000000000004'::uuid;
+
+SELECT extensions.is(
+  (SELECT count(*)::integer FROM public.activities
+    WHERE entity_type = 'devices'
+      AND entity_id = 'a0000000-0005-0005-0005-000000000004'::uuid
+      AND action = 'restore'),
+  1,
+  'devices restore (deleted_at non-null -> null) still logs action=restore'
 );
 
 -- ============================================================

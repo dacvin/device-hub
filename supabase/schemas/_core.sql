@@ -48,22 +48,23 @@ $$;
 
 insert into storage.buckets (id, name, public) values
   ('device-photos',    'device-photos',    false),
-  ('device-documents', 'device-documents', false)
+  ('device-documents', 'device-documents', false),
+  ('checkout-photos',  'checkout-photos',  false)
 on conflict (id) do nothing;
 
 create policy "authenticated read device files"
   on storage.objects for select to authenticated
-  using (bucket_id in ('device-photos', 'device-documents'));
+  using (bucket_id in ('device-photos', 'device-documents', 'checkout-photos'));
 
 create policy "authenticated write device files"
   on storage.objects for insert to authenticated
-  with check (bucket_id in ('device-photos', 'device-documents'));
+  with check (bucket_id in ('device-photos', 'device-documents', 'checkout-photos'));
 
 create policy "authenticated update device files"
   on storage.objects for update to authenticated
-  using (bucket_id in ('device-photos', 'device-documents'))
-  with check (bucket_id in ('device-photos', 'device-documents'));
+  using (bucket_id in ('device-photos', 'device-documents', 'checkout-photos'))
+  with check (bucket_id in ('device-photos', 'device-documents', 'checkout-photos'));
 
 create policy "authenticated delete device files"
   on storage.objects for delete to authenticated
-  using (bucket_id in ('device-photos', 'device-documents'));
+  using (bucket_id in ('device-photos', 'device-documents', 'checkout-photos'));

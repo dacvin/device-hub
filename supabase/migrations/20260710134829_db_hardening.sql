@@ -1,25 +1,17 @@
--- ============================================================
--- log_activity — AFTER INSERT/UPDATE/DELETE trigger that writes
--- one row into public.activities per mutation. before/after carry
--- full row snapshots so any field-level diff is reconstructable.
---
--- A deleted_at going non-null → null is recorded as action='restore'.
---
--- SECURITY DEFINER because activities has no INSERT policy — only
--- this trigger can insert. Lives in `private` (non-exposed) and has
--- EXECUTE revoked from PUBLIC; only the table triggers can invoke
--- it via their explicit reference.
---
--- public.app_user_id() is referenced lazily (plpgsql defers
--- identifier resolution to first call); defined in users-functions.sql.
--- ============================================================
+alter table "public"."devices" drop constraint "devices_quantity_check";
 
-create or replace function private.log_activity()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
+alter table "public"."devices" add constraint "devices_quantity_check" CHECK ((quantity >= 0)) not valid;
+
+alter table "public"."devices" validate constraint "devices_quantity_check";
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION private.log_activity()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
 declare
   -- v_action is plain text (not public.activity_action) so this file
   -- can be created before activities.sql defines the enum. plpgsql
@@ -70,8 +62,7 @@ begin
 
   return null;
 end;
-$$;
+$function$
+;
 
--- private.log_activity() is invoked from trigger context only (the
--- trigger machinery resolves the function as the table owner). No
--- direct RPC exposure because `private` is not in db.api.schemas.
+
