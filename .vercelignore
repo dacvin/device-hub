@@ -1,0 +1,10 @@
+/.import-venv
+/.git
+/*.xlsx
+/*.png
+/docs
+/scripts
+/supabase
+/.env
+/.env.*
+.env*.local

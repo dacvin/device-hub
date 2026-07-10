@@ -1,0 +1,18 @@
+# Environment variables — Supabase CLI reads this file for env() interpolation in config.toml
+.env
+.env.local
+.env.*.local
+
+# macOS + stray asset spreadsheets at repo root (not source)
+.DS_Store
+/*.xlsx
+.playwright-mcp/
+.vercel
+.env*
+
+# device-import local venv
+.import-venv/
+
+# Local Claude Code state (personal settings + runtime locks); skills are tracked
+.claude/settings.local.json
+.claude/*.lock

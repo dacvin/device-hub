@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v2]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Full CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── pnpm + Node ─────────────────────────────────────────────────────────
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: client/pnpm-lock.yaml
+
+      # ── Install client dependencies ─────────────────────────────────────────
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ── Cache Playwright browsers ───────────────────────────────────────────
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('client/pnpm-lock.yaml') }}
+
+      # ── Supabase CLI ────────────────────────────────────────────────────────
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # ── Start Supabase (Docker is available on ubuntu-latest) ───────────────
+      - name: Start Supabase
+        working-directory: .
+        run: supabase start
+
+      # ── Apply migrations + seed ─────────────────────────────────────────────
+      - name: Reset database
+        working-directory: .
+        run: supabase db reset
+
+      # ── Provision credentials ────────────────────────────────────────────────
+      # `supabase status -o env` emits key=value lines including:
+      #   API_URL, PUBLISHABLE_KEY, ANON_KEY, SERVICE_ROLE_KEY
+      # We:
+      #   1. Write client/.env.local so Next.js build + e2e-creds.ts can read it.
+      #   2. Export vars to $GITHUB_ENV so subsequent steps' env: blocks can use them.
+      - name: Write client/.env.local and export env vars
+        working-directory: .
+        run: |
+          eval "$(supabase status -o env | sed 's/^/export /')"
+
+          # Write .env.local for Next.js build, integration tests, and Playwright
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}"
+            echo "SUPABASE_API_URL=${API_URL}"
+            echo "SUPABASE_ANON_KEY=${ANON_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}"
+          } > client/.env.local
+
+          # Also export to GITHUB_ENV so steps below can reference ${{ env.* }}
+          echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${PUBLISHABLE_KEY}" >> "$GITHUB_ENV"
+          echo "SUPABASE_API_URL=${API_URL}" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}" >> "$GITHUB_ENV"
+
+      # ── pgTAP DB tests ──────────────────────────────────────────────────────
+      - name: Run pgTAP tests
+        working-directory: .
+        run: supabase test db
+
+      # ── Lint ────────────────────────────────────────────────────────────────
+      - name: Lint
+        run: pnpm lint
+
+      # ── Build ────────────────────────────────────────────────────────────────
+      # Next.js loads client/.env.local automatically; env: block makes them
+      # explicit for the build process just in case.
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+
+      # ── Vitest unit + component tests ───────────────────────────────────────
+      - name: Unit / component tests
+        run: pnpm test:run
+
+      # ── Vitest integration tests ─────────────────────────────────────────────
+      # Integration creds resolve from SUPABASE_API_URL / SUPABASE_ANON_KEY /
+      # SUPABASE_SERVICE_ROLE_KEY env vars (see src/testing/integration/supabase-creds.ts).
+      - name: Integration tests
+        run: pnpm test:integration
+        env:
+          SUPABASE_API_URL: ${{ env.SUPABASE_API_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # ── Playwright browsers (skip if cached) ────────────────────────────────
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      # ── Playwright E2E ──────────────────────────────────────────────────────
+      # global-setup.ts uses resolveE2ECreds() which checks env vars first,
+      # so SUPABASE_API_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY
+      # are sufficient (client/.env.local is also present as fallback).
+      - name: E2E tests
+        run: pnpm test:e2e
+        env:
+          SUPABASE_API_URL: ${{ env.SUPABASE_API_URL }}
+          SUPABASE_ANON_KEY: ${{ env.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # ── Upload Playwright report on failure ─────────────────────────────────
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: client/playwright-report/
+          retention-days: 7
