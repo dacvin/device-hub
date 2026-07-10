@@ -275,7 +275,7 @@ export function DeviceDetailClient({ deviceId }: { deviceId: string }) {
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Main column */}
-        <div className="space-y-4 lg:col-span-2">
+        <div className="order-2 space-y-4 lg:order-1 lg:col-span-2">
           <Section icon={Fingerprint} title={t('sectionIdentification')}>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
               <Fact label={t('fieldName')}>{device.name}</Fact>
@@ -345,7 +345,7 @@ export function DeviceDetailClient({ deviceId }: { deviceId: string }) {
         </div>
 
         {/* Summary sidebar */}
-        <div className="space-y-4 lg:sticky lg:top-0 lg:self-start">
+        <div className="order-1 space-y-4 lg:order-2 lg:sticky lg:top-0 lg:self-start">
           <Card className="py-0">
             <CardContent className="space-y-4 p-5">
               <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">

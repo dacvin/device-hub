@@ -31,20 +31,22 @@ export function PageLayout({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="shrink-0 border-b px-4 pt-6 pb-4 md:px-6 md:pt-8">
+      <header className="shrink-0 border-b px-4 pt-4 pb-3 md:px-6 md:pt-8 md:pb-4">
         {backHref && (
           <Link
             href={backHref}
-            className="text-muted-foreground hover:text-foreground mb-3 inline-flex items-center gap-1 text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground mb-2 inline-flex items-center gap-1 text-sm transition-colors md:mb-3"
           >
             <ArrowLeft className="size-4" />
             {backLabel}
           </Link>
         )}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-3 md:gap-4">
           <div className="min-w-0 space-y-1">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">{title}</h1>
-            {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
+            <h1 className="truncate text-xl font-semibold tracking-tight md:text-2xl">{title}</h1>
+            {subtitle && (
+              <p className="text-muted-foreground hidden text-sm md:block">{subtitle}</p>
+            )}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </div>
