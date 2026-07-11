@@ -18,7 +18,7 @@ import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getCheckoutsQueryOptions } from '@/features/checkouts/api/get-checkouts';
-import { fetchLoanStatusFor } from '@/features/checkouts/api/get-device-loan-status';
+import { fetchActiveLoanStatus } from '@/features/checkouts/api/get-device-loan-status';
 import { cn } from '@/lib/utils';
 
 import { deviceMediaUrl, PHOTOS_BUCKET } from '../api/device-media';
@@ -185,11 +185,9 @@ export function DevicesClient() {
   );
 
   const devices = useMemo(() => data ?? [], [data]);
-  const deviceIds = useMemo(() => devices.map((d) => d.id), [devices]);
   const { data: loanStatus } = useQuery({
-    queryKey: [...getCheckoutsQueryOptions().queryKey, 'loan-status', deviceIds],
-    queryFn: () => fetchLoanStatusFor(deviceIds),
-    enabled: deviceIds.length > 0,
+    queryKey: [...getCheckoutsQueryOptions().queryKey, 'loan-status', 'active'],
+    queryFn: fetchActiveLoanStatus,
   });
   const onLoanByDeviceId = useMemo(() => {
     const map = new Map<string, number>();

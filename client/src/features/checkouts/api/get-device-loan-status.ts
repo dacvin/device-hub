@@ -18,6 +18,15 @@ export const fetchLoanStatusFor = async (deviceIds: string[]): Promise<DeviceLoa
   return camelcaseKeys(data) as DeviceLoanStatus[];
 };
 
+// Devices with an outstanding checkout — a small subset of all devices, so this
+// avoids building a giant `device_id=in.(...)` list for the full devices list.
+export const fetchActiveLoanStatus = async (): Promise<DeviceLoanStatus[]> => {
+  const supabase = createClient();
+  const { data, error } = await supabase.from('device_loan_status').select('*').gt('on_loan', 0);
+  if (error) throw error;
+  return camelcaseKeys(data) as DeviceLoanStatus[];
+};
+
 export const getDeviceLoanStatusQueryOptions = (deviceId: string | undefined) =>
   queryOptions({
     queryKey: [...getCheckoutsQueryOptions().queryKey, 'loan-status', deviceId],
