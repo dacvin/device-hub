@@ -5,7 +5,7 @@
 -- depleted devices stay visible at quantity 0).
 -- ============================================================
 BEGIN;
-SELECT plan(2);
+SELECT plan(3);
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
@@ -17,11 +17,11 @@ VALUES ('a0000000-0013-0013-0013-000000000001'::uuid, 'Depletion Test Group');
 INSERT INTO public.manufacturers (id, name)
 VALUES ('a0000000-0013-0013-0013-000000000002'::uuid, 'Depletion Test Manufacturer');
 
--- device with 2 units
-INSERT INTO public.devices (id, code, name, group_id, manufacturer_id, quantity)
+-- accessory with 2 units
+INSERT INTO public.devices (id, code, name, group_id, manufacturer_id, quantity, type)
 VALUES ('a0000000-0013-0013-0013-000000000003'::uuid, 'DEPTEST-001', 'Depletion Test Device',
         'a0000000-0013-0013-0013-000000000001'::uuid,
-        'a0000000-0013-0013-0013-000000000002'::uuid, 2);
+        'a0000000-0013-0013-0013-000000000002'::uuid, 2, 'accessory');
 
 -- checkout all 2 units
 INSERT INTO public.checkouts (id, device_id, borrower_name, quantity)
@@ -38,6 +38,14 @@ SELECT extensions.is(
   (SELECT quantity FROM public.devices WHERE id = 'a0000000-0013-0013-0013-000000000003'::uuid),
   0,
   'device quantity is drained to 0'
+);
+
+-- consumed-to-0 keeps the record in storage (only a LOST drain marks it
+-- lost); the sync trigger returns it from checked_out since on_loan = 0
+SELECT extensions.is(
+  (SELECT status FROM public.devices WHERE id = 'a0000000-0013-0013-0013-000000000003'::uuid),
+  'storage'::public.device_status,
+  'consumed drain leaves the device in storage'
 );
 
 SELECT * FROM finish();

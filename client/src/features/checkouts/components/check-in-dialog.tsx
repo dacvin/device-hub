@@ -42,6 +42,7 @@ const OUTCOME_DESCRIPTOR_KEY: Record<(typeof CHECKIN_OUTCOMES)[number], string> 
   normal: 'outcomeNormalDescriptor',
   consumed: 'outcomeConsumedDescriptor',
   other: 'outcomeOtherDescriptor',
+  lost: 'outcomeLostDescriptor',
 };
 
 // AnyFieldApi types `name`/`state.value` as `any`; read them as definite strings.
@@ -122,6 +123,16 @@ function SplitCodePrefill({
     }
   }, [split, splitCode, nextCode.data, onSuggestion]);
 
+  return null;
+}
+
+// Forces split back off when its preconditions vanish (quantity raised to the
+// device's full stock, or outcome changed) so a stale hidden toggle can never
+// reach the RPC. Hook lives in its own component to stay unconditional.
+function SplitOff({ split, onOff }: { split: boolean; onOff: () => void }) {
+  useEffect(() => {
+    if (split) onOff();
+  }, [split, onOff]);
   return null;
 }
 
@@ -224,7 +235,7 @@ export function CheckInDialog({
                   onValueChange={(v) => {
                     field.handleChange(v as CheckinOutcome);
                   }}
-                  className="grid grid-cols-3 gap-2"
+                  className="grid grid-cols-2 gap-2"
                 >
                   {CHECKIN_OUTCOMES.map((outcome) => {
                     const selected = field.state.value === outcome;
@@ -275,72 +286,100 @@ export function CheckInDialog({
             )}
           </form.Field>
 
-          <form.Subscribe selector={(s) => s.values.outcome}>
-            {(outcome) => (
-              <Reveal open={outcome === 'normal'} className="-my-2">
-                <div className="space-y-4 py-2">
-                  <form.Field name="condition">
-                    {(field) => (
-                      <FieldRow field={field} label={t('fieldCondition')}>
-                        {(isInvalid) => (
-                          <TextControl
-                            field={field}
-                            isInvalid={isInvalid}
-                            type="number"
-                            min={0}
-                            max={100}
+          <form.Subscribe
+            selector={(s) => ({ outcome: s.values.outcome, quantity: s.values.quantity })}
+          >
+            {({ outcome, quantity }) => {
+              // splitting is accessories-only and must leave the parent with
+              // stock (splitting everything would just rename the record)
+              const splitAllowed =
+                checkout.deviceType === 'accessory' && quantity < checkout.deviceQuantity;
+              return (
+                <Reveal open={outcome === 'normal'} className="-my-2">
+                  <div className="space-y-4 py-2">
+                    <form.Field name="condition">
+                      {(field) => (
+                        <FieldRow field={field} label={t('fieldCondition')}>
+                          {(isInvalid) => (
+                            <TextControl
+                              field={field}
+                              isInvalid={isInvalid}
+                              type="number"
+                              min={0}
+                              max={100}
+                            />
+                          )}
+                        </FieldRow>
+                      )}
+                    </form.Field>
+
+                    {splitAllowed ? (
+                      <>
+                        <form.Field name="split">
+                          {(field) => (
+                            <Field orientation="horizontal">
+                              <FieldLabel htmlFor={fieldId(field.name)}>
+                                {t('fieldSplit')}
+                              </FieldLabel>
+                              <Switch
+                                id={fieldId(field.name)}
+                                checked={field.state.value}
+                                onCheckedChange={(checked) => {
+                                  field.handleChange(checked);
+                                }}
+                              />
+                            </Field>
+                          )}
+                        </form.Field>
+
+                        <form.Subscribe
+                          selector={(s) => ({
+                            split: s.values.split,
+                            splitCode: s.values.splitCode,
+                          })}
+                        >
+                          {({ split, splitCode }) => (
+                            <>
+                              <SplitCodePrefill
+                                split={split}
+                                splitCode={splitCode}
+                                onSuggestion={(code) => {
+                                  form.setFieldValue('splitCode', code);
+                                }}
+                              />
+                              <Reveal open={split} fast className="ml-1 border-l pl-4">
+                                <div className="py-2">
+                                  <form.Field name="splitCode">
+                                    {(field) => (
+                                      <FieldRow field={field} label={t('fieldSplitCode')}>
+                                        {(isInvalid) => (
+                                          <TextControl field={field} isInvalid={isInvalid} />
+                                        )}
+                                      </FieldRow>
+                                    )}
+                                  </form.Field>
+                                </div>
+                              </Reveal>
+                            </>
+                          )}
+                        </form.Subscribe>
+                      </>
+                    ) : (
+                      <form.Subscribe selector={(s) => s.values.split}>
+                        {(split) => (
+                          <SplitOff
+                            split={split}
+                            onOff={() => {
+                              form.setFieldValue('split', false);
+                            }}
                           />
                         )}
-                      </FieldRow>
+                      </form.Subscribe>
                     )}
-                  </form.Field>
-
-                  <form.Field name="split">
-                    {(field) => (
-                      <Field orientation="horizontal">
-                        <FieldLabel htmlFor={fieldId(field.name)}>{t('fieldSplit')}</FieldLabel>
-                        <Switch
-                          id={fieldId(field.name)}
-                          checked={field.state.value}
-                          onCheckedChange={(checked) => {
-                            field.handleChange(checked);
-                          }}
-                        />
-                      </Field>
-                    )}
-                  </form.Field>
-
-                  <form.Subscribe
-                    selector={(s) => ({ split: s.values.split, splitCode: s.values.splitCode })}
-                  >
-                    {({ split, splitCode }) => (
-                      <>
-                        <SplitCodePrefill
-                          split={split}
-                          splitCode={splitCode}
-                          onSuggestion={(code) => {
-                            form.setFieldValue('splitCode', code);
-                          }}
-                        />
-                        <Reveal open={split} fast className="ml-1 border-l pl-4">
-                          <div className="py-2">
-                            <form.Field name="splitCode">
-                              {(field) => (
-                                <FieldRow field={field} label={t('fieldSplitCode')}>
-                                  {(isInvalid) => (
-                                    <TextControl field={field} isInvalid={isInvalid} />
-                                  )}
-                                </FieldRow>
-                              )}
-                            </form.Field>
-                          </div>
-                        </Reveal>
-                      </>
-                    )}
-                  </form.Subscribe>
-                </div>
-              </Reveal>
-            )}
+                  </div>
+                </Reveal>
+              );
+            }}
           </form.Subscribe>
 
           <div className="space-y-3">

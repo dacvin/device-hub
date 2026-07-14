@@ -111,7 +111,7 @@ function GoogleLogo() {
 // Signature: a mono telemetry legend echoing the app's device-status vocabulary.
 function StatusReadout({ labels }: { labels: [string, string, string, string] }) {
   const dots = [
-    { c: 'bg-status-in-use', label: labels[0] },
+    { c: 'bg-status-checked-out', label: labels[0] },
     { c: 'bg-status-storage', label: labels[1] },
     { c: 'bg-status-repair', label: labels[2] },
     { c: 'bg-status-retired', label: labels[3] },
@@ -184,7 +184,7 @@ export default function LoginPage() {
         </div>
         <StatusReadout
           labels={[
-            t('devices.statusInUse'),
+            t('devices.statusCheckedOut'),
             t('devices.statusStorage'),
             t('devices.statusRepair'),
             t('devices.statusRetired'),

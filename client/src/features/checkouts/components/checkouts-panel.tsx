@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { DeviceStatus } from '@/features/devices/types/device';
 
 import { useDeviceCheckouts } from '../api/get-checkouts';
 import { useDeviceLoanStatus } from '../api/get-device-loan-status';
@@ -18,9 +19,10 @@ import { CheckoutDialog } from './checkout-dialog';
 import type { CheckinWithPhotos, CheckoutWithDetail } from '../types/checkout';
 
 const CHECKIN_OUTCOME_SOFT_CLASS: Record<CheckinWithPhotos['outcome'], string> = {
-  normal: 'bg-status-in-use-soft text-status-in-use',
+  normal: 'bg-status-checked-out-soft text-status-checked-out',
   consumed: 'bg-status-repair-soft text-status-repair',
   other: 'bg-status-retired-soft text-status-retired',
+  lost: 'bg-status-lost-soft text-status-lost',
 };
 
 function SoftBadge({ className, children }: { className: string; children: ReactNode }) {
@@ -115,6 +117,7 @@ function CheckoutRow({
             type="button"
             variant="outline"
             size="sm"
+            className="h-9 sm:h-7"
             onClick={() => {
               onCheckIn(checkout);
             }}
@@ -156,7 +159,15 @@ function ClosedCheckoutRow({ checkout }: { checkout: CheckoutWithDetail }) {
   );
 }
 
-export function CheckoutsPanel({ deviceId, deviceName }: { deviceId: string; deviceName: string }) {
+export function CheckoutsPanel({
+  deviceId,
+  deviceName,
+  deviceStatus,
+}: {
+  deviceId: string;
+  deviceName: string;
+  deviceStatus: DeviceStatus;
+}) {
   const t = useTranslations('checkouts');
   const { data: loanStatus } = useDeviceLoanStatus(deviceId);
   const { data: checkouts } = useDeviceCheckouts(deviceId);
@@ -166,6 +177,9 @@ export function CheckoutsPanel({ deviceId, deviceName }: { deviceId: string; dev
   const available = loanStatus?.available ?? 0;
   const total = loanStatus?.total ?? 0;
   const onLoan = loanStatus?.onLoan ?? 0;
+  // storage-only policy (mirrors the DB guard): checked_out is implicitly
+  // covered by available = 0, the rest are blocked by status.
+  const statusBlocked = deviceStatus !== 'storage' && deviceStatus !== 'checked_out';
 
   const active = (checkouts ?? []).filter((c) => c.status !== 'closed');
   const closed = (checkouts ?? []).filter((c) => c.status === 'closed');
@@ -186,12 +200,14 @@ export function CheckoutsPanel({ deviceId, deviceName }: { deviceId: string; dev
         <Button
           type="button"
           size="sm"
-          disabled={available <= 0}
-          title={available <= 0 ? t('noneAvailable') : undefined}
+          disabled={statusBlocked || available <= 0}
+          title={
+            statusBlocked ? t('statusBlocked') : available <= 0 ? t('noneAvailable') : undefined
+          }
           onClick={() => {
             setCheckoutOpen(true);
           }}
-          className="self-start sm:self-auto"
+          className="h-9 self-start sm:h-7 sm:self-auto"
         >
           {t('checkOut')}
         </Button>

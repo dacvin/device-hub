@@ -18,13 +18,13 @@ type T = (key: string, values?: Record<string, string | number>) => string;
 // Soft pill (tinted background + on-color text); colour never carries meaning
 // alone — the label is always visible. Mirrors DeviceStatusBadge's shape.
 const STATUS_SOFT_CLASS: Record<CheckoutStatus, string> = {
-  outstanding: 'bg-status-in-use-soft text-status-in-use',
+  outstanding: 'bg-status-checked-out-soft text-status-checked-out',
   overdue: 'bg-status-retired-soft text-status-retired',
   closed: 'bg-status-storage-soft text-status-storage',
 };
 
 const STATUS_SOLID_CLASS: Record<CheckoutStatus, string> = {
-  outstanding: 'bg-status-in-use',
+  outstanding: 'bg-status-checked-out',
   overdue: 'bg-status-retired',
   closed: 'bg-status-storage',
 };

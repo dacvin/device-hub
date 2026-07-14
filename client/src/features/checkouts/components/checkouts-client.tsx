@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 import { useCheckoutsList, useDeviceCheckouts } from '../api/get-checkouts';
 import { CheckInDialog } from './check-in-dialog';
+import { CheckoutLauncher } from './checkout-launcher';
 import { checkoutColumns, CheckoutStatusBadge } from './checkouts-columns';
 
 import type { CheckoutListItem, CheckoutStatus } from '../types/checkout';
@@ -45,8 +46,8 @@ function CheckoutsTabs({
 }) {
   const t = useTranslations('checkouts');
   return (
-    <div className="border-b">
-      <nav className="-mb-px flex gap-6">
+    <div className="overflow-x-auto border-b">
+      <nav className="-mb-px flex gap-4 sm:gap-6">
         {TABS.map((tab) => {
           const isActive = tab.value === active;
           return (
@@ -57,7 +58,7 @@ function CheckoutsTabs({
                 onChange(tab.value);
               }}
               className={cn(
-                'flex items-center gap-1.5 border-b-2 px-1 pb-3 text-sm font-medium transition-colors',
+                'flex shrink-0 items-center gap-1.5 border-b-2 px-1 pb-3 text-sm font-medium whitespace-nowrap transition-colors',
                 isActive
                   ? 'border-primary text-foreground'
                   : 'text-muted-foreground hover:text-foreground border-transparent',
@@ -122,7 +123,7 @@ function CheckoutMobileCard({
             e.stopPropagation();
             onCheckIn(checkout);
           }}
-          className="border-input mt-1 self-start rounded-md border px-2.5 py-1 text-xs font-medium"
+          className="border-input mt-1 inline-flex min-h-9 items-center self-start rounded-md border px-3 text-sm font-medium"
         >
           {t('checkIn')}
         </button>
@@ -215,7 +216,7 @@ export function CheckoutsClient() {
     );
 
   return (
-    <PageLayout title={t('title')} subtitle={t('description')} fill>
+    <PageLayout title={t('title')} subtitle={t('description')} fill actions={<CheckoutLauncher />}>
       <div className="mb-4">
         <CheckoutsTabs active={tab} onChange={setTab} counts={counts} />
       </div>

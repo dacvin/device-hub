@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { useTranslations } from 'next-intl';
 
@@ -18,6 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from '@/components/ui/sidebar';
 
 import { AccountMenu } from './account-menu';
@@ -26,6 +28,12 @@ import { isNavItemActive, NAV_ITEMS } from './nav-items';
 export function AppSidebar({ user }: { user: { name: string; email: string } }) {
   const pathname = usePathname();
   const t = useTranslations('nav');
+  const { setOpenMobile } = useSidebar();
+
+  // Close the mobile drawer after navigating so it doesn't cover the destination.
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   return (
     <Sidebar>

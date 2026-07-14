@@ -53,3 +53,33 @@ Both env vars are required (no defaults) so you can't run against the wrong targ
 
 Idempotency: manufacturer + groups are upserted by name. `import_devices.py` with
 `WIPE=1` deletes all devices first. `import_photos.py` is additive — run once per import.
+
+## parse_ledgers.py — ledgers → JSON (no DB)
+
+Structured extraction of **all 648 item rows** into JSON, including the columns
+the importer ignores (`Thừa`/`Thiếu` surplus/missing, `Phẩm chất` quality marks)
+and a derived `loan` block interpreting the checkout/check-in signals embedded
+in the sheets:
+
+| Signal | Source | JSON |
+|---|---|---|
+| Active borrower | `Người sử dụng` = person (thầy/cô/anh/chị/sếp …) | `loan.borrower` (9 rows) |
+| Borrowed/held per note | `Ghi chú` "… mượn" / "… giữ" | `loan.borrowerNote` (2) |
+| Lost units | `Thiếu` subcolumn | `missingQty` (31 rows) |
+| Returned | note "Đã trả" | `loan.returned` (1) |
+| Return requested | note "yêu cầu/đề xuất trả" | `loan.returnRequested` (3) |
+| Transfer slip | note "phiếu điều chuyển … NNN" | `loan.transferTo` (9) |
+| Decommission request | "XIN GIẢM MÃ" | `loan.decommissionRequested` (4) |
+| Serial number | note "Mã seri …" | `serialNumber` (16) |
+| Broken | `hư` in image/user column | `broken` (4) |
+
+`Người sử dụng` free text that is *not* a person (`hư`, `Thiếu 1`, `Nằm ở 504`, …)
+stays in `user` without becoming a borrower.
+
+```sh
+python3 parse_ledgers.py --ledger-dir /path/to/ledgers   # out: ./json/
+```
+
+Writes `json/P402.json`, `json/P501.json`, `json/P502.json` + combined
+`json/all.json` (gitignored — contains staff names) and prints a signal summary.
+Row detection mirrors `import_devices.py`, so counts line up (648).

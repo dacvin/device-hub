@@ -43,14 +43,16 @@
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
 
-  --color-status-in-use: var(--status-in-use);
-  --color-status-in-use-soft: var(--status-in-use-soft);
+  --color-status-checked-out: var(--status-checked-out);
+  --color-status-checked-out-soft: var(--status-checked-out-soft);
   --color-status-storage: var(--status-storage);
   --color-status-storage-soft: var(--status-storage-soft);
   --color-status-repair: var(--status-repair);
   --color-status-repair-soft: var(--status-repair-soft);
   --color-status-retired: var(--status-retired);
   --color-status-retired-soft: var(--status-retired-soft);
+  --color-status-lost: var(--status-lost);
+  --color-status-lost-soft: var(--status-lost-soft);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -102,14 +104,16 @@
   --sidebar-border: #1e293b;
   --sidebar-ring: #0d9488;
 
-  --status-in-use: #059669;
-  --status-in-use-soft: #ecfdf5;
+  --status-checked-out: #059669;
+  --status-checked-out-soft: #ecfdf5;
   --status-storage: #64748b;
   --status-storage-soft: #f1f5f9;
   --status-repair: #d97706;
   --status-repair-soft: #fffbeb;
   --status-retired: #e11d48;
   --status-retired-soft: #fff1f2;
+  --status-lost: #7c3aed;
+  --status-lost-soft: #f5f3ff;
 }
 
 .dark {
@@ -147,14 +151,16 @@
   --sidebar-border: #1e293b;
   --sidebar-ring: #14b8a6;
 
-  --status-in-use: #10b981;
-  --status-in-use-soft: #052e23;
+  --status-checked-out: #10b981;
+  --status-checked-out-soft: #052e23;
   --status-storage: #94a3b8;
   --status-storage-soft: #1e293b;
   --status-repair: #f59e0b;
   --status-repair-soft: #382407;
   --status-retired: #fb7185;
   --status-retired-soft: #3a1620;
+  --status-lost: #a78bfa;
+  --status-lost-soft: #2e1f47;
 }
 
 @layer base {

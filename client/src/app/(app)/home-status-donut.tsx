@@ -12,10 +12,11 @@ import { DeviceStatuses } from '@/features/devices/constants/device';
 import type { DeviceStatus } from '@/features/devices/types/device';
 
 const COLOR: Record<DeviceStatus, string> = {
-  'in-use': 'var(--color-status-in-use)',
+  checked_out: 'var(--color-status-checked-out)',
   storage: 'var(--color-status-storage)',
   repair: 'var(--color-status-repair)',
   retired: 'var(--color-status-retired)',
+  lost: 'var(--color-status-lost)',
 };
 
 export function HomeStatusDonut({

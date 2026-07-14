@@ -56,6 +56,7 @@ export function CatalogRowActions({
         label={t('edit')}
         variant="ghost"
         size="icon-sm"
+        className="size-9 sm:size-7"
         onClick={(e) => {
           e.stopPropagation();
           onEdit();
@@ -67,7 +68,7 @@ export function CatalogRowActions({
         label={t('delete')}
         variant="ghost"
         size="icon-sm"
-        className="text-muted-foreground hover:text-destructive"
+        className="text-muted-foreground hover:text-destructive size-9 sm:size-7"
         onClick={(e) => {
           e.stopPropagation();
           setConfirmOpen(true);

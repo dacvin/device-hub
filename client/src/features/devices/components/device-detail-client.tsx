@@ -98,7 +98,7 @@ function ConditionRing({ value }: { value: number }) {
   const circ = 2 * Math.PI * r;
   const color =
     clamped >= 80
-      ? 'text-status-in-use'
+      ? 'text-status-checked-out'
       : clamped >= 50
         ? 'text-status-repair'
         : 'text-status-retired';
@@ -346,7 +346,11 @@ export function DeviceDetailClient({ deviceId }: { deviceId: string }) {
           </Section>
 
           <Section icon={ArrowLeftRight} title={t('sectionCheckouts')}>
-            <CheckoutsPanel deviceId={deviceId} deviceName={device.name} />
+            <CheckoutsPanel
+              deviceId={deviceId}
+              deviceName={device.name}
+              deviceStatus={device.status}
+            />
           </Section>
         </div>
 

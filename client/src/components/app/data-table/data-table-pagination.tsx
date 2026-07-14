@@ -48,6 +48,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
           label={t('previousPage')}
           variant="outline"
           size="icon-sm"
+          className="size-9 sm:size-7"
           onClick={() => {
             table.previousPage();
           }}
@@ -93,6 +94,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
           label={t('nextPage')}
           variant="outline"
           size="icon-sm"
+          className="size-9 sm:size-7"
           onClick={() => {
             table.nextPage();
           }}
@@ -109,7 +111,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
             table.setPageSize(Number(v));
           }}
         >
-          <SelectTrigger size="sm" className="bg-card w-[4.5rem]">
+          <SelectTrigger size="sm" className="bg-card min-h-9 w-[4.5rem] sm:min-h-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

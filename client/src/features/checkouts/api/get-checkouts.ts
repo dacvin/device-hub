@@ -3,6 +3,7 @@ import camelcaseKeys from 'camelcase-keys';
 
 import { fromDbDescriptors } from '@/features/devices/api/media-descriptor';
 import { createClient } from '@/lib/supabase/client';
+import type { DeviceStatus, DeviceType } from '@/features/devices/types/device';
 import type { QueryConfig } from '@/lib/react-query';
 
 import { checkoutStatus } from '../constants/checkout';
@@ -13,7 +14,7 @@ import type { Checkin, CheckoutListItem, CheckoutWithDetail } from '../types/che
 export const getCheckoutsQueryOptions = () => queryOptions({ queryKey: ['checkouts'] as const });
 
 const SELECT =
-  '*, device:devices(code, name), checked_out_by_user:users!checkouts_checked_out_by_fkey(name), checkins(*)';
+  '*, device:devices(code, name, type, quantity, status), checked_out_by_user:users!checkouts_checked_out_by_fkey(name), checkins(*)';
 
 type Row = {
   id: string;
@@ -22,7 +23,13 @@ type Row = {
   quantity: number;
   checked_out_at: string;
   expected_return_date: string | null;
-  device: { code: string; name: string } | null;
+  device: {
+    code: string;
+    name: string;
+    type: DeviceType;
+    quantity: number;
+    status: DeviceStatus;
+  } | null;
   checked_out_by_user: { name: string } | null;
   checkins: { quantity: number }[];
 };
@@ -97,6 +104,9 @@ export const getDeviceCheckouts = async (deviceId: string): Promise<CheckoutWith
       ...(base as unknown as CheckoutWithDetail),
       deviceCode: r.device?.code ?? '—',
       deviceName: r.device?.name ?? '—',
+      deviceType: r.device?.type ?? 'device',
+      deviceQuantity: r.device?.quantity ?? 0,
+      deviceStatus: r.device?.status ?? 'storage',
       checkedOutByName: r.checked_out_by_user?.name ?? null,
       checkins,
       outstanding,

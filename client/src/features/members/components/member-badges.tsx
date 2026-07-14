@@ -16,7 +16,10 @@ export const STATUS_LABEL_KEY: Record<UserStatus, string> = {
 };
 
 const STATUS_CLASS: Record<UserStatus, { soft: string; dot: string }> = {
-  active: { soft: 'bg-status-in-use-soft text-status-in-use', dot: 'bg-status-in-use' },
+  active: {
+    soft: 'bg-status-checked-out-soft text-status-checked-out',
+    dot: 'bg-status-checked-out',
+  },
   invited: { soft: 'bg-status-repair-soft text-status-repair', dot: 'bg-status-repair' },
   deactivated: { soft: 'bg-status-storage-soft text-status-storage', dot: 'bg-status-storage' },
 };

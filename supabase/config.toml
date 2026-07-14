@@ -66,7 +66,6 @@ schema_paths = [
   # Independent lookup tables.
   "./schemas/groups.sql",
   "./schemas/manufacturers.sql",
-  "./schemas/units.sql",
   "./schemas/users.sql",
   # devices depends on the lookups above + users.
   "./schemas/devices.sql",

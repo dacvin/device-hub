@@ -1,7 +1,11 @@
 import type { CamelCaseKeys } from 'camelcase-keys';
 
 // Photos are the same generic file-descriptor shape as device media.
-import type { DeviceFileDescriptor } from '@/features/devices/types/device';
+import type {
+  DeviceFileDescriptor,
+  DeviceStatus,
+  DeviceType,
+} from '@/features/devices/types/device';
 import type { Enums, Tables, TablesInsert } from '@/types/database.types';
 
 export type Checkout = CamelCaseKeys<Tables<'checkouts'>>;
@@ -22,6 +26,9 @@ export type CheckinWithPhotos = Omit<Checkin, 'photos'> & { photos: DeviceFileDe
 export type CheckoutWithDetail = Checkout & {
   deviceCode: string;
   deviceName: string;
+  deviceType: DeviceType;
+  deviceQuantity: number;
+  deviceStatus: DeviceStatus;
   checkedOutByName: string | null;
   checkins: CheckinWithPhotos[];
   outstanding: number;

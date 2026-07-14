@@ -36,7 +36,13 @@ import { createGroupFormSchema } from '@/features/catalogs/validations/group';
 import { createManufacturerFormSchema } from '@/features/catalogs/validations/manufacturer';
 import { FieldError } from '@/lib/form/field-error';
 
-import { DeviceSources, DeviceStatuses, DeviceUnits } from '../constants/device';
+import {
+  DEVICE_FORM_STATUS_OPTIONS,
+  DeviceSources,
+  DeviceStatuses,
+  DeviceTypes,
+  DeviceUnits,
+} from '../constants/device';
 import { createDeviceFormSchema } from '../validations/device';
 import { DeviceDocumentsField } from './device-documents-field';
 import { DeviceFkField, type FkOption, makeCatalogSearchSource } from './device-fk-field';
@@ -83,10 +89,12 @@ function TextControl({
   field,
   isInvalid,
   type = 'text',
+  disabled,
 }: {
   field: AnyFieldApi;
   isInvalid: boolean;
   type?: string;
+  disabled?: boolean;
 }) {
   return (
     <Input
@@ -99,6 +107,7 @@ function TextControl({
         field.handleChange(e.target.value);
       }}
       aria-invalid={isInvalid}
+      disabled={disabled}
     />
   );
 }
@@ -279,22 +288,55 @@ export function DeviceForm({
               )}
             </form.Field>
             <form.Field name="status">
+              {(field) => {
+                // checked_out is automation-only: it can be displayed (device
+                // currently on loan) but never picked by hand.
+                const isCheckedOut = fieldText(field.state.value) === 'checked_out';
+                return (
+                  <FieldRow field={field} label={t('fieldStatus')} required>
+                    {() => (
+                      <Select
+                        value={fieldText(field.state.value)}
+                        onValueChange={(v) => {
+                          field.handleChange(v as never);
+                        }}
+                        disabled={isCheckedOut}
+                      >
+                        <SelectTrigger id={fieldId(field.name)} className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(isCheckedOut ? DeviceStatuses : DEVICE_FORM_STATUS_OPTIONS).map((s) => (
+                            <SelectItem key={s} value={s}>
+                              {tRoot(STATUS_LABEL_KEY[s])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </FieldRow>
+                );
+              }}
+            </form.Field>
+            <form.Field name="type">
               {(field) => (
-                <FieldRow field={field} label={t('fieldStatus')} required>
+                <FieldRow field={field} label={t('fieldType')} required>
                   {() => (
                     <Select
                       value={fieldText(field.state.value)}
                       onValueChange={(v) => {
                         field.handleChange(v as never);
+                        // serialized devices hold exactly one unit
+                        if (v === 'device') form.setFieldValue('quantity', 1);
                       }}
                     >
                       <SelectTrigger id={fieldId(field.name)} className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {DeviceStatuses.map((s) => (
+                        {DeviceTypes.map((s) => (
                           <SelectItem key={s} value={s}>
-                            {tRoot(STATUS_LABEL_KEY[s])}
+                            {t(`type${s[0].toUpperCase()}${s.slice(1)}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -393,13 +435,24 @@ export function DeviceForm({
                 </FieldRow>
               )}
             </form.Field>
-            <form.Field name="quantity">
-              {(field) => (
-                <FieldRow field={field} label={t('fieldQuantity')}>
-                  {(isInvalid) => <TextControl field={field} isInvalid={isInvalid} type="number" />}
-                </FieldRow>
+            <form.Subscribe selector={(s) => s.values.type}>
+              {(type) => (
+                <form.Field name="quantity">
+                  {(field) => (
+                    <FieldRow field={field} label={t('fieldQuantity')}>
+                      {(isInvalid) => (
+                        <TextControl
+                          field={field}
+                          isInvalid={isInvalid}
+                          type="number"
+                          disabled={type === 'device'}
+                        />
+                      )}
+                    </FieldRow>
+                  )}
+                </form.Field>
               )}
-            </form.Field>
+            </form.Subscribe>
           </div>
           <form.Field name="specifications">
             {(field) => (

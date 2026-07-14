@@ -49,7 +49,7 @@ export function FacetedFilter({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
+        <Button variant="outline" size="sm" className="h-9 border-dashed sm:h-7">
           <PlusCircle />
           {label}
           {selected.length > 0 && (

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { DeviceSources, DeviceStatuses, DeviceUnits } from '../constants/device';
+import { DeviceSources, DeviceStatuses, DeviceTypes, DeviceUnits } from '../constants/device';
 
 // Nullable text/date fields live as '' in the form (never null); the API layer
 // converts '' → null on write.
@@ -23,12 +23,13 @@ export const createDeviceFormSchema = z
     specifications: nullableText,
     notes: nullableText,
     status: z.enum(DeviceStatuses, { message: 'validation.statusRequired' }),
+    type: z.enum(DeviceTypes, { message: 'validation.typeRequired' }),
     condition: z.coerce
       .number()
       .int()
       .min(0, { message: 'validation.conditionRange' })
       .max(100, { message: 'validation.conditionRange' }),
-    quantity: z.coerce.number().int().min(1, { message: 'validation.quantityMin' }),
+    quantity: z.coerce.number().int().min(0, { message: 'validation.quantityNonNegative' }),
     source: z.enum(DeviceSources).or(z.literal('')),
     location: nullableText,
     importDate: dateString,
@@ -44,6 +45,11 @@ export const createDeviceFormSchema = z
   .refine((v) => !v.warrantyStart || !v.warrantyEnd || v.warrantyEnd >= v.warrantyStart, {
     message: 'validation.warrantyRange',
     path: ['warrantyEnd'],
+  })
+  // serialized devices hold at most one unit (mirrors the DB constraint)
+  .refine((v) => v.type === 'accessory' || v.quantity <= 1, {
+    message: 'validation.deviceQuantityLocked',
+    path: ['quantity'],
   });
 
 export const deviceFileDescriptorSchema = z.object({
@@ -71,6 +77,7 @@ export const DEVICE_FORM_DEFAULTS: CreateDeviceFormValues = {
   specifications: '',
   notes: '',
   status: 'storage',
+  type: 'device',
   condition: 100,
   quantity: 1,
   source: '',

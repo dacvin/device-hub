@@ -19,7 +19,7 @@ const ICON: Record<string, LucideIcon> = {
 };
 
 const TONE: Record<string, string> = {
-  insert: 'text-status-in-use bg-status-in-use-soft',
+  insert: 'text-status-checked-out bg-status-checked-out-soft',
   update: 'text-primary bg-accent',
   delete: 'text-status-retired bg-status-retired-soft',
   restore: 'text-status-storage bg-status-storage-soft',

@@ -237,6 +237,7 @@ export type Database = {
           specifications: string | null
           split_from_device_id: string | null
           status: Database["public"]["Enums"]["device_status"]
+          type: Database["public"]["Enums"]["device_type"]
           unit: Database["public"]["Enums"]["device_unit"]
           updated_at: string
           warranty_end: string | null
@@ -265,6 +266,7 @@ export type Database = {
           specifications?: string | null
           split_from_device_id?: string | null
           status?: Database["public"]["Enums"]["device_status"]
+          type?: Database["public"]["Enums"]["device_type"]
           unit?: Database["public"]["Enums"]["device_unit"]
           updated_at?: string
           warranty_end?: string | null
@@ -293,6 +295,7 @@ export type Database = {
           specifications?: string | null
           split_from_device_id?: string | null
           status?: Database["public"]["Enums"]["device_status"]
+          type?: Database["public"]["Enums"]["device_type"]
           unit?: Database["public"]["Enums"]["device_unit"]
           updated_at?: string
           warranty_end?: string | null
@@ -493,9 +496,10 @@ export type Database = {
     }
     Enums: {
       activity_action: "insert" | "update" | "delete" | "restore"
-      checkin_outcome: "normal" | "consumed" | "other"
+      checkin_outcome: "normal" | "consumed" | "other" | "lost"
       device_source: "Purchased" | "Leased" | "Donated" | "Transferred"
-      device_status: "in-use" | "storage" | "repair" | "retired"
+      device_status: "checked_out" | "storage" | "repair" | "retired" | "lost"
+      device_type: "device" | "accessory"
       device_unit: "piece" | "set" | "unit" | "box" | "item"
       user_role: "admin" | "member"
       user_status: "active" | "invited" | "deactivated"
@@ -630,9 +634,10 @@ export const Constants = {
   public: {
     Enums: {
       activity_action: ["insert", "update", "delete", "restore"],
-      checkin_outcome: ["normal", "consumed", "other"],
+      checkin_outcome: ["normal", "consumed", "other", "lost"],
       device_source: ["Purchased", "Leased", "Donated", "Transferred"],
-      device_status: ["in-use", "storage", "repair", "retired"],
+      device_status: ["checked_out", "storage", "repair", "retired", "lost"],
+      device_type: ["device", "accessory"],
       device_unit: ["piece", "set", "unit", "box", "item"],
       user_role: ["admin", "member"],
       user_status: ["active", "invited", "deactivated"],

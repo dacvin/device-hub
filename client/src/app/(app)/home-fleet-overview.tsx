@@ -118,9 +118,9 @@ export function HomeFleetOverview() {
           icon={HardDrive}
         />
         <Kpi
-          label={t('home.statInUse')}
-          value={String(stats.byStatus['in-use'])}
-          sub={t('home.ofFleet', { percent: pct(stats.byStatus['in-use']) })}
+          label={t('home.statCheckedOut')}
+          value={String(stats.byStatus.checked_out)}
+          sub={t('home.ofFleet', { percent: pct(stats.byStatus.checked_out) })}
           icon={Activity}
         />
         <Kpi
@@ -138,7 +138,7 @@ export function HomeFleetOverview() {
               <div className="bg-muted h-1.5 overflow-hidden rounded-full">
                 <div
                   className={cn('h-full rounded-full', {
-                    'bg-status-in-use': avg >= 80,
+                    'bg-status-checked-out': avg >= 80,
                     'bg-status-repair': avg >= 50 && avg < 80,
                     'bg-status-retired': avg < 50,
                   })}

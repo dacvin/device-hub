@@ -10,8 +10,10 @@
 .vercel
 .env*
 
-# device-import local venv
+# device-import local venv + parsed ledger JSON (derived from the gitignored
+# .xlsx; contains staff names)
 .import-venv/
+/scripts/device-import/json/
 
 # Local Claude Code state (personal settings + runtime locks); skills are tracked
 .claude/settings.local.json

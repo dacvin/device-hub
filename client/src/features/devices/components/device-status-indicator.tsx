@@ -3,26 +3,29 @@ import { cn } from '@/lib/utils';
 import type { DeviceStatus } from '../types/device';
 
 export const STATUS_LABEL_KEY: Record<DeviceStatus, string> = {
-  'in-use': 'devices.statusInUse',
+  checked_out: 'devices.statusCheckedOut',
   storage: 'devices.statusStorage',
   repair: 'devices.statusRepair',
   retired: 'devices.statusRetired',
+  lost: 'devices.statusLost',
 };
 
 // Solid color for dots and progress bars.
 export const STATUS_SOLID_CLASS: Record<DeviceStatus, string> = {
-  'in-use': 'bg-status-in-use',
+  checked_out: 'bg-status-checked-out',
   storage: 'bg-status-storage',
   repair: 'bg-status-repair',
   retired: 'bg-status-retired',
+  lost: 'bg-status-lost',
 };
 
 // Soft pill (tinted background + on-color text) for badges.
 export const STATUS_SOFT_CLASS: Record<DeviceStatus, string> = {
-  'in-use': 'bg-status-in-use-soft text-status-in-use',
+  checked_out: 'bg-status-checked-out-soft text-status-checked-out',
   storage: 'bg-status-storage-soft text-status-storage',
   repair: 'bg-status-repair-soft text-status-repair',
   retired: 'bg-status-retired-soft text-status-retired',
+  lost: 'bg-status-lost-soft text-status-lost',
 };
 
 type T = (key: string) => string;

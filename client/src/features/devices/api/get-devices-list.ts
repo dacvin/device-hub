@@ -5,13 +5,14 @@ import type { QueryConfig } from '@/lib/react-query';
 
 import { getDevicesQueryOptions } from './get-paginated-devices';
 
-import type { DeviceListItem, DeviceStatus } from '../types/device';
+import type { DeviceListItem, DeviceStatus, DeviceType } from '../types/device';
 
 type Row = {
   id: string;
   code: string;
   name: string;
   status: DeviceStatus;
+  type: DeviceType;
   condition: number;
   quantity: number;
   location: string | null;
@@ -30,7 +31,7 @@ export const getDevicesList = async (): Promise<DeviceListItem[]> => {
   const { data, error } = await supabase
     .from('devices')
     .select(
-      'id, code, name, status, condition, quantity, location, serial_number, created_at, photos, group:groups(name), manufacturer:manufacturers(name)',
+      'id, code, name, status, type, condition, quantity, location, serial_number, created_at, photos, group:groups(name), manufacturer:manufacturers(name)',
     )
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
@@ -42,6 +43,7 @@ export const getDevicesList = async (): Promise<DeviceListItem[]> => {
     code: d.code,
     name: d.name,
     status: d.status,
+    type: d.type,
     condition: d.condition,
     quantity: d.quantity,
     location: d.location,

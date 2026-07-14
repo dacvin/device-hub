@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Pencil, Trash2 } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 
 import { DataTableColumnHeader } from '@/components/app/data-table/data-table-column-header';
@@ -15,13 +15,13 @@ import { DeviceStatusBadge } from './device-status-indicator';
 import type { DeviceListItem } from '../types/device';
 
 function conditionColor(condition: number): string {
-  if (condition >= 80) return 'text-status-in-use';
+  if (condition >= 80) return 'text-status-checked-out';
   if (condition >= 50) return 'text-status-repair';
   return 'text-status-retired';
 }
 
 function conditionBar(condition: number): string {
-  if (condition >= 80) return 'bg-status-in-use';
+  if (condition >= 80) return 'bg-status-checked-out';
   if (condition >= 50) return 'bg-status-repair';
   return 'bg-status-retired';
 }
@@ -33,12 +33,16 @@ export function deviceColumns({
   tRoot,
   router,
   onDelete,
+  onCheckOut,
+  onCheckIn,
   onLoanByDeviceId,
 }: {
   t: T;
   tRoot: T;
   router: AppRouterInstance;
   onDelete: (device: DeviceListItem) => void;
+  onCheckOut: (device: DeviceListItem) => void;
+  onCheckIn: (device: DeviceListItem) => void;
   onLoanByDeviceId: Map<string, number>;
 }): ColumnDef<DeviceListItem>[] {
   return [
@@ -66,7 +70,7 @@ export function deviceColumns({
           <div className="flex items-center gap-2">
             <span className="font-medium">{row.original.name}</span>
             {onLoan !== undefined && (
-              <span className="bg-status-in-use-soft text-status-in-use inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
+              <span className="bg-status-checked-out-soft text-status-checked-out inline-flex shrink-0 items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
                 {tRoot('checkouts.nOut', { n: onLoan })}
               </span>
             )}
@@ -153,8 +157,37 @@ export function deviceColumns({
       enableSorting: false,
       cell: ({ row }) => {
         const d = row.original;
+        const onLoan = onLoanByDeviceId.get(d.id) ?? 0;
+        // storage-only policy (mirrors the DB guard); available comes from
+        // the same loan-status map that feeds the "n out" pill
+        const canCheckOut = d.status === 'storage' && d.quantity - onLoan > 0;
         return (
           <div className="flex justify-end gap-1">
+            {onLoan > 0 && (
+              <IconButton
+                label={tRoot('checkouts.checkIn')}
+                variant="ghost"
+                size="icon-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCheckIn(d);
+                }}
+              >
+                <ArrowDownLeft />
+              </IconButton>
+            )}
+            <IconButton
+              label={tRoot('checkouts.checkOut')}
+              variant="ghost"
+              size="icon-sm"
+              disabled={!canCheckOut}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCheckOut(d);
+              }}
+            >
+              <ArrowUpRight />
+            </IconButton>
             <IconButton
               label={t('edit')}
               variant="ghost"

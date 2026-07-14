@@ -153,6 +153,7 @@ export function DeviceEditPage({ deviceId }: { deviceId: string }) {
     specifications: device.specifications ?? '',
     notes: device.notes ?? '',
     status: device.status,
+    type: device.type,
     condition: device.condition,
     quantity: device.quantity,
     source: device.source ?? '',

@@ -4,6 +4,7 @@ import type { Enums, Tables, TablesInsert, TablesUpdate } from '@/types/database
 
 export type DeviceStatus = Enums<'device_status'>;
 export type DeviceSource = Enums<'device_source'>;
+export type DeviceType = Enums<'device_type'>;
 
 export type Device = CamelCaseKeys<Tables<'devices'>>;
 export type DeviceInsert = CamelCaseKeys<TablesInsert<'devices'>>;
@@ -15,6 +16,7 @@ export type DeviceListItem = {
   code: string;
   name: string;
   status: DeviceStatus;
+  type: DeviceType;
   condition: number;
   quantity: number;
   location: string | null;

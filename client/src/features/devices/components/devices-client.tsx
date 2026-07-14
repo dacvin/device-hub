@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { HardDrive, MapPin, Plus, Search, X } from 'lucide-react';
@@ -17,8 +17,13 @@ import { FacetedFilter } from '@/components/app/faceted-filter';
 import { PageLayout } from '@/components/app/page-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getCheckoutsQueryOptions } from '@/features/checkouts/api/get-checkouts';
+import {
+  getCheckoutsQueryOptions,
+  useDeviceCheckouts,
+} from '@/features/checkouts/api/get-checkouts';
 import { fetchActiveLoanStatus } from '@/features/checkouts/api/get-device-loan-status';
+import { CheckInDialog } from '@/features/checkouts/components/check-in-dialog';
+import { CheckoutDialog } from '@/features/checkouts/components/checkout-dialog';
 import { cn } from '@/lib/utils';
 
 import { deviceMediaUrl, PHOTOS_BUCKET } from '../api/device-media';
@@ -31,6 +36,43 @@ import { deviceColumns } from './devices-columns';
 import { DevicesSkeleton } from './devices-skeleton';
 
 import type { DeviceListItem } from '../types/device';
+
+// Opens CheckInDialog for a device's single active checkout; with several
+// active loans there is no unambiguous target, so it falls through to the
+// device page where the checkouts panel lists them all.
+function DeviceCheckInGate({
+  device,
+  onClose,
+  router,
+}: {
+  device: DeviceListItem;
+  onClose: () => void;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const { data, isFetching } = useDeviceCheckouts(device.id);
+  const active = useMemo(() => (data ?? []).filter((c) => c.status !== 'closed'), [data]);
+  // an invalidated cache serves stale rows while refetching — deciding on
+  // those routes to the wrong place, so wait until the data has settled
+  const settled = data !== undefined && !isFetching;
+
+  useEffect(() => {
+    if (settled && active.length !== 1) {
+      onClose();
+      router.push(`/devices/${device.id}`);
+    }
+  }, [settled, active, onClose, router, device.id]);
+
+  if (!settled || active.length !== 1) return null;
+  return (
+    <CheckInDialog
+      checkout={active[0]}
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    />
+  );
+}
 
 // Client-side search across code, name and serial number.
 const searchFilter: FilterFn<DeviceListItem> = (row, _id, value) => {
@@ -155,7 +197,7 @@ function DeviceMobileCard({ device, coverUrl }: { device: DeviceListItem; coverU
           <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
             <div
               className={cn('h-full rounded-full', {
-                'bg-status-in-use': device.condition >= 80,
+                'bg-status-checked-out': device.condition >= 80,
                 'bg-status-repair': device.condition >= 50 && device.condition < 80,
                 'bg-status-retired': device.condition < 50,
               })}
@@ -176,6 +218,8 @@ export function DevicesClient() {
   const searchParams = useSearchParams();
   const { data, isPending } = useDevicesList();
   const [deleting, setDeleting] = useState<DeviceListItem | null>(null);
+  const [checkoutTarget, setCheckoutTarget] = useState<DeviceListItem | null>(null);
+  const [checkInTarget, setCheckInTarget] = useState<DeviceListItem | null>(null);
   const bulkDelete = useSoftDeleteDevice();
 
   const groupParam = searchParams.get('group');
@@ -197,7 +241,16 @@ export function DevicesClient() {
     return map;
   }, [loanStatus]);
   const columns = useMemo(
-    () => deviceColumns({ t, tRoot, router, onDelete: setDeleting, onLoanByDeviceId }),
+    () =>
+      deviceColumns({
+        t,
+        tRoot,
+        router,
+        onDelete: setDeleting,
+        onCheckOut: setCheckoutTarget,
+        onCheckIn: setCheckInTarget,
+        onLoanByDeviceId,
+      }),
     [t, tRoot, router, onLoanByDeviceId],
   );
   const groupOptions = useMemo(() => {
@@ -302,6 +355,28 @@ export function DevicesClient() {
           if (!open) setDeleting(null);
         }}
       />
+
+      {checkoutTarget && (
+        <CheckoutDialog
+          deviceId={checkoutTarget.id}
+          deviceName={checkoutTarget.name}
+          available={checkoutTarget.quantity - (onLoanByDeviceId.get(checkoutTarget.id) ?? 0)}
+          open
+          onOpenChange={(open) => {
+            if (!open) setCheckoutTarget(null);
+          }}
+        />
+      )}
+
+      {checkInTarget && (
+        <DeviceCheckInGate
+          device={checkInTarget}
+          onClose={() => {
+            setCheckInTarget(null);
+          }}
+          router={router}
+        />
+      )}
     </PageLayout>
   );
 }

@@ -9,7 +9,13 @@
 -- key for device-photos / device-documents.
 -- ============================================================
 
-create type public.device_status as enum ('in-use', 'storage', 'repair', 'retired');
+-- 'checked_out' is automation-only: set/cleared by the checkout sync trigger
+-- (see checkouts.sql), never picked manually. 'lost' can be set manually or by
+-- a lost check-in draining the device to 0.
+create type public.device_status as enum ('checked_out', 'storage', 'repair', 'retired', 'lost');
+-- 'device' = serialized single asset (quantity locked to ≤ 1);
+-- 'accessory' = bulk stock (quantity counts units, may hit 0 when depleted).
+create type public.device_type as enum ('device', 'accessory');
 create type public.device_source as enum ('Purchased', 'Leased', 'Donated', 'Transferred');
 -- Quantity unit. Stored as an English slug; the UI localizes the label (VI/EN)
 -- the same way device_status does. Was a `units` catalog table; promoted to an
@@ -33,6 +39,7 @@ create table public.devices (
   condition       int  not null default 100 check (condition between 0 and 100),
   location        text,
   quantity        int  not null default 1   check (quantity >= 0),
+  type            public.device_type not null default 'device',
   source          public.device_source,
   status          public.device_status not null default 'storage',
 
@@ -51,7 +58,9 @@ create table public.devices (
   updated_at  timestamptz not null default now(),
   deleted_at  timestamptz,
 
-  check (warranty_end is null or warranty_start is null or warranty_end >= warranty_start)
+  check (warranty_end is null or warranty_start is null or warranty_end >= warranty_start),
+  -- serialized devices hold at most one unit (0 after a lost/consumed drain)
+  constraint devices_type_quantity_check check (type = 'accessory' or quantity <= 1)
 );
 
 create index devices_group_idx        on public.devices(group_id);

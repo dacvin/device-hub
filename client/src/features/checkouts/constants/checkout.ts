@@ -4,12 +4,13 @@ import type { CheckinOutcome, CheckoutStatus } from '../types/checkout';
 
 export const CHECKOUT_PHOTOS_BUCKET = 'checkout-photos';
 
-export const CHECKIN_OUTCOMES = Constants.public.Enums.checkin_outcome; // ['normal','consumed','other']
+export const CHECKIN_OUTCOMES = Constants.public.Enums.checkin_outcome; // ['normal','consumed','other','lost']
 
 export const CHECKIN_OUTCOME_LABEL_KEY: Record<CheckinOutcome, string> = {
   normal: 'checkouts.outcomeNormal',
   consumed: 'checkouts.outcomeConsumed',
   other: 'checkouts.outcomeOther',
+  lost: 'checkouts.outcomeLost',
 };
 
 export const CHECKOUT_STATUS_LABEL_KEY: Record<CheckoutStatus, string> = {
